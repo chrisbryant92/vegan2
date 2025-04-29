@@ -2,8 +2,13 @@ import { users, donations, veganConversions, mediaShared, campaigns } from "@sha
 import type { User, InsertUser, Donation, InsertDonation, VeganConversion, InsertVeganConversion, MediaShared, InsertMediaShared, Campaign, InsertCampaign } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
+import { db } from "./db";
+import { eq, and, desc, sql, count, sum } from "drizzle-orm";
+import { pool } from "./db";
 
 const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
   // User operations
@@ -53,7 +58,7 @@ export interface IStorage {
   }>;
 
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: any;
 }
 
 export class MemStorage implements IStorage {
@@ -69,7 +74,7 @@ export class MemStorage implements IStorage {
   private mediaSharedIdCounter: number;
   private campaignIdCounter: number;
   
-  sessionStore: session.SessionStore;
+  sessionStore: any;
 
   constructor() {
     this.users = new Map();
@@ -272,4 +277,229 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  sessionStore: any;
+
+  constructor() {
+    this.sessionStore = new PostgresSessionStore({ 
+      pool, 
+      createTableIfMissing: true
+    });
+  }
+
+  // User operations
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  // Donation operations
+  async getDonations(userId: number): Promise<Donation[]> {
+    return db.select()
+      .from(donations)
+      .where(eq(donations.userId, userId))
+      .orderBy(desc(donations.date));
+  }
+
+  async getDonation(id: number): Promise<Donation | undefined> {
+    const [donation] = await db.select().from(donations).where(eq(donations.id, id));
+    return donation;
+  }
+
+  async createDonation(donation: InsertDonation): Promise<Donation> {
+    const [newDonation] = await db.insert(donations).values(donation).returning();
+    return newDonation;
+  }
+
+  async updateDonation(id: number, donation: Partial<InsertDonation>): Promise<Donation | undefined> {
+    const [updatedDonation] = await db.update(donations)
+      .set(donation)
+      .where(eq(donations.id, id))
+      .returning();
+    return updatedDonation;
+  }
+
+  async deleteDonation(id: number): Promise<boolean> {
+    const result = await db.delete(donations).where(eq(donations.id, id));
+    return result.count > 0;
+  }
+
+  // Vegan conversion operations
+  async getVeganConversions(userId: number): Promise<VeganConversion[]> {
+    return db.select()
+      .from(veganConversions)
+      .where(eq(veganConversions.userId, userId))
+      .orderBy(desc(veganConversions.date));
+  }
+
+  async getVeganConversion(id: number): Promise<VeganConversion | undefined> {
+    const [conversion] = await db.select().from(veganConversions).where(eq(veganConversions.id, id));
+    return conversion;
+  }
+
+  async createVeganConversion(conversion: InsertVeganConversion): Promise<VeganConversion> {
+    const [newConversion] = await db.insert(veganConversions).values(conversion).returning();
+    return newConversion;
+  }
+
+  async updateVeganConversion(id: number, conversion: Partial<InsertVeganConversion>): Promise<VeganConversion | undefined> {
+    const [updatedConversion] = await db.update(veganConversions)
+      .set(conversion)
+      .where(eq(veganConversions.id, id))
+      .returning();
+    return updatedConversion;
+  }
+
+  async deleteVeganConversion(id: number): Promise<boolean> {
+    const result = await db.delete(veganConversions).where(eq(veganConversions.id, id));
+    return result.count > 0;
+  }
+
+  // Media shared operations
+  async getMediaShared(userId: number): Promise<MediaShared[]> {
+    return db.select()
+      .from(mediaShared)
+      .where(eq(mediaShared.userId, userId))
+      .orderBy(desc(mediaShared.date));
+  }
+
+  async getMediaSharedItem(id: number): Promise<MediaShared | undefined> {
+    const [media] = await db.select().from(mediaShared).where(eq(mediaShared.id, id));
+    return media;
+  }
+
+  async createMediaShared(media: InsertMediaShared): Promise<MediaShared> {
+    const [newMedia] = await db.insert(mediaShared).values(media).returning();
+    return newMedia;
+  }
+
+  async updateMediaShared(id: number, media: Partial<InsertMediaShared>): Promise<MediaShared | undefined> {
+    const [updatedMedia] = await db.update(mediaShared)
+      .set(media)
+      .where(eq(mediaShared.id, id))
+      .returning();
+    return updatedMedia;
+  }
+
+  async deleteMediaShared(id: number): Promise<boolean> {
+    const result = await db.delete(mediaShared).where(eq(mediaShared.id, id));
+    return result.count > 0;
+  }
+
+  // Campaign operations
+  async getCampaigns(userId: number): Promise<Campaign[]> {
+    return db.select()
+      .from(campaigns)
+      .where(eq(campaigns.userId, userId))
+      .orderBy(desc(campaigns.startDate));
+  }
+
+  async getCampaign(id: number): Promise<Campaign | undefined> {
+    const [campaign] = await db.select().from(campaigns).where(eq(campaigns.id, id));
+    return campaign;
+  }
+
+  async createCampaign(campaign: InsertCampaign): Promise<Campaign> {
+    const [newCampaign] = await db.insert(campaigns).values(campaign).returning();
+    return newCampaign;
+  }
+
+  async updateCampaign(id: number, campaign: Partial<InsertCampaign>): Promise<Campaign | undefined> {
+    const [updatedCampaign] = await db.update(campaigns)
+      .set(campaign)
+      .where(eq(campaigns.id, id))
+      .returning();
+    return updatedCampaign;
+  }
+
+  async deleteCampaign(id: number): Promise<boolean> {
+    const result = await db.delete(campaigns).where(eq(campaigns.id, id));
+    return result.count > 0;
+  }
+
+  // User statistics
+  async getUserStats(userId: number): Promise<{
+    totalAnimalsSaved: number;
+    donationsCount: number;
+    donationsAnimalsSaved: number;
+    veganCount: number;
+    veganAnimalsSaved: number;
+    mediaCount: number;
+    mediaAnimalsSaved: number;
+    campaignsCount: number;
+    campaignsAnimalsSaved: number;
+  }> {
+    // Donations stats
+    const donationsResult = await db
+      .select({
+        count: count(),
+        totalSaved: sum(donations.animalsSaved)
+      })
+      .from(donations)
+      .where(eq(donations.userId, userId));
+    
+    // Vegan conversions stats
+    const veganResult = await db
+      .select({
+        count: count(),
+        totalSaved: sum(veganConversions.animalsSaved)
+      })
+      .from(veganConversions)
+      .where(eq(veganConversions.userId, userId));
+    
+    // Media shared stats
+    const mediaResult = await db
+      .select({
+        count: count(),
+        totalSaved: sum(mediaShared.animalsSaved)
+      })
+      .from(mediaShared)
+      .where(eq(mediaShared.userId, userId));
+    
+    // Campaigns stats
+    const campaignsResult = await db
+      .select({
+        count: count(),
+        totalSaved: sum(campaigns.animalsSaved)
+      })
+      .from(campaigns)
+      .where(eq(campaigns.userId, userId));
+
+    const donationsCount = Number(donationsResult[0]?.count || 0);
+    const donationsAnimalsSaved = Number(donationsResult[0]?.totalSaved || 0);
+    
+    const veganCount = Number(veganResult[0]?.count || 0);
+    const veganAnimalsSaved = Number(veganResult[0]?.totalSaved || 0);
+    
+    const mediaCount = Number(mediaResult[0]?.count || 0);
+    const mediaAnimalsSaved = Number(mediaResult[0]?.totalSaved || 0);
+    
+    const campaignsCount = Number(campaignsResult[0]?.count || 0);
+    const campaignsAnimalsSaved = Number(campaignsResult[0]?.totalSaved || 0);
+
+    return {
+      totalAnimalsSaved: donationsAnimalsSaved + veganAnimalsSaved + mediaAnimalsSaved + campaignsAnimalsSaved,
+      donationsCount,
+      donationsAnimalsSaved,
+      veganCount,
+      veganAnimalsSaved,
+      mediaCount,
+      mediaAnimalsSaved,
+      campaignsCount,
+      campaignsAnimalsSaved
+    };
+  }
+}
+
+// Switch from MemStorage to DatabaseStorage
+export const storage = new DatabaseStorage();
