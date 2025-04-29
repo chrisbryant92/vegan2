@@ -37,19 +37,31 @@ export function calculateDonationImpact(amount: number): number {
 }
 
 // Calculate animals saved from vegan conversions
+// Formula: ((Date Ended-Date Started)/3)*(Meatiness Before Conversion-Meatiness After Conversion)*Influence
 export function calculateVeganImpact(
-  conversionType: string, 
-  monthsActive: number = 1
+  dateStarted: Date,
+  dateEnded: Date | null,
+  meatinessBefore: number,
+  meatinessAfter: number,
+  influence: number
 ): number {
-  const factor = VEGAN_CONVERSION_FACTORS[conversionType as keyof typeof VEGAN_CONVERSION_FACTORS] || 1;
+  // If dateEnded is not provided, use current date
+  const endDate = dateEnded || new Date();
   
-  // Scale to monthly impact (yearly factors / 12)
-  if (conversionType !== 'veganMeal') {
-    return Math.round((factor / 12) * monthsActive);
-  }
+  // Calculate days between dates
+  const daysDiff = Math.max(1, Math.floor((endDate.getTime() - dateStarted.getTime()) / (1000 * 60 * 60 * 24)));
   
-  // Vegan meal is already a per-meal impact
-  return factor;
+  // Convert days to 3-day units (days / 3)
+  const timeUnits = daysDiff / 3;
+  
+  // Calculate meatiness difference (as decimal - divide by 100 to convert from percentage)
+  const meatinessDiff = (meatinessBefore - meatinessAfter) / 100;
+  
+  // Calculate influence as decimal - divide by 100 to convert from percentage
+  const influenceFactor = influence / 100;
+  
+  // Calculate and round the result
+  return Math.round(timeUnits * meatinessDiff * influenceFactor);
 }
 
 // Calculate animals saved from media sharing

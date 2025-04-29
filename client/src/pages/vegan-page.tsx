@@ -11,28 +11,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { VeganConversion } from "@shared/schema";
+import { VeganConversion, veganConversionSchema } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/utils";
 import { calculateVeganImpact } from "@/lib/calculations";
-
-// Zod schema for vegan conversion form
-const veganConversionSchema = z.object({
-  personName: z.string().optional(),
-  relationship: z.string().min(1, "Relationship is required"),
-  conversionType: z.string().min(1, "Conversion type is required"),
-  date: z.string().min(1, "Date is required"),
-  conversation: z.boolean().optional(),
-  documentary: z.boolean().optional(),
-  cookedMeal: z.boolean().optional(),
-  restaurant: z.boolean().optional(),
-  notes: z.string().optional(),
-});
 
 type VeganConversionFormValues = z.infer<typeof veganConversionSchema>;
 
@@ -50,13 +37,11 @@ export default function VeganPage() {
     resolver: zodResolver(veganConversionSchema),
     defaultValues: {
       personName: "",
-      relationship: "",
-      conversionType: "",
-      date: new Date().toISOString().split("T")[0],
-      conversation: false,
-      documentary: false,
-      cookedMeal: false,
-      restaurant: false,
+      dateStarted: new Date().toISOString().split("T")[0],
+      dateEnded: "",
+      meatinessBefore: 100,
+      meatinessAfter: 0,
+      influence: 100,
       notes: "",
     },
   });
@@ -64,9 +49,18 @@ export default function VeganPage() {
   // Create vegan conversion mutation
   const createVeganConversion = useMutation({
     mutationFn: async (data: VeganConversionFormValues) => {
-      // Calculate impact based on conversion type
-      // For simplicity, we'll use 1 month as default timeframe
-      const animalsSaved = calculateVeganImpact(data.conversionType, 1);
+      // Parse dates
+      const dateStarted = new Date(data.dateStarted);
+      const dateEnded = data.dateEnded ? new Date(data.dateEnded) : null;
+      
+      // Calculate impact based on formula
+      const animalsSaved = calculateVeganImpact(
+        dateStarted,
+        dateEnded,
+        data.meatinessBefore,
+        data.meatinessAfter,
+        data.influence
+      );
       
       const res = await apiRequest("POST", "/api/vegan-conversions", {
         ...data,
@@ -81,13 +75,11 @@ export default function VeganPage() {
       });
       form.reset({
         personName: "",
-        relationship: "",
-        conversionType: "",
-        date: new Date().toISOString().split("T")[0],
-        conversation: false,
-        documentary: false,
-        cookedMeal: false,
-        restaurant: false,
+        dateStarted: new Date().toISOString().split("T")[0],
+        dateEnded: "",
+        meatinessBefore: 100,
+        meatinessAfter: 0,
+        influence: 100,
         notes: "",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/vegan-conversions"] });
@@ -234,127 +226,89 @@ export default function VeganPage() {
                   <CardTitle>Log a Conversion</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="personName">Person's Name (Optional)</Label>
+                      <Input
+                        id="personName"
+                        placeholder="Name (optional)"
+                        {...form.register("personName")}
+                      />
+                    </div>
+                    
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="personName">Person's Name (Optional)</Label>
+                        <Label htmlFor="dateStarted">Date Started</Label>
                         <Input
-                          id="personName"
-                          placeholder="Name (optional)"
-                          {...form.register("personName")}
+                          id="dateStarted"
+                          type="date"
+                          {...form.register("dateStarted")}
                         />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="relationship">Relationship</Label>
-                        <Select
-                          onValueChange={(value) => form.setValue("relationship", value)}
-                          defaultValue={form.getValues("relationship")}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select relationship" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="family">Family</SelectItem>
-                            <SelectItem value="friend">Friend</SelectItem>
-                            <SelectItem value="colleague">Colleague</SelectItem>
-                            <SelectItem value="acquaintance">Acquaintance</SelectItem>
-                            <SelectItem value="stranger">Stranger</SelectItem>
-                            <SelectItem value="self">Self</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {form.formState.errors.relationship && (
+                        {form.formState.errors.dateStarted && (
                           <p className="text-sm text-red-500">
-                            {form.formState.errors.relationship.message}
+                            {form.formState.errors.dateStarted.message}
                           </p>
                         )}
                       </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="dateEnded">Date Ended (Optional)</Label>
+                        <Input
+                          id="dateEnded"
+                          type="date"
+                          {...form.register("dateEnded")}
+                        />
+                        <p className="text-xs text-gray-500">Leave blank if still ongoing</p>
+                      </div>
                     </div>
                     
-                    <div className="space-y-2">
-                      <Label htmlFor="conversionType">Conversion Type</Label>
-                      <Select
-                        onValueChange={(value) => form.setValue("conversionType", value)}
-                        defaultValue={form.getValues("conversionType")}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="fullVegan">Full Vegan</SelectItem>
-                          <SelectItem value="vegetarian">Vegetarian</SelectItem>
-                          <SelectItem value="reducetarian">Reducetarian</SelectItem>
-                          <SelectItem value="veganDays">Vegan Days (e.g., Meatless Monday)</SelectItem>
-                          <SelectItem value="veganMeal">Single Vegan Meal</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {form.formState.errors.conversionType && (
-                        <p className="text-sm text-red-500">
-                          {form.formState.errors.conversionType.message}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="date">Date</Label>
-                      <Input
-                        id="date"
-                        type="date"
-                        {...form.register("date")}
-                      />
-                      {form.formState.errors.date && (
-                        <p className="text-sm text-red-500">
-                          {form.formState.errors.date.message}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>How did you influence them?</Label>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="conversation"
-                            checked={form.watch("conversation")}
-                            onCheckedChange={(checked) => 
-                              form.setValue("conversation", checked as boolean)
-                            }
-                          />
-                          <Label htmlFor="conversation" className="font-normal">Conversation</Label>
+                    <div className="space-y-4">
+                      <div className="space-y-1">
+                        <div className="flex justify-between">
+                          <Label htmlFor="meatinessBefore">Meatiness Before Conversion (%)</Label>
+                          <span className="text-sm text-gray-500">{form.watch("meatinessBefore")}%</span>
                         </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="documentary"
-                            checked={form.watch("documentary")}
-                            onCheckedChange={(checked) => 
-                              form.setValue("documentary", checked as boolean)
-                            }
-                          />
-                          <Label htmlFor="documentary" className="font-normal">Shared documentary/video</Label>
+                        <Slider
+                          id="meatinessBefore"
+                          min={0}
+                          max={100}
+                          step={1}
+                          defaultValue={[form.watch("meatinessBefore")]}
+                          onValueChange={(value) => form.setValue("meatinessBefore", value[0])}
+                        />
+                        <p className="text-xs text-gray-500">100% = Full meat diet, 0% = No meat</p>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <div className="flex justify-between">
+                          <Label htmlFor="meatinessAfter">Meatiness After Conversion (%)</Label>
+                          <span className="text-sm text-gray-500">{form.watch("meatinessAfter")}%</span>
                         </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="cookedMeal"
-                            checked={form.watch("cookedMeal")}
-                            onCheckedChange={(checked) => 
-                              form.setValue("cookedMeal", checked as boolean)
-                            }
-                          />
-                          <Label htmlFor="cookedMeal" className="font-normal">Cooked vegan meal</Label>
+                        <Slider
+                          id="meatinessAfter"
+                          min={0}
+                          max={100}
+                          step={1}
+                          defaultValue={[form.watch("meatinessAfter")]}
+                          onValueChange={(value) => form.setValue("meatinessAfter", value[0])}
+                        />
+                        <p className="text-xs text-gray-500">100% = Full meat diet, 0% = No meat</p>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <div className="flex justify-between">
+                          <Label htmlFor="influence">Your Influence (%)</Label>
+                          <span className="text-sm text-gray-500">{form.watch("influence")}%</span>
                         </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="restaurant"
-                            checked={form.watch("restaurant")}
-                            onCheckedChange={(checked) => 
-                              form.setValue("restaurant", checked as boolean)
-                            }
-                          />
-                          <Label htmlFor="restaurant" className="font-normal">Took to vegan restaurant</Label>
-                        </div>
+                        <Slider
+                          id="influence"
+                          min={0}
+                          max={100}
+                          step={1}
+                          defaultValue={[form.watch("influence")]}
+                          onValueChange={(value) => form.setValue("influence", value[0])}
+                        />
+                        <p className="text-xs text-gray-500">100% = Entirely your influence, 0% = No influence</p>
                       </div>
                     </div>
                     
@@ -367,13 +321,21 @@ export default function VeganPage() {
                       />
                     </div>
                     
-                    <Button
-                      type="submit"
-                      className="bg-green-600 hover:bg-green-700"
-                      disabled={createVeganConversion.isPending}
-                    >
-                      {createVeganConversion.isPending ? "Saving..." : "Save Conversion"}
-                    </Button>
+                    <div className="pt-2">
+                      <div className="p-3 bg-green-50 border border-green-100 rounded-md mb-4">
+                        <p className="text-sm text-gray-700">
+                          <span className="font-medium">Impact Calculation:</span> ((Date Ended - Date Started) / 3) × (Meatiness Before - Meatiness After) × Influence
+                        </p>
+                      </div>
+                      
+                      <Button
+                        type="submit"
+                        className="w-full bg-green-600 hover:bg-green-700"
+                        disabled={createVeganConversion.isPending}
+                      >
+                        {createVeganConversion.isPending ? "Saving..." : "Save Conversion"}
+                      </Button>
+                    </div>
                   </form>
                 </CardContent>
               </Card>

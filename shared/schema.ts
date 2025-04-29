@@ -32,13 +32,11 @@ export const veganConversions = pgTable("vegan_conversions", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
   personName: text("person_name"),
-  relationship: text("relationship").notNull(),
-  conversionType: text("conversion_type").notNull(),
-  date: timestamp("date").notNull(),
-  conversation: boolean("conversation").default(false),
-  documentary: boolean("documentary").default(false),
-  cookedMeal: boolean("cooked_meal").default(false),
-  restaurant: boolean("restaurant").default(false),
+  dateStarted: timestamp("date_started").notNull(),
+  dateEnded: timestamp("date_ended"),
+  meatinessBefore: integer("meatiness_before").notNull(), // Percentage
+  meatinessAfter: integer("meatiness_after").notNull(), // Percentage
+  influence: integer("influence").notNull(), // Percentage
   notes: text("notes"),
   animalsSaved: integer("animals_saved").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -96,6 +94,19 @@ export const donationSchema = z.object({
   dateStarted: z.string().nullable().optional(),
   dateEnded: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
+  userId: z.number().optional(),
+  animalsSaved: z.number().optional(),
+});
+
+// Form validation schema for vegan conversions
+export const veganConversionSchema = z.object({
+  personName: z.string().optional(),
+  dateStarted: z.string().min(1, "Start date is required"),
+  dateEnded: z.string().nullable().optional(),
+  meatinessBefore: z.number().min(0, "Must be between 0-100").max(100, "Must be between 0-100"),
+  meatinessAfter: z.number().min(0, "Must be between 0-100").max(100, "Must be between 0-100"),
+  influence: z.number().min(0, "Must be between 0-100").max(100, "Must be between 0-100"),
+  notes: z.string().optional(),
   userId: z.number().optional(),
   animalsSaved: z.number().optional(),
 });
