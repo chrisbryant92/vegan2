@@ -179,18 +179,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/vegan-conversions", ensureAuthenticated, async (req, res) => {
     try {
       const userId = req.user!.id;
-      const validatedData = insertVeganConversionSchema.parse({
-        ...req.body,
-        userId
-      });
+      console.log("Vegan conversion request body:", req.body);
       
-      const conversion = await storage.createVeganConversion(validatedData);
+      // Create a conversion object with properly parsed dates
+      const processedData = {
+        personName: req.body.personName || null,
+        dateStarted: new Date(req.body.dateStarted),
+        dateEnded: req.body.dateEnded ? new Date(req.body.dateEnded) : null,
+        meatinessBefore: Number(req.body.meatinessBefore),
+        meatinessAfter: Number(req.body.meatinessAfter),
+        influence: Number(req.body.influence),
+        notes: req.body.notes || null,
+        animalsSaved: Number(req.body.animalsSaved),
+        userId
+      };
+      
+      console.log("Processed vegan conversion data:", processedData);
+      
+      // Use storage method that expects properly formatted data
+      const conversion = await storage.createVeganConversion(processedData);
       res.status(201).json(conversion);
     } catch (error) {
+      console.error("Error creating vegan conversion:", error);
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: error.errors });
       } else {
-        res.status(500).json({ error: "Failed to create vegan conversion" });
+        res.status(500).json({ error: "Failed to create vegan conversion: " + (error instanceof Error ? error.message : String(error)) });
       }
     }
   });
@@ -198,10 +212,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/vegan-conversions", ensureAuthenticated, async (req, res) => {
     try {
       const userId = req.user!.id;
+      console.log("Getting vegan conversions for user:", userId);
       const conversions = await storage.getVeganConversions(userId);
+      console.log("Retrieved vegan conversions:", conversions);
       res.json(conversions);
     } catch (error) {
-      res.status(500).json({ error: "Failed to get vegan conversions" });
+      console.error("Error getting vegan conversions:", error);
+      res.status(500).json({ error: "Failed to get vegan conversions: " + (error instanceof Error ? error.message : String(error)) });
     }
   });
 

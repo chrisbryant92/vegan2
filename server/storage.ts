@@ -157,7 +157,7 @@ export class MemStorage implements IStorage {
   async getVeganConversions(userId: number): Promise<VeganConversion[]> {
     return Array.from(this.veganConversions.values())
       .filter(conversion => conversion.userId === userId)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .sort((a, b) => new Date(b.dateStarted).getTime() - new Date(a.dateStarted).getTime());
   }
 
   async getVeganConversion(id: number): Promise<VeganConversion | undefined> {
@@ -172,11 +172,8 @@ export class MemStorage implements IStorage {
       id, 
       createdAt,
       personName: conversion.personName ?? null,
-      notes: conversion.notes ?? null,
-      conversation: conversion.conversation ?? null,
-      documentary: conversion.documentary ?? null,
-      cookedMeal: conversion.cookedMeal ?? null,
-      restaurant: conversion.restaurant ?? null
+      dateEnded: conversion.dateEnded ?? null,
+      notes: conversion.notes ?? null
     };
     this.veganConversions.set(id, newConversion);
     return newConversion;
