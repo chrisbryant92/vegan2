@@ -196,7 +196,7 @@ export class MemStorage implements IStorage {
   async getMediaShared(userId: number): Promise<MediaShared[]> {
     return Array.from(this.mediaShared.values())
       .filter(media => media.userId === userId)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .sort((a, b) => new Date(b.dateStarted).getTime() - new Date(a.dateStarted).getTime());
   }
 
   async getMediaSharedItem(id: number): Promise<MediaShared | undefined> {
@@ -210,8 +210,10 @@ export class MemStorage implements IStorage {
       ...media, 
       id, 
       createdAt,
-      reach: media.reach ?? null,
-      engagement: media.engagement ?? null,
+      oneOffPieces: media.oneOffPieces ?? null,
+      postsPerMonth: media.postsPerMonth ?? null,
+      estimatedReach: media.estimatedReach ?? null,
+      estimatedPersuasiveness: media.estimatedPersuasiveness ?? null,
       description: media.description ?? null
     };
     this.mediaShared.set(id, newMedia);
@@ -412,7 +414,7 @@ export class DatabaseStorage implements IStorage {
     return db.select()
       .from(mediaShared)
       .where(eq(mediaShared.userId, userId))
-      .orderBy(desc(mediaShared.date));
+      .orderBy(desc(mediaShared.dateStarted));
   }
 
   async getMediaSharedItem(id: number): Promise<MediaShared | undefined> {
@@ -421,7 +423,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMediaShared(media: InsertMediaShared): Promise<MediaShared> {
+    console.log("Creating media shared with data:", media);
     const [newMedia] = await db.insert(mediaShared).values(media).returning();
+    console.log("Created media shared:", newMedia);
     return newMedia;
   }
 
@@ -443,7 +447,7 @@ export class DatabaseStorage implements IStorage {
     return db.select()
       .from(campaigns)
       .where(eq(campaigns.userId, userId))
-      .orderBy(desc(campaigns.startDate));
+      .orderBy(desc(campaigns.createdAt));
   }
 
   async getCampaign(id: number): Promise<Campaign | undefined> {

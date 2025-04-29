@@ -289,18 +289,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/media-shared", ensureAuthenticated, async (req, res) => {
     try {
       const userId = req.user!.id;
-      const validatedData = insertMediaSharedSchema.parse({
-        ...req.body,
-        userId
-      });
+      console.log("Media shared request body:", req.body);
       
-      const media = await storage.createMediaShared(validatedData);
+      // Create a media shared object with properly parsed dates
+      const processedData = {
+        title: req.body.title,
+        oneOffPieces: Number(req.body.oneOffPieces || 0),
+        postsPerMonth: Number(req.body.postsPerMonth || 0),
+        estimatedReach: Number(req.body.estimatedReach || 0),
+        estimatedPersuasiveness: Number(req.body.estimatedPersuasiveness || 0),
+        dateStarted: new Date(req.body.dateStarted),
+        dateEnded: req.body.dateEnded ? new Date(req.body.dateEnded) : null,
+        description: req.body.description || null,
+        animalsSaved: Number(req.body.animalsSaved),
+        userId
+      };
+      
+      console.log("Processed media shared data:", processedData);
+      
+      // Use storage method that expects properly formatted data
+      const media = await storage.createMediaShared(processedData);
       res.status(201).json(media);
     } catch (error) {
+      console.error("Error creating media shared:", error);
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: error.errors });
       } else {
-        res.status(500).json({ error: "Failed to create media shared record" });
+        res.status(500).json({ error: "Failed to create media shared record: " + (error instanceof Error ? error.message : String(error)) });
       }
     }
   });
@@ -308,10 +323,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/media-shared", ensureAuthenticated, async (req, res) => {
     try {
       const userId = req.user!.id;
+      console.log("Getting media shared items for user:", userId);
       const mediaItems = await storage.getMediaShared(userId);
+      console.log("Retrieved media shared items:", mediaItems);
       res.json(mediaItems);
     } catch (error) {
-      res.status(500).json({ error: "Failed to get media shared records" });
+      console.error("Error getting media shared items:", error);
+      res.status(500).json({ error: "Failed to get media shared records: " + (error instanceof Error ? error.message : String(error)) });
     }
   });
 
@@ -330,7 +348,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(media);
     } catch (error) {
-      res.status(500).json({ error: "Failed to get media shared record" });
+      console.error("Error getting media shared item:", error);
+      res.status(500).json({ error: "Failed to get media shared record: " + (error instanceof Error ? error.message : String(error)) });
     }
   });
 
@@ -347,13 +366,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: "Not authorized to update this media record" });
       }
       
-      const updatedMedia = await storage.updateMediaShared(id, req.body);
+      // Create a processed data object with only fields that are present in the body
+      const processedData: any = {};
+      
+      if (req.body.title) processedData.title = req.body.title;
+      if (req.body.oneOffPieces !== undefined) processedData.oneOffPieces = Number(req.body.oneOffPieces);
+      if (req.body.postsPerMonth !== undefined) processedData.postsPerMonth = Number(req.body.postsPerMonth);
+      if (req.body.estimatedReach !== undefined) processedData.estimatedReach = Number(req.body.estimatedReach);
+      if (req.body.estimatedPersuasiveness !== undefined) processedData.estimatedPersuasiveness = Number(req.body.estimatedPersuasiveness);
+      if (req.body.dateStarted) processedData.dateStarted = new Date(req.body.dateStarted);
+      if (req.body.dateEnded) processedData.dateEnded = new Date(req.body.dateEnded);
+      if (req.body.description !== undefined) processedData.description = req.body.description || null;
+      if (req.body.animalsSaved) processedData.animalsSaved = Number(req.body.animalsSaved);
+      
+      const updatedMedia = await storage.updateMediaShared(id, processedData);
       res.json(updatedMedia);
     } catch (error) {
+      console.error("Error updating media shared:", error);
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: error.errors });
       } else {
-        res.status(500).json({ error: "Failed to update media shared record" });
+        res.status(500).json({ error: "Failed to update media shared record: " + (error instanceof Error ? error.message : String(error)) });
       }
     }
   });
@@ -374,7 +407,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteMediaShared(id);
       res.status(204).send();
     } catch (error) {
-      res.status(500).json({ error: "Failed to delete media shared record" });
+      console.error("Error deleting media shared:", error);
+      res.status(500).json({ error: "Failed to delete media shared record: " + (error instanceof Error ? error.message : String(error)) });
     }
   });
 
