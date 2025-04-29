@@ -122,7 +122,20 @@ export default function DonationsPage() {
 
   // Form submission handler
   const onSubmit = (data: DonationFormValues) => {
-    createDonation.mutate(data);
+    console.log("Submitting form data:", data);
+    
+    // Make sure dates are handled properly
+    const formattedData = {
+      ...data,
+      // Convert date strings to proper format
+      date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
+      // Handle the monthly donation dates
+      dateStarted: data.isMonthly && data.dateStarted ? new Date(data.dateStarted).toISOString() : null,
+      dateEnded: data.isMonthly && data.dateEnded ? new Date(data.dateEnded).toISOString() : null,
+    };
+    
+    console.log("Formatted data:", formattedData);
+    createDonation.mutate(formattedData);
   };
 
   // Calculate total animals saved and total donated

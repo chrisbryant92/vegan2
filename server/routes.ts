@@ -32,14 +32,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/donations", ensureAuthenticated, async (req, res) => {
     try {
       const userId = req.user!.id;
-      const validatedData = insertDonationSchema.parse({
+      console.log("Donation request body:", req.body);
+      
+      // Process the data before validation
+      const processedData = {
         ...req.body,
-        userId
-      });
+        userId,
+        // Ensure isMonthly is treated as a boolean
+        isMonthly: req.body.isMonthly === true || req.body.isMonthly === "true",
+        // Handle date values
+        dateStarted: req.body.dateStarted || null,
+        dateEnded: req.body.dateEnded || null,
+        notes: req.body.notes || null
+      };
+      
+      console.log("Processed donation data:", processedData);
+      
+      const validatedData = insertDonationSchema.parse(processedData);
+      console.log("Validated donation data:", validatedData);
       
       const donation = await storage.createDonation(validatedData);
+      console.log("Created donation:", donation);
+      
       res.status(201).json(donation);
     } catch (error) {
+      console.error("Error creating donation:", error);
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: error.errors });
       } else {
