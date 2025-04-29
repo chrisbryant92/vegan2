@@ -77,6 +77,98 @@ export default function LandingPage() {
               <p className="text-gray-600 text-sm text-center">Track your participation in animal welfare campaigns and advocacy.</p>
             </div>
           </div>
+          
+          {/* Testimonials Section */}
+          <div className="mt-24 mb-16">
+            <h2 className="text-3xl font-bold text-center mb-12">What Animal Advocates Are Saying</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Testimonial 1 */}
+              <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-md">
+                <div className="flex flex-col items-center mb-4">
+                  <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
+                    <span className="text-2xl font-bold text-indigo-600">J</span>
+                  </div>
+                  <h4 className="font-semibold">Jamie Wilson</h4>
+                  <p className="text-gray-500 text-sm">Animal Rights Activist</p>
+                </div>
+                <p className="text-gray-700 text-center italic">
+                  "This calculator has completely transformed how I track my advocacy efforts. Now I can see exactly how many animals I'm helping save through all my different activities."
+                </p>
+                <div className="flex justify-center mt-4">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg key={star} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Testimonial 2 */}
+              <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-md">
+                <div className="flex flex-col items-center mb-4">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <span className="text-2xl font-bold text-green-600">S</span>
+                  </div>
+                  <h4 className="font-semibold">Sarah Chen</h4>
+                  <p className="text-gray-500 text-sm">Vegan Educator</p>
+                </div>
+                <p className="text-gray-700 text-center italic">
+                  "As someone who helps others transition to a vegan lifestyle, this tool gives me concrete data to show the impact of dietary choices. It's a game-changer for my advocacy work."
+                </p>
+                <div className="flex justify-center mt-4">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg key={star} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Testimonial 3 */}
+              <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-md">
+                <div className="flex flex-col items-center mb-4">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    <span className="text-2xl font-bold text-blue-600">M</span>
+                  </div>
+                  <h4 className="font-semibold">Michael Taylor</h4>
+                  <p className="text-gray-500 text-sm">Nonprofit Director</p>
+                </div>
+                <p className="text-gray-700 text-center italic">
+                  "Our organization uses this calculator to demonstrate our collective impact to donors and volunteers. The visualizations make it easy to show the real-world difference we're making."
+                </p>
+                <div className="flex justify-center mt-4">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg key={star} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Call to Action Section */}
+          <div className="py-16 px-6 bg-indigo-600 rounded-3xl shadow-xl">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+                Start Tracking Your Impact Today
+              </h2>
+              <p className="text-indigo-100 text-lg mb-8 max-w-2xl mx-auto">
+                Join thousands of animal advocates who are measuring and maximizing their positive impact on animal welfare. Every action counts!
+              </p>
+              <div className="flex flex-wrap justify-center gap-4">
+                <Link href="/auth">
+                  <Button size="lg" className="bg-white hover:bg-gray-100 text-indigo-700 font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
+                    Create Free Account
+                  </Button>
+                </Link>
+              </div>
+              <p className="text-indigo-200 text-sm mt-6">
+                No credit card required. Start making a difference in just 60 seconds.
+              </p>
+            </div>
+          </div>
+          
         </div>
       </div>
       
