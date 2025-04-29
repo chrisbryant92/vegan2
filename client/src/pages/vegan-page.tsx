@@ -431,7 +431,7 @@ export default function VeganPage() {
                 <div className="mt-6 p-4 bg-green-50 rounded-md">
                   <h4 className="font-medium text-sm mb-2">Did you know?</h4>
                   <p className="text-sm text-gray-700">
-                    A person who goes vegan can save approximately 30 animals per month from a life of suffering.
+                    The average meat-eater eats 120 animals per year (there are estimates between 100 - 500 per year), so for every person you convert, you can take credit for some portion of those animals saved each year that they stay vegan!
                   </p>
                 </div>
               </CardContent>
