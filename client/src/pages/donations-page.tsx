@@ -24,8 +24,11 @@ import { calculateDonationImpact } from "@/lib/calculations";
 const donationSchema = z.object({
   organization: z.string().min(1, "Organization name is required"),
   amount: z.number().positive("Amount must be positive"),
-  donationType: z.string().min(1, "Donation type is required"),
+  donationType: z.string().min(1, "Donation type is required"), // "One-Off" or "Monthly"
   date: z.string().min(1, "Date is required"),
+  isMonthly: z.boolean().default(false),
+  dateStarted: z.string().optional().nullable(),
+  dateEnded: z.string().optional().nullable(),
   notes: z.string().optional(),
 });
 
@@ -48,6 +51,9 @@ export default function DonationsPage() {
       amount: 0,
       donationType: "",
       date: new Date().toISOString().split("T")[0],
+      isMonthly: false,
+      dateStarted: null,
+      dateEnded: null,
       notes: "",
     },
   });
@@ -74,6 +80,9 @@ export default function DonationsPage() {
         amount: 0,
         donationType: "",
         date: new Date().toISOString().split("T")[0],
+        isMonthly: false,
+        dateStarted: null,
+        dateEnded: null,
         notes: "",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/donations"] });
@@ -146,8 +155,17 @@ export default function DonationsPage() {
       cell: (donation: Donation) => formatCurrency(donation.amount),
     },
     {
-      header: "Type",
+      header: "Org Type",
       accessorKey: "donationType",
+    },
+    {
+      header: "Frequency",
+      accessorKey: "isMonthly",
+      cell: (donation: Donation) => (
+        <Badge variant={donation.isMonthly ? "secondary" : "outline"}>
+          {donation.isMonthly ? "Monthly" : "One-Off"}
+        </Badge>
+      ),
     },
     {
       header: "Date",
@@ -232,13 +250,13 @@ export default function DonationsPage() {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="donationType">Donation Type</Label>
+                      <Label htmlFor="donationType">Organization Type</Label>
                       <Select
                         onValueChange={(value) => form.setValue("donationType", value)}
                         defaultValue={form.getValues("donationType")}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
+                          <SelectValue placeholder="Select organization type" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="animalShelter">Animal Shelter</SelectItem>
@@ -255,19 +273,90 @@ export default function DonationsPage() {
                       )}
                     </div>
                     
-                    <div className="space-y-2">
-                      <Label htmlFor="date">Date</Label>
-                      <Input
-                        id="date"
-                        type="date"
-                        {...form.register("date")}
-                      />
-                      {form.formState.errors.date && (
-                        <p className="text-sm text-red-500">
-                          {form.formState.errors.date.message}
-                        </p>
-                      )}
+                    <div className="space-y-4">
+                      <Label>Donation Frequency</Label>
+                      <div className="flex flex-col space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <input 
+                            type="radio" 
+                            id="one-off" 
+                            value="one-off"
+                            checked={!form.getValues("isMonthly")}
+                            onChange={() => {
+                              form.setValue("isMonthly", false);
+                              form.setValue("dateStarted", null);
+                              form.setValue("dateEnded", null);
+                            }}
+                            className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
+                          />
+                          <Label htmlFor="one-off" className="font-normal">One-Off Donation</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input 
+                            type="radio" 
+                            id="monthly" 
+                            value="monthly"
+                            checked={form.getValues("isMonthly")}
+                            onChange={() => {
+                              form.setValue("isMonthly", true);
+                              form.setValue("dateStarted", new Date().toISOString().split("T")[0]);
+                            }}
+                            className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
+                          />
+                          <Label htmlFor="monthly" className="font-normal">Monthly Donation</Label>
+                        </div>
+                      </div>
                     </div>
+                    
+                    {!form.getValues("isMonthly") ? (
+                      <div className="space-y-2">
+                        <Label htmlFor="date">Donation Date</Label>
+                        <Input
+                          id="date"
+                          type="date"
+                          {...form.register("date")}
+                        />
+                        {form.formState.errors.date && (
+                          <p className="text-sm text-red-500">
+                            {form.formState.errors.date.message}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="dateStarted">Date Started</Label>
+                          <Input
+                            id="dateStarted"
+                            type="date"
+                            {...form.register("dateStarted")}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="dateEnded">Date Ended (Optional)</Label>
+                          <Input
+                            id="dateEnded"
+                            type="date"
+                            {...form.register("dateEnded")}
+                          />
+                          <p className="text-xs text-gray-500">Leave blank if still active</p>
+                        </div>
+                        <div className="space-y-2 md:col-span-2">
+                          <Label htmlFor="date">Last Donation Date</Label>
+                          <Input
+                            id="date"
+                            type="date"
+                            {...form.register("date")}
+                          />
+                          {form.formState.errors.date && (
+                            <p className="text-sm text-red-500">
+                              {form.formState.errors.date.message}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     
                     <div className="space-y-2">
                       <Label htmlFor="notes">Notes (Optional)</Label>
@@ -405,9 +494,33 @@ export default function DonationsPage() {
                     <p>{selectedDonation.donationType}</p>
                   </div>
                   <div>
-                    <Label className="font-semibold">Date</Label>
-                    <p>{formatDate(selectedDonation.date)}</p>
+                    <Label className="font-semibold">Donation Type</Label>
+                    <p>{selectedDonation.isMonthly ? "Monthly Donation" : "One-Off Donation"}</p>
                   </div>
+                  
+                  {selectedDonation.isMonthly ? (
+                    <>
+                      <div>
+                        <Label className="font-semibold">Date Started</Label>
+                        <p>{selectedDonation.dateStarted ? formatDate(selectedDonation.dateStarted) : "N/A"}</p>
+                      </div>
+                      {selectedDonation.dateEnded && (
+                        <div>
+                          <Label className="font-semibold">Date Ended</Label>
+                          <p>{formatDate(selectedDonation.dateEnded)}</p>
+                        </div>
+                      )}
+                      <div>
+                        <Label className="font-semibold">Last Payment Date</Label>
+                        <p>{formatDate(selectedDonation.date)}</p>
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <Label className="font-semibold">Date</Label>
+                      <p>{formatDate(selectedDonation.date)}</p>
+                    </div>
+                  )}
                   <div>
                     <Label className="font-semibold">Impact</Label>
                     <p>{selectedDonation.animalsSaved} animals saved</p>

@@ -127,7 +127,15 @@ export class MemStorage implements IStorage {
   async createDonation(donation: InsertDonation): Promise<Donation> {
     const id = this.donationIdCounter++;
     const createdAt = new Date();
-    const newDonation: Donation = { ...donation, id, createdAt };
+    const newDonation: Donation = { 
+      ...donation,
+      id, 
+      createdAt,
+      isMonthly: donation.isMonthly ?? false,
+      dateStarted: donation.dateStarted ?? null,
+      dateEnded: donation.dateEnded ?? null,
+      notes: donation.notes ?? null
+    };
     this.donations.set(id, newDonation);
     return newDonation;
   }
