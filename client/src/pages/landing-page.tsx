@@ -16,7 +16,7 @@ export default function LandingPage() {
       {/* Hero Section */}
       <div className="flex-grow flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-16 text-center">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 bg-gradient-to-r from-indigo-600 to-blue-500 text-transparent bg-clip-text">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-12 bg-gradient-to-r from-indigo-600 to-blue-500 text-transparent bg-clip-text">
             Animal Saving Calculator
           </h1>
           
