@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Sidebar } from "@/components/sidebar";
 import { MobileNav } from "@/components/mobile-nav";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -10,29 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { MediaShared } from "@shared/schema";
+import { MediaShared, mediaSharedSchema } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/utils";
 import { calculateMediaImpact } from "@/lib/calculations";
-import { Tv, Video, FileText, Twitter, Facebook, Instagram, Youtube, FileSpreadsheet } from "lucide-react";
 
-// Zod schema for media shared form
-const mediaSharedSchema = z.object({
-  mediaType: z.string().min(1, "Media type is required"),
-  title: z.string().min(1, "Title is required"),
-  platform: z.string().min(1, "Platform is required"),
-  date: z.string().min(1, "Date is required"),
-  reach: z.number().min(0, "Reach must be a positive number").optional(),
-  engagement: z.number().min(0, "Engagement must be a positive number").optional(),
-  description: z.string().optional(),
-});
-
-type MediaSharedFormValues = z.infer<typeof mediaSharedSchema>;
+type MediaSharedFormValues = typeof mediaSharedSchema._type;
 
 export default function MediaPage() {
   const { toast } = useToast();

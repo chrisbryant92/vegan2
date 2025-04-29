@@ -65,26 +65,32 @@ export function calculateVeganImpact(
 }
 
 // Calculate animals saved from media sharing
+// Formula: (((Date Ended-Date Started)*Posts Per Month/30)+One-Off Pieces)*Estimated Persuasiveness*Estimated Reach*120
 export function calculateMediaImpact(
-  mediaType: string, 
-  reach: number = 0, 
-  engagement: number = 0
+  dateStarted: Date,
+  dateEnded: Date | null,
+  oneOffPieces: number = 0, 
+  postsPerMonth: number = 0,
+  estimatedReach: number = 0,
+  estimatedPersuasiveness: number = 0
 ): number {
-  const baseFactor = MEDIA_IMPACT_FACTORS[mediaType as keyof typeof MEDIA_IMPACT_FACTORS] || 1;
+  // If dateEnded is not provided, use current date
+  const endDate = dateEnded || new Date();
   
-  // Calculate impact based on reach and engagement
-  let reachFactor = 0;
-  if (reach > 0) {
-    // Logarithmic scaling to prevent unrealistic impacts from large numbers
-    reachFactor = Math.log10(reach) * 0.5;
-  }
+  // Calculate days between dates
+  const daysDiff = Math.max(1, Math.floor((endDate.getTime() - dateStarted.getTime()) / (1000 * 60 * 60 * 24)));
   
-  let engagementFactor = 0;
-  if (engagement > 0) {
-    engagementFactor = Math.log10(engagement) * 0.7;
-  }
+  // Calculate post count over time period: (daysDiff * postsPerMonth / 30) + oneOffPieces
+  const totalPosts = (daysDiff * postsPerMonth / 30) + oneOffPieces;
   
-  return Math.max(1, Math.round(baseFactor + reachFactor + engagementFactor));
+  // Convert persuasiveness percentage to decimal
+  const persuasiveness = estimatedPersuasiveness / 100;
+  
+  // Calculate total animal impact
+  // Each person saves 120 animals per year on average when converted
+  const impact = totalPosts * persuasiveness * estimatedReach * 120;
+  
+  return Math.max(0, Math.round(impact));
 }
 
 // Calculate animals saved from campaign participation

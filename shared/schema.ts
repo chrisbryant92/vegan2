@@ -46,12 +46,13 @@ export const veganConversions = pgTable("vegan_conversions", {
 export const mediaShared = pgTable("media_shared", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
-  mediaType: text("media_type").notNull(),
   title: text("title").notNull(),
-  platform: text("platform").notNull(),
-  date: timestamp("date").notNull(),
-  reach: integer("reach"),
-  engagement: integer("engagement"),
+  oneOffPieces: integer("one_off_pieces").default(0),
+  postsPerMonth: integer("posts_per_month").default(0),
+  estimatedReach: integer("estimated_reach").default(0),
+  estimatedPersuasiveness: integer("estimated_persuasiveness").default(0),
+  dateStarted: timestamp("date_started").notNull(),
+  dateEnded: timestamp("date_ended"),
   description: text("description"),
   animalsSaved: integer("animals_saved").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -113,6 +114,20 @@ export const veganConversionSchema = z.object({
 
 export const insertVeganConversionSchema = createInsertSchema(veganConversions)
   .omit({ id: true, createdAt: true });
+
+// Form validation schema for media shared
+export const mediaSharedSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  oneOffPieces: z.number().min(0, "Must be a positive number"),
+  postsPerMonth: z.number().min(0, "Must be a positive number"),
+  estimatedReach: z.number().min(0, "Must be a positive number"),
+  estimatedPersuasiveness: z.number().min(0, "Must be between 0-100").max(100, "Must be between 0-100"),
+  dateStarted: z.string().min(1, "Start date is required"),
+  dateEnded: z.string().nullable().optional(),
+  description: z.string().optional(),
+  userId: z.number().optional(),
+  animalsSaved: z.number().optional(),
+});
 
 export const insertMediaSharedSchema = createInsertSchema(mediaShared)
   .omit({ id: true, createdAt: true });
