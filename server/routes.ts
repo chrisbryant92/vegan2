@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { eq } from "drizzle-orm";
 import { desc } from "drizzle-orm";
 import { donations, campaigns, insertDonationSchema, insertVeganConversionSchema, insertMediaSharedSchema, insertCampaignSchema, campaignSchema } from "@shared/schema";
@@ -419,38 +419,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user!.id;
       console.log("Campaign request body:", req.body);
       
-      // Create a campaign object directly without relying on schema validation
-      const processedData = {
-        name: req.body.name,
-        // Either null out these fields or remove them entirely since they're now nullable
-        campaign_type: null,
-        organization: req.body.organization || null,
-        start_date: null,
-        end_date: null,
-        budget: null,
-        scope: null,
-        people_reached: null,
-        people_recruited: null,
-        emails: Number(req.body.emails || 0),
-        social_media_actions: Number(req.body.socialMediaActions || 0),
-        letters: Number(req.body.letters || 0),
-        other_actions: Number(req.body.otherActions || 0),
-        total_actions: Number(req.body.totalActions || 0),
-        notes: req.body.notes || null,
-        animals_saved: Number(req.body.animalsSaved),
-        user_id: userId,
-        // Setting default values for other required fields
-        signed: false,
-        shared: false,
-        contacted: false,
-        recruited: false,
-        donated: false
-      };
+      // Let's directly use a SQL INSERT statement to avoid column mapping issues
+      const insertQuery = `
+        INSERT INTO campaigns (
+          name, campaign_type, organization, start_date, end_date, 
+          budget, scope, people_reached, people_recruited, emails, 
+          social_media_actions, letters, other_actions, total_actions, 
+          notes, animals_saved, user_id, signed, shared, contacted, 
+          recruited, donated
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
+        ) RETURNING *
+      `;
+
+      const values = [
+        req.body.name,               // $1 - name
+        null,                        // $2 - campaign_type
+        req.body.organization || null, // $3 - organization
+        null,                        // $4 - start_date
+        null,                        // $5 - end_date
+        null,                        // $6 - budget
+        null,                        // $7 - scope
+        null,                        // $8 - people_reached
+        null,                        // $9 - people_recruited
+        Number(req.body.emails || 0), // $10 - emails
+        Number(req.body.socialMediaActions || 0), // $11 - social_media_actions
+        Number(req.body.letters || 0), // $12 - letters
+        Number(req.body.otherActions || 0), // $13 - other_actions
+        Number(req.body.totalActions || 0), // $14 - total_actions
+        req.body.notes || null,      // $15 - notes
+        Number(req.body.animalsSaved), // $16 - animals_saved
+        userId,                      // $17 - user_id
+        false,                       // $18 - signed
+        false,                       // $19 - shared
+        false,                       // $20 - contacted
+        false,                       // $21 - recruited
+        false                        // $22 - donated
+      ];
+
+      console.log("Executing direct SQL insert with values:", values);
       
-      console.log("Processed campaign data:", processedData);
+      // Import pool from db.ts
+      const { pool } = await import('./db');
       
-      // Execute database query directly using SQL statements to bypass type checking
-      const [campaign] = await db.insert(campaigns).values([processedData as any]).returning();
+      // Execute direct SQL query
+      const result = await pool.query(insertQuery, values);
+      const campaign = result.rows[0];
       console.log("Created campaign:", campaign);
       
       res.status(201).json(campaign);
