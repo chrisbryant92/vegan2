@@ -366,7 +366,7 @@ export default function VeganPage() {
               <CardContent>
                 <div className="flex justify-center mb-6">
                   <div className="relative w-48 h-48">
-                    <div className="absolute inset-0 flex items-center justify-center flex-col">
+                    <div className="absolute inset-0 flex items-center justify-center flex-col z-10">
                       <span className="text-4xl font-bold text-green-600">{totalAnimalsSaved}</span>
                       <span className="text-sm text-gray-500">Animals Saved</span>
                     </div>
@@ -377,17 +377,18 @@ export default function VeganPage() {
                           data={chartData}
                           cx="50%"
                           cy="50%"
-                          innerRadius={60}
-                          outerRadius={80}
+                          innerRadius={40}
+                          outerRadius={70}
                           dataKey="value"
                           label={false}
+                          paddingAngle={2}
                         >
                           {chartData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
                         <Tooltip formatter={(value) => [`${value} animals`, 'Impact']} />
-                        <Legend />
+                        <Legend layout="horizontal" verticalAlign="bottom" align="center" />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
