@@ -81,7 +81,7 @@ export default function LandingPage() {
                 whileTap={{ scale: 0.95 }}
               >
                 <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white font-medium px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
-                  Get Started
+                  Get Started Now
                 </Button>
               </motion.div>
             </Link>
@@ -187,21 +187,8 @@ export default function LandingPage() {
             </motion.div>
           </motion.div>
           
-          {/* Simple Call to Action */}
-          <motion.div 
-            className="mt-16 mb-12 flex justify-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9, duration: 0.5 }}
-          >
-            <Link href="/auth">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white font-medium px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
-                  Get Started Now
-                </Button>
-              </motion.div>
-            </Link>
-          </motion.div>
+          {/* Extra spacing at the bottom */}
+          <div className="pb-12"></div>
         </motion.div>
       </div>
       
