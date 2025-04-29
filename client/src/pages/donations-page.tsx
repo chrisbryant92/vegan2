@@ -132,7 +132,29 @@ export default function DonationsPage() {
 
   // Calculate total animals saved and total donated
   const totalAnimalsSaved = donations.reduce((sum, donation) => sum + donation.animalsSaved, 0);
-  const totalDonated = donations.reduce((sum, donation) => sum + donation.amount, 0);
+  
+  // Calculate total donated with the new formula
+  const totalDonated = donations.reduce((sum, donation) => {
+    if (!donation.isMonthly) {
+      // One-off donation: just add the amount
+      return sum + donation.amount;
+    } else {
+      // Monthly donation: calculate based on time period
+      const startDate = donation.dateStarted ? new Date(donation.dateStarted) : null;
+      const endDate = donation.dateEnded ? new Date(donation.dateEnded) : new Date(); // Use current date if no end date
+      
+      if (!startDate) {
+        return sum; // Skip if no start date available
+      }
+      
+      // Calculate months between dates: (endDate - startDate) / 30
+      const daysDiff = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+      const monthsDiff = daysDiff / 30;
+      
+      // Monthly formula: (months * monthly amount)
+      return sum + (monthsDiff * donation.amount);
+    }
+  }, 0);
   
   // Prepare data for chart
   const donationsByType = donations.reduce((acc, donation) => {
