@@ -371,10 +371,17 @@ export class DatabaseStorage implements IStorage {
 
   // Vegan conversion operations
   async getVeganConversions(userId: number): Promise<VeganConversion[]> {
-    return db.select()
-      .from(veganConversions)
-      .where(eq(veganConversions.userId, userId))
-      .orderBy(desc(veganConversions.date));
+    try {
+      console.log("Executing database query for vegan conversions...");
+      const result = await db.select()
+        .from(veganConversions)
+        .where(eq(veganConversions.userId, userId));
+      console.log("Query successful, got results:", result);
+      return result;
+    } catch (error) {
+      console.error("Database error in getVeganConversions:", error);
+      return [];
+    }
   }
 
   async getVeganConversion(id: number): Promise<VeganConversion | undefined> {

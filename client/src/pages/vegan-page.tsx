@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
@@ -125,13 +124,26 @@ export default function VeganPage() {
   // Calculate total animals saved
   const totalAnimalsSaved = veganConversions.reduce((sum, conversion) => sum + conversion.animalsSaved, 0);
   
-  // Prepare data for chart
-  const conversionsByType = veganConversions.reduce((acc, conversion) => {
-    acc[conversion.conversionType] = (acc[conversion.conversionType] || 0) + conversion.animalsSaved;
+  // Prepare data for chart - using meatiness reduction % ranges as categories
+  const conversionsByImpact = veganConversions.reduce((acc, conversion) => {
+    const impact = conversion.meatinessBefore - conversion.meatinessAfter;
+    
+    let category = '';
+    if (impact >= 80) {
+      category = "Major reduction (80-100%)";
+    } else if (impact >= 50) {
+      category = "Significant reduction (50-79%)";
+    } else if (impact >= 30) {
+      category = "Moderate reduction (30-49%)";
+    } else {
+      category = "Minor reduction (0-29%)";
+    }
+    
+    acc[category] = (acc[category] || 0) + conversion.animalsSaved;
     return acc;
   }, {} as Record<string, number>);
 
-  const chartData = Object.entries(conversionsByType).map(([name, value]) => ({
+  const chartData = Object.entries(conversionsByImpact).map(([name, value]) => ({
     name,
     value,
   }));
@@ -139,15 +151,18 @@ export default function VeganPage() {
   // Colors for the chart
   const COLORS = ["#10B981", "#6EE7B7", "#3B82F6", "#FBBF24", "#4F46E5"];
 
-  // Format conversion type for display
-  const formatConversionType = (type: string) => {
-    switch (type) {
-      case "fullVegan": return "Full Vegan";
-      case "vegetarian": return "Vegetarian";
-      case "reducetarian": return "Reducetarian";
-      case "veganDays": return "Vegan Days";
-      case "veganMeal": return "Vegan Meal";
-      default: return type;
+  // Format impact level for display
+  const formatImpactLevel = (meatinessBefore: number, meatinessAfter: number) => {
+    const impact = meatinessBefore - meatinessAfter;
+    
+    if (impact >= 80) {
+      return "Major reduction";
+    } else if (impact >= 50) {
+      return "Significant reduction";
+    } else if (impact >= 30) {
+      return "Moderate reduction";
+    } else {
+      return "Minor reduction";
     }
   };
 
@@ -157,28 +172,31 @@ export default function VeganPage() {
       header: "Person",
       accessorKey: "personName",
       cell: (conversion: VeganConversion) => 
-        conversion.personName || `Anonymous ${conversion.relationship}`,
+        conversion.personName || "Anonymous",
     },
     {
-      header: "Relationship",
-      accessorKey: "relationship",
+      header: "Impact Level",
+      accessorKey: "meatinessBefore",
+      cell: (conversion: VeganConversion) => 
+        formatImpactLevel(conversion.meatinessBefore, conversion.meatinessAfter),
     },
     {
-      header: "Type",
-      accessorKey: "conversionType",
-      cell: (conversion: VeganConversion) => formatConversionType(conversion.conversionType),
+      header: "Date Started",
+      accessorKey: "dateStarted",
+      cell: (conversion: VeganConversion) => formatDate(conversion.dateStarted),
     },
     {
-      header: "Date",
-      accessorKey: "date",
-      cell: (conversion: VeganConversion) => formatDate(conversion.date),
+      header: "Meatiness Change",
+      accessorKey: "meatinessBefore",
+      cell: (conversion: VeganConversion) => 
+        `${conversion.meatinessBefore}% → ${conversion.meatinessAfter}%`,
     },
     {
-      header: "Impact",
+      header: "Animals Saved",
       accessorKey: "animalsSaved",
       cell: (conversion: VeganConversion) => (
         <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
-          {conversion.animalsSaved} animals
+          {conversion.animalsSaved}
         </Badge>
       ),
     },
@@ -197,13 +215,12 @@ export default function VeganPage() {
     },
   ];
 
-  // Conversion type mapping for display in the metrics
-  const conversionTypeCount = {
-    fullVegan: veganConversions.filter(c => c.conversionType === "fullVegan").length,
-    vegetarian: veganConversions.filter(c => c.conversionType === "vegetarian").length,
-    reducetarian: veganConversions.filter(c => c.conversionType === "reducetarian").length,
-    veganDays: veganConversions.filter(c => c.conversionType === "veganDays").length,
-    veganMeal: veganConversions.filter(c => c.conversionType === "veganMeal").length,
+  // Categorize conversions by impact level
+  const impactLevels = {
+    major: veganConversions.filter(c => (c.meatinessBefore - c.meatinessAfter) >= 80).length,
+    significant: veganConversions.filter(c => (c.meatinessBefore - c.meatinessAfter) >= 50 && (c.meatinessBefore - c.meatinessAfter) < 80).length,
+    moderate: veganConversions.filter(c => (c.meatinessBefore - c.meatinessAfter) >= 30 && (c.meatinessBefore - c.meatinessAfter) < 50).length,
+    minor: veganConversions.filter(c => (c.meatinessBefore - c.meatinessAfter) < 30).length,
   };
 
   return (
@@ -380,222 +397,131 @@ export default function VeganPage() {
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
                     <div className="flex items-center">
                       <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                      <span className="text-sm">Full Vegan</span>
+                      <span className="text-sm">Major Reductions</span>
                     </div>
-                    <span className="font-bold">{conversionTypeCount.fullVegan}</span>
+                    <span className="font-bold">{impactLevels.major}</span>
                   </div>
                   
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
                     <div className="flex items-center">
                       <span className="w-3 h-3 bg-green-300 rounded-full mr-2"></span>
-                      <span className="text-sm">Vegetarian</span>
+                      <span className="text-sm">Significant Reductions</span>
                     </div>
-                    <span className="font-bold">{conversionTypeCount.vegetarian}</span>
+                    <span className="font-bold">{impactLevels.significant}</span>
                   </div>
                   
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
                     <div className="flex items-center">
                       <span className="w-3 h-3 bg-blue-300 rounded-full mr-2"></span>
-                      <span className="text-sm">Reducetarian</span>
+                      <span className="text-sm">Moderate Reductions</span>
                     </div>
-                    <span className="font-bold">{conversionTypeCount.reducetarian}</span>
+                    <span className="font-bold">{impactLevels.moderate}</span>
                   </div>
                   
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
                     <div className="flex items-center">
                       <span className="w-3 h-3 bg-yellow-300 rounded-full mr-2"></span>
-                      <span className="text-sm">Vegan Days</span>
+                      <span className="text-sm">Minor Reductions</span>
                     </div>
-                    <span className="font-bold">{conversionTypeCount.veganDays}</span>
+                    <span className="font-bold">{impactLevels.minor}</span>
                   </div>
                 </div>
                 
                 <div className="mt-6 p-4 bg-green-50 rounded-md">
                   <h4 className="font-medium text-sm mb-2">Did you know?</h4>
                   <p className="text-sm text-gray-700">
-                    A person going vegan saves approximately 365 animals per year from factory farming.
+                    A person who goes vegan can save approximately 30 animals per month from a life of suffering.
                   </p>
                 </div>
               </CardContent>
             </Card>
           </div>
           
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Vegan Resources Card */}
+          {/* Data Table Card */}
+          <div className="mt-8">
             <Card>
               <CardHeader>
-                <CardTitle>Resources to Share</CardTitle>
+                <CardTitle>Your Conversion History</CardTitle>
+                <CardDescription>
+                  Track and manage all the dietary changes you've influenced
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="p-4 border border-gray-200 rounded-md flex items-start">
-                    <div className="w-16 h-16 flex items-center justify-center bg-green-100 rounded mr-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-medium">Vegan Starter Kit</h4>
-                      <p className="text-sm text-gray-600 mb-2">Perfect for beginners interested in plant-based eating</p>
-                      <Button variant="link" className="p-0 h-auto text-primary">Download PDF</Button>
-                    </div>
+                {isLoading ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">Loading conversions...</p>
                   </div>
-                  
-                  <div className="p-4 border border-gray-200 rounded-md flex items-start">
-                    <div className="w-16 h-16 flex items-center justify-center bg-green-100 rounded mr-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-medium">30 Easy Vegan Recipes</h4>
-                      <p className="text-sm text-gray-600 mb-2">Simple and delicious meals anyone can make</p>
-                      <Button variant="link" className="p-0 h-auto text-primary">View Recipes</Button>
-                    </div>
+                ) : veganConversions.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No conversions recorded yet.</p>
+                    <p className="text-gray-500 text-sm mt-1">
+                      Start tracking your impact by logging a conversion above.
+                    </p>
                   </div>
-                  
-                  <div className="p-4 border border-gray-200 rounded-md flex items-start">
-                    <div className="w-16 h-16 flex items-center justify-center bg-green-100 rounded mr-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
-                        <line x1="7" y1="2" x2="7" y2="22"/>
-                        <line x1="17" y1="2" x2="17" y2="22"/>
-                        <line x1="2" y1="12" x2="22" y2="12"/>
-                        <line x1="2" y1="7" x2="7" y2="7"/>
-                        <line x1="2" y1="17" x2="7" y2="17"/>
-                        <line x1="17" y1="17" x2="22" y2="17"/>
-                        <line x1="17" y1="7" x2="22" y2="7"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-medium">Documentaries List</h4>
-                      <p className="text-sm text-gray-600 mb-2">Compelling films about animal agriculture</p>
-                      <Button variant="link" className="p-0 h-auto text-primary">Get List</Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Conversion History Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Conversions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {veganConversions.length === 0 ? (
-                  <p className="text-center py-6 text-muted-foreground">
-                    No conversions recorded yet. Start logging your vegan influences!
-                  </p>
                 ) : (
-                  <div className="space-y-4">
-                    {veganConversions.slice(0, 3).map((conversion) => (
-                      <div key={conversion.id} className="p-4 bg-gray-50 rounded-md">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h4 className="font-medium">
-                              {conversion.personName ? conversion.personName : `Anonymous`} ({conversion.relationship})
-                            </h4>
-                            <p className="text-sm text-gray-600">{formatConversionType(conversion.conversionType)}</p>
-                          </div>
-                          <Badge variant="outline" className="bg-green-100 text-green-800">
-                            {conversion.animalsSaved} animals/month
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-gray-600">
-                          {[
-                            conversion.conversation && "Conversation",
-                            conversion.documentary && "Documentary",
-                            conversion.cookedMeal && "Cooked meals",
-                            conversion.restaurant && "Restaurant visit"
-                          ].filter(Boolean).join(", ") || "No specific method"}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">{formatDate(conversion.date)}</p>
-                      </div>
-                    ))}
-                  </div>
+                  <DataTable columns={columns} data={veganConversions} />
                 )}
               </CardContent>
             </Card>
           </div>
           
-          {/* Conversion History Table */}
-          <div className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Conversion History</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <DataTable
-                  data={veganConversions}
-                  columns={columns}
-                  searchable
-                  searchField="personName"
-                  searchPlaceholder="Search by name..."
-                />
-              </CardContent>
-            </Card>
-          </div>
-          
-          {/* Conversion Details Modal */}
+          {/* Selected Conversion Details Modal */}
           {selectedConversion && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
               <Card className="w-full max-w-md">
                 <CardHeader>
-                  <CardTitle>Conversion Details</CardTitle>
+                  <CardTitle>
+                    {selectedConversion.personName || "Anonymous"} - Conversion Details
+                  </CardTitle>
+                  <CardDescription>
+                    Started on {formatDate(selectedConversion.dateStarted)}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label className="font-semibold">Person</Label>
-                    <p>{selectedConversion.personName || `Anonymous ${selectedConversion.relationship}`}</p>
-                  </div>
-                  <div>
-                    <Label className="font-semibold">Relationship</Label>
-                    <p>{selectedConversion.relationship}</p>
-                  </div>
-                  <div>
-                    <Label className="font-semibold">Conversion Type</Label>
-                    <p>{formatConversionType(selectedConversion.conversionType)}</p>
-                  </div>
-                  <div>
-                    <Label className="font-semibold">Date</Label>
-                    <p>{formatDate(selectedConversion.date)}</p>
-                  </div>
-                  <div>
-                    <Label className="font-semibold">Methods Used</Label>
+                    <h4 className="font-medium mb-1">Duration</h4>
                     <p>
-                      {[
-                        selectedConversion.conversation && "Conversation",
-                        selectedConversion.documentary && "Documentary",
-                        selectedConversion.cookedMeal && "Cooked meals",
-                        selectedConversion.restaurant && "Restaurant visit"
-                      ].filter(Boolean).join(", ") || "No specific method"}
+                      {selectedConversion.dateEnded
+                        ? `${formatDate(selectedConversion.dateStarted)} to ${formatDate(selectedConversion.dateEnded)}`
+                        : `Started ${formatDate(selectedConversion.dateStarted)} (ongoing)`}
                     </p>
                   </div>
+                  
                   <div>
-                    <Label className="font-semibold">Impact</Label>
-                    <p>{selectedConversion.animalsSaved} animals saved per month</p>
+                    <h4 className="font-medium mb-1">Meatiness Change</h4>
+                    <p>From {selectedConversion.meatinessBefore}% to {selectedConversion.meatinessAfter}%</p>
                   </div>
+                  
+                  <div>
+                    <h4 className="font-medium mb-1">Your Influence</h4>
+                    <p>{selectedConversion.influence}%</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium mb-1">Impact</h4>
+                    <p className="text-green-600 font-bold">{selectedConversion.animalsSaved} animals saved</p>
+                  </div>
+                  
                   {selectedConversion.notes && (
                     <div>
-                      <Label className="font-semibold">Notes</Label>
-                      <p>{selectedConversion.notes}</p>
+                      <h4 className="font-medium mb-1">Notes</h4>
+                      <p className="text-sm">{selectedConversion.notes}</p>
                     </div>
                   )}
                   
                   <div className="flex justify-end space-x-2 pt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setSelectedConversion(null)}
+                    >
+                      Close
+                    </Button>
                     <Button
                       variant="destructive"
                       onClick={() => deleteVeganConversion.mutate(selectedConversion.id)}
                       disabled={deleteVeganConversion.isPending}
                     >
                       {deleteVeganConversion.isPending ? "Deleting..." : "Delete"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setSelectedConversion(null)}
-                    >
-                      Close
                     </Button>
                   </div>
                 </CardContent>
