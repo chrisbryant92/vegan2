@@ -68,6 +68,7 @@ export const campaigns = pgTable("campaigns", {
   letters: integer("letters").default(0),
   otherActions: integer("other_actions").default(0),
   totalActions: integer("total_actions").default(0),
+  notes: text("notes"),
   animalsSaved: integer("animals_saved").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

@@ -6,7 +6,8 @@ import { z } from "zod";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { desc } from "drizzle-orm";
-import { donations, insertDonationSchema, insertVeganConversionSchema, insertMediaSharedSchema, insertCampaignSchema } from "@shared/schema";
+import { donations, campaigns, insertDonationSchema, insertVeganConversionSchema, insertMediaSharedSchema, insertCampaignSchema, campaignSchema } from "@shared/schema";
+import { sum, count } from "drizzle-orm";
 
 // Authentication middleware
 const ensureAuthenticated = (req: Request, res: Response, next: Function) => {
@@ -416,36 +417,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/campaigns", ensureAuthenticated, async (req, res) => {
     try {
       const userId = req.user!.id;
-      const validatedData = insertCampaignSchema.parse({
-        ...req.body,
-        userId
-      });
+      console.log("Campaign request body:", req.body);
       
-      const campaign = await storage.createCampaign(validatedData);
+      // Create a campaign object directly without relying on schema validation
+      const processedData = {
+        name: req.body.name,
+        emails: Number(req.body.emails || 0),
+        socialMediaActions: Number(req.body.socialMediaActions || 0),
+        letters: Number(req.body.letters || 0),
+        otherActions: Number(req.body.otherActions || 0),
+        totalActions: Number(req.body.totalActions || 0),
+        notes: req.body.notes || null,
+        animalsSaved: Number(req.body.animalsSaved),
+        userId
+      };
+      
+      console.log("Processed campaign data:", processedData);
+      
+      // Execute database query directly
+      const [campaign] = await db.insert(campaigns).values(processedData).returning();
+      console.log("Created campaign:", campaign);
+      
       res.status(201).json(campaign);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ error: error.errors });
-      } else {
-        res.status(500).json({ error: "Failed to create campaign" });
-      }
+      console.error("Error creating campaign:", error);
+      res.status(500).json({ error: "Failed to create campaign: " + (error instanceof Error ? error.message : String(error)) });
     }
   });
 
   app.get("/api/campaigns", ensureAuthenticated, async (req, res) => {
     try {
       const userId = req.user!.id;
-      const campaigns = await storage.getCampaigns(userId);
-      res.json(campaigns);
+      console.log("Getting campaigns for user:", userId);
+      
+      // Access database directly
+      const campaignsList = await db.select()
+        .from(campaigns)
+        .where(eq(campaigns.userId, userId))
+        .orderBy(desc(campaigns.createdAt));
+      
+      console.log("Retrieved campaigns:", campaignsList);
+      res.json(campaignsList);
     } catch (error) {
-      res.status(500).json({ error: "Failed to get campaigns" });
+      console.error("Error getting campaigns:", error);
+      res.status(500).json({ error: "Failed to get campaigns: " + (error instanceof Error ? error.message : String(error)) });
     }
   });
 
   app.get("/api/campaigns/:id", ensureAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const campaign = await storage.getCampaign(id);
+      const [campaign] = await db.select()
+        .from(campaigns)
+        .where(eq(campaigns.id, id));
       
       if (!campaign) {
         return res.status(404).json({ error: "Campaign not found" });
@@ -457,51 +481,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(campaign);
     } catch (error) {
-      res.status(500).json({ error: "Failed to get campaign" });
+      console.error("Error getting campaign:", error);
+      res.status(500).json({ error: "Failed to get campaign: " + (error instanceof Error ? error.message : String(error)) });
     }
   });
 
   app.put("/api/campaigns/:id", ensureAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const campaign = await storage.getCampaign(id);
+      const [campaignCheck] = await db.select()
+        .from(campaigns)
+        .where(eq(campaigns.id, id));
       
-      if (!campaign) {
+      if (!campaignCheck) {
         return res.status(404).json({ error: "Campaign not found" });
       }
       
-      if (campaign.userId !== req.user!.id) {
+      if (campaignCheck.userId !== req.user!.id) {
         return res.status(403).json({ error: "Not authorized to update this campaign" });
       }
       
-      const updatedCampaign = await storage.updateCampaign(id, req.body);
+      // Create a processed data object with only fields that are present in the body
+      const processedData: any = {};
+      
+      if (req.body.name !== undefined) processedData.name = req.body.name;
+      if (req.body.emails !== undefined) processedData.emails = Number(req.body.emails);
+      if (req.body.socialMediaActions !== undefined) processedData.socialMediaActions = Number(req.body.socialMediaActions);
+      if (req.body.letters !== undefined) processedData.letters = Number(req.body.letters);
+      if (req.body.otherActions !== undefined) processedData.otherActions = Number(req.body.otherActions);
+      if (req.body.totalActions !== undefined) processedData.totalActions = Number(req.body.totalActions);
+      if (req.body.notes !== undefined) processedData.notes = req.body.notes || null;
+      if (req.body.animalsSaved !== undefined) processedData.animalsSaved = Number(req.body.animalsSaved);
+      
+      console.log("Updating campaign with processed data:", processedData);
+      
+      // Execute database query directly
+      const [updatedCampaign] = await db.update(campaigns)
+        .set(processedData)
+        .where(eq(campaigns.id, id))
+        .returning();
+      
       res.json(updatedCampaign);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ error: error.errors });
-      } else {
-        res.status(500).json({ error: "Failed to update campaign" });
-      }
+      console.error("Error updating campaign:", error);
+      res.status(500).json({ error: "Failed to update campaign: " + (error instanceof Error ? error.message : String(error)) });
     }
   });
 
   app.delete("/api/campaigns/:id", ensureAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const campaign = await storage.getCampaign(id);
+      const [campaignCheck] = await db.select()
+        .from(campaigns)
+        .where(eq(campaigns.id, id));
       
-      if (!campaign) {
+      if (!campaignCheck) {
         return res.status(404).json({ error: "Campaign not found" });
       }
       
-      if (campaign.userId !== req.user!.id) {
+      if (campaignCheck.userId !== req.user!.id) {
         return res.status(403).json({ error: "Not authorized to delete this campaign" });
       }
       
-      await storage.deleteCampaign(id);
+      // Execute delete query directly
+      await db.delete(campaigns).where(eq(campaigns.id, id));
       res.status(204).send();
     } catch (error) {
-      res.status(500).json({ error: "Failed to delete campaign" });
+      console.error("Error deleting campaign:", error);
+      res.status(500).json({ error: "Failed to delete campaign: " + (error instanceof Error ? error.message : String(error)) });
     }
   });
 
