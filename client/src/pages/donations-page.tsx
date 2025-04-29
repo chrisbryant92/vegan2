@@ -542,7 +542,7 @@ export default function DonationsPage() {
                 <div className="mt-6 p-4 bg-indigo-50 rounded-md">
                   <h4 className="font-medium text-sm mb-2">Did you know?</h4>
                   <p className="text-sm text-gray-700">
-                    Every $5 donated to animal welfare organizations can help feed and shelter an animal for up to a week.
+                    According to Animal Charity Evaluators, the most efficient animal charities focus on helping farmed animals, and the very best of them can save, on average, 4,056 animals for every $1,000 (USD) donated. This is about 500 times more effective than the average animal shelter, which save just 7 animals per $1,000 donated. (It's worth noting that there is considerable uncertainty in these estimates)
                   </p>
                 </div>
               </CardContent>
