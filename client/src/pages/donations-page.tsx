@@ -170,6 +170,29 @@ export default function DonationsPage() {
   // Colors for the chart
   const COLORS = ["#4F46E5", "#10B981", "#F59E0B", "#EC4899", "#6366F1"];
 
+  // Helper function to calculate total amount for a donation
+  const calculateTotalAmount = (donation: Donation): number => {
+    if (!donation.isMonthly) {
+      // One-off donation: just return the amount
+      return donation.amount;
+    } else {
+      // Monthly donation: calculate based on time period
+      const startDate = donation.dateStarted ? new Date(donation.dateStarted) : null;
+      const endDate = donation.dateEnded ? new Date(donation.dateEnded) : new Date(); // Use current date if no end date
+      
+      if (!startDate) {
+        return donation.amount; // Return just the amount if no start date available
+      }
+      
+      // Calculate months between dates: (endDate - startDate) / 30
+      const daysDiff = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+      const monthsDiff = daysDiff / 30;
+      
+      // Monthly formula: (months * monthly amount)
+      return monthsDiff * donation.amount;
+    }
+  };
+
   // Data table columns
   const columns = [
     {
@@ -180,6 +203,13 @@ export default function DonationsPage() {
       header: "Amount",
       accessorKey: "amount" as const,
       cell: (donation: Donation) => formatCurrency(donation.amount),
+    },
+    {
+      header: "Total Amount",
+      // Use a valid key from Donation type but override with custom cell render function
+      accessorKey: "amount" as const, 
+      id: "totalAmount",
+      cell: (donation: Donation) => formatCurrency(calculateTotalAmount(donation)),
     },
     {
       header: "Org Type",
@@ -524,8 +554,12 @@ export default function DonationsPage() {
                     <p>{selectedDonation.organization}</p>
                   </div>
                   <div>
-                    <Label className="font-semibold">Amount</Label>
+                    <Label className="font-semibold">Amount {selectedDonation.isMonthly ? "(Monthly)" : ""}</Label>
                     <p>{formatCurrency(selectedDonation.amount)}</p>
+                  </div>
+                  <div>
+                    <Label className="font-semibold">Total Amount</Label>
+                    <p>{formatCurrency(calculateTotalAmount(selectedDonation))}</p>
                   </div>
                   <div>
                     <Label className="font-semibold">Type</Label>
