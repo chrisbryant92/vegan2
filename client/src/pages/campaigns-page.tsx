@@ -126,7 +126,7 @@ export default function CampaignsPage() {
   };
 
   // Calculate total animals saved
-  const totalAnimalsSaved = campaigns.reduce((sum, campaign) => sum + campaign.animalsSaved, 0);
+  const totalAnimalsSaved = campaigns.reduce((sum, campaign) => sum + (campaign.animals_saved || 0), 0);
   
   // Prepare data for chart - group by type of campaign (email, social media, etc.)
   const actionTypes = {
@@ -138,9 +138,9 @@ export default function CampaignsPage() {
   
   const chartData = [
     { name: actionTypes.emails, value: calculateCampaignImpact(1, 0, 0, 0) * campaigns.reduce((sum, c) => sum + (c.emails || 0), 0) },
-    { name: actionTypes.socialMedia, value: calculateCampaignImpact(0, 1, 0, 0) * campaigns.reduce((sum, c) => sum + (c.socialMediaActions || 0), 0) },
+    { name: actionTypes.socialMedia, value: calculateCampaignImpact(0, 1, 0, 0) * campaigns.reduce((sum, c) => sum + (c.social_media_actions || 0), 0) },
     { name: actionTypes.letters, value: calculateCampaignImpact(0, 0, 1, 0) * campaigns.reduce((sum, c) => sum + (c.letters || 0), 0) },
-    { name: actionTypes.other, value: calculateCampaignImpact(0, 0, 0, 1) * campaigns.reduce((sum, c) => sum + (c.otherActions || 0), 0) }
+    { name: actionTypes.other, value: calculateCampaignImpact(0, 0, 0, 1) * campaigns.reduce((sum, c) => sum + (c.other_actions || 0), 0) }
   ].filter(item => item.value > 0);
 
   // Colors for the chart
@@ -150,9 +150,9 @@ export default function CampaignsPage() {
   const calculateSuccessRate = () => {
     if (campaigns.length === 0) return 0;
     
-    const animalsSaved = campaigns.map(c => c.animalsSaved);
+    const animalsSaved = campaigns.map(c => c.animals_saved || 0);
     const median = animalsSaved.sort((a, b) => a - b)[Math.floor(animalsSaved.length / 2)];
-    const successfulCampaigns = campaigns.filter(c => c.animalsSaved > median).length;
+    const successfulCampaigns = campaigns.filter(c => (c.animals_saved || 0) > median).length;
     
     return Math.round((successfulCampaigns / campaigns.length) * 100);
   };
@@ -165,12 +165,12 @@ export default function CampaignsPage() {
     },
     {
       header: "Actions Taken",
-      accessorKey: "totalActions" as keyof Campaign,
+      accessorKey: "total_actions" as keyof Campaign,
       cell: (campaign: Campaign) => (
         <div className="flex flex-col">
-          <span className="font-medium">{campaign.totalActions || 0} total</span>
+          <span className="font-medium">{campaign.total_actions || 0} total</span>
           <span className="text-xs text-gray-500">
-            {campaign.emails || 0} emails, {campaign.socialMediaActions || 0} social
+            {campaign.emails || 0} emails, {campaign.social_media_actions || 0} social
           </span>
         </div>
       ),
@@ -182,15 +182,15 @@ export default function CampaignsPage() {
     },
     {
       header: "Other",
-      accessorKey: "otherActions" as keyof Campaign,
-      cell: (campaign: Campaign) => campaign.otherActions || 0,
+      accessorKey: "other_actions" as keyof Campaign,
+      cell: (campaign: Campaign) => campaign.other_actions || 0,
     },
     {
       header: "Impact",
-      accessorKey: "animalsSaved" as keyof Campaign,
+      accessorKey: "animals_saved" as keyof Campaign,
       cell: (campaign: Campaign) => (
         <Badge variant="outline" className="bg-amber-100 text-amber-800 hover:bg-amber-100">
-          {campaign.animalsSaved} animals
+          {campaign.animals_saved} animals
         </Badge>
       ),
     },
@@ -427,10 +427,10 @@ export default function CampaignsPage() {
                     <div className="flex justify-between text-sm mb-1">
                       <span className="font-medium">Total Actions</span>
                       <span className="font-bold">
-                        {campaigns.reduce((sum, c) => sum + (c.totalActions || 0), 0)}
+                        {campaigns.reduce((sum, c) => sum + (c.total_actions || 0), 0)}
                       </span>
                     </div>
-                    <Progress value={Math.min(campaigns.reduce((sum, c) => sum + (c.totalActions || 0), 0) / 2, 100)} className="h-2" />
+                    <Progress value={Math.min(campaigns.reduce((sum, c) => sum + (c.total_actions || 0), 0) / 2, 100)} className="h-2" />
                   </div>
                   
                   <div>
@@ -504,7 +504,7 @@ export default function CampaignsPage() {
                       </div>
                       <div className="flex justify-between">
                         <span>Social Media Actions:</span>
-                        <span className="font-medium">{selectedCampaign.socialMediaActions || 0}</span>
+                        <span className="font-medium">{selectedCampaign.social_media_actions || 0}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Letters Written:</span>
@@ -512,20 +512,20 @@ export default function CampaignsPage() {
                       </div>
                       <div className="flex justify-between">
                         <span>Other Actions:</span>
-                        <span className="font-medium">{selectedCampaign.otherActions || 0}</span>
+                        <span className="font-medium">{selectedCampaign.other_actions || 0}</span>
                       </div>
                       <div className="flex justify-between border-t pt-2 mt-2">
                         <span className="font-medium">Total Actions:</span>
-                        <span className="font-medium">{selectedCampaign.totalActions || 0}</span>
+                        <span className="font-medium">{selectedCampaign.total_actions || 0}</span>
                       </div>
                     </div>
                   </div>
                 
                   <div>
                     <Label className="font-semibold">Impact</Label>
-                    <p className="text-xl font-bold text-amber-600">{selectedCampaign.animalsSaved} animals saved</p>
+                    <p className="text-xl font-bold text-amber-600">{selectedCampaign.animals_saved} animals saved</p>
                     <Progress 
-                      value={Math.min(selectedCampaign.animalsSaved / 5, 100)} 
+                      value={Math.min((selectedCampaign.animals_saved || 0) / 5, 100)} 
                       className="h-2 mt-2"
                     />
                   </div>
