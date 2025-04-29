@@ -224,6 +224,17 @@ export default function DonationsPage() {
     {
       header: "Org Type",
       accessorKey: "donationType" as const,
+      cell: (donation: Donation) => {
+        // Format the organization type to be user-friendly
+        const typeMap: Record<string, string> = {
+          animalShelter: "Animal Shelter",
+          wildlifeConservation: "Wildlife Conservation",
+          rescueOperation: "Rescue Operation",
+          animalRights: "Animal Rights Organization",
+          other: "Other"
+        };
+        return typeMap[donation.donationType] || donation.donationType;
+      },
     },
     {
       header: "Frequency",
@@ -242,11 +253,16 @@ export default function DonationsPage() {
     {
       header: "Impact",
       accessorKey: "animalsSaved" as const,
-      cell: (donation: Donation) => (
-        <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
-          {donation.animalsSaved} animals
-        </Badge>
-      ),
+      cell: (donation: Donation) => {
+        // Calculate the real impact based on the total amount
+        const totalAmount = calculateTotalAmount(donation);
+        const recalculatedImpact = calculateDonationImpact(totalAmount);
+        return (
+          <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
+            {recalculatedImpact} animals
+          </Badge>
+        );
+      },
     },
     {
       header: "Actions",
@@ -573,7 +589,16 @@ export default function DonationsPage() {
                   </div>
                   <div>
                     <Label className="font-semibold">Type</Label>
-                    <p>{selectedDonation.donationType}</p>
+                    <p>{
+                      // Format the organization type to be user-friendly
+                      {
+                        animalShelter: "Animal Shelter",
+                        wildlifeConservation: "Wildlife Conservation",
+                        rescueOperation: "Rescue Operation",
+                        animalRights: "Animal Rights Organization",
+                        other: "Other"
+                      }[selectedDonation.donationType] || selectedDonation.donationType
+                    }</p>
                   </div>
                   <div>
                     <Label className="font-semibold">Donation Type</Label>
@@ -605,7 +630,7 @@ export default function DonationsPage() {
                   )}
                   <div>
                     <Label className="font-semibold">Impact</Label>
-                    <p>{selectedDonation.animalsSaved} animals saved</p>
+                    <p>{calculateDonationImpact(calculateTotalAmount(selectedDonation))} animals saved</p>
                   </div>
                   {selectedDonation.notes && (
                     <div>
