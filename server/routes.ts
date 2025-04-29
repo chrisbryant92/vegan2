@@ -422,6 +422,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create a campaign object directly without relying on schema validation
       const processedData = {
         name: req.body.name,
+        campaign_type: 'Online Action', // Default value for campaign_type
+        organization: req.body.organization || 'Not specified', // Default value for organization
+        start_date: new Date(), // Using current date as default
         emails: Number(req.body.emails || 0),
         socialMediaActions: Number(req.body.socialMediaActions || 0),
         letters: Number(req.body.letters || 0),
@@ -429,7 +432,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalActions: Number(req.body.totalActions || 0),
         notes: req.body.notes || null,
         animalsSaved: Number(req.body.animalsSaved),
-        userId
+        userId,
+        // Setting default values for other required fields
+        signed: false,
+        shared: false,
+        contacted: false,
+        recruited: false,
+        donated: false
       };
       
       console.log("Processed campaign data:", processedData);
