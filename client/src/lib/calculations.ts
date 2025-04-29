@@ -94,31 +94,21 @@ export function calculateMediaImpact(
 }
 
 // Calculate animals saved from campaign participation
+// New formula: (Emails*5)+(Social Media Actions*7)+(Letters*50)+(Other Actions*7)
 export function calculateCampaignImpact(
-  participation: {
-    signed: boolean,
-    shared: boolean,
-    contacted: boolean,
-    recruited: boolean,
-    donated: boolean
-  },
-  peopleRecruited: number = 0
+  emails: number = 0,
+  socialMediaActions: number = 0,
+  letters: number = 0,
+  otherActions: number = 0
 ): number {
-  let impact = 0;
+  const impact = 
+    (emails * 5) + 
+    (socialMediaActions * 7) + 
+    (letters * 50) + 
+    (otherActions * 7);
   
-  // Add impact for each participation type
-  if (participation.signed) impact += CAMPAIGN_PARTICIPATION_FACTORS.signed;
-  if (participation.shared) impact += CAMPAIGN_PARTICIPATION_FACTORS.shared;
-  if (participation.contacted) impact += CAMPAIGN_PARTICIPATION_FACTORS.contacted;
-  if (participation.recruited) impact += CAMPAIGN_PARTICIPATION_FACTORS.recruited;
-  if (participation.donated) impact += CAMPAIGN_PARTICIPATION_FACTORS.donated;
-  
-  // Add additional impact for people recruited
-  if (peopleRecruited > 0) {
-    impact += Math.min(peopleRecruited * 2, 50); // Cap the impact to prevent unrealistic numbers
-  }
-  
-  return Math.max(1, Math.round(impact));
+  // Return as whole number, minimum 0
+  return Math.max(0, Math.round(impact));
 }
 
 // Get description for impact calculation

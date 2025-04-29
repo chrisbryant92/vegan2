@@ -26,17 +26,10 @@ import { Megaphone } from "lucide-react";
 // Zod schema for campaign form
 const campaignSchema = z.object({
   name: z.string().min(1, "Campaign name is required"),
-  campaignType: z.string().min(1, "Campaign type is required"),
-  organization: z.string().optional(),
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().optional(),
-  signed: z.boolean().optional(),
-  shared: z.boolean().optional(),
-  contacted: z.boolean().optional(),
-  recruited: z.boolean().optional(),
-  donated: z.boolean().optional(),
-  peopleRecruited: z.number().min(0, "People recruited must be a positive number").optional(),
-  notes: z.string().optional(),
+  emails: z.number().min(0, "Must be a positive number").default(0),
+  socialMediaActions: z.number().min(0, "Must be a positive number").default(0),
+  letters: z.number().min(0, "Must be a positive number").default(0),
+  otherActions: z.number().min(0, "Must be a positive number").default(0),
 });
 
 type CampaignFormValues = z.infer<typeof campaignSchema>;
@@ -55,37 +48,30 @@ export default function CampaignsPage() {
     resolver: zodResolver(campaignSchema),
     defaultValues: {
       name: "",
-      campaignType: "",
-      organization: "",
-      startDate: new Date().toISOString().split("T")[0],
-      endDate: "",
-      signed: false,
-      shared: false,
-      contacted: false,
-      recruited: false,
-      donated: false,
-      peopleRecruited: 0,
-      notes: "",
+      emails: 0,
+      socialMediaActions: 0,
+      letters: 0,
+      otherActions: 0,
     },
   });
 
   // Create campaign mutation
   const createCampaign = useMutation({
     mutationFn: async (data: CampaignFormValues) => {
-      // Calculate impact based on participation and people recruited
+      // Calculate the total actions
+      const totalActions = data.emails + data.socialMediaActions + data.letters + data.otherActions;
+      
+      // Calculate impact using the new formula
       const animalsSaved = calculateCampaignImpact(
-        {
-          signed: data.signed || false,
-          shared: data.shared || false,
-          contacted: data.contacted || false,
-          recruited: data.recruited || false,
-          donated: data.donated || false,
-        },
-        data.peopleRecruited || 0
+        data.emails,
+        data.socialMediaActions,
+        data.letters,
+        data.otherActions
       );
       
       const res = await apiRequest("POST", "/api/campaigns", {
         ...data,
+        totalActions,
         animalsSaved,
       });
       return await res.json();
@@ -97,17 +83,10 @@ export default function CampaignsPage() {
       });
       form.reset({
         name: "",
-        campaignType: "",
-        organization: "",
-        startDate: new Date().toISOString().split("T")[0],
-        endDate: "",
-        signed: false,
-        shared: false,
-        contacted: false,
-        recruited: false,
-        donated: false,
-        peopleRecruited: 0,
-        notes: "",
+        emails: 0,
+        socialMediaActions: 0,
+        letters: 0,
+        otherActions: 0,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/campaigns"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
