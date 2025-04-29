@@ -129,6 +129,18 @@ export const insertMediaSharedSchema = createInsertSchema(mediaShared)
 export const insertCampaignSchema = createInsertSchema(campaigns)
   .omit({ id: true, createdAt: true });
 
+// Form validation schema for campaigns
+export const campaignSchema = z.object({
+  name: z.string().min(1, "Campaign name is required"),
+  emails: z.number().min(0, "Must be a positive number").default(0),
+  socialMediaActions: z.number().min(0, "Must be a positive number").default(0),
+  letters: z.number().min(0, "Must be a positive number").default(0),
+  otherActions: z.number().min(0, "Must be a positive number").default(0),
+  userId: z.number().optional(),
+  totalActions: z.number().optional(),
+  animalsSaved: z.number().optional(),
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
