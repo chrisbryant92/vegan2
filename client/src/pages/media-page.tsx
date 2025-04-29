@@ -153,8 +153,15 @@ export default function MediaPage() {
     return `${start} - ${formatDate(endDate)}`;
   };
 
+  // Define column types
+  type Column = {
+    header: string;
+    accessorKey?: keyof MediaShared;
+    cell?: (media: MediaShared) => React.ReactNode;
+  };
+
   // Data table columns
-  const columns = [
+  const columns: Column[] = [
     {
       header: "Title",
       accessorKey: "title",

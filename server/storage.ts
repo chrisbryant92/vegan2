@@ -206,16 +206,23 @@ export class MemStorage implements IStorage {
   async createMediaShared(media: InsertMediaShared): Promise<MediaShared> {
     const id = this.mediaSharedIdCounter++;
     const createdAt = new Date();
+    
+    // Make sure all required fields are explicitly defined to handle nullable correctly
     const newMedia: MediaShared = { 
-      ...media, 
-      id, 
-      createdAt,
-      oneOffPieces: media.oneOffPieces ?? null,
-      postsPerMonth: media.postsPerMonth ?? null,
-      estimatedReach: media.estimatedReach ?? null,
-      estimatedPersuasiveness: media.estimatedPersuasiveness ?? null,
-      description: media.description ?? null
+      id,
+      userId: media.userId, 
+      title: media.title,
+      dateStarted: media.dateStarted,
+      dateEnded: media.dateEnded || null,
+      animalsSaved: media.animalsSaved,
+      oneOffPieces: media.oneOffPieces || 0,
+      postsPerMonth: media.postsPerMonth || 0,
+      estimatedReach: media.estimatedReach || 0,
+      estimatedPersuasiveness: media.estimatedPersuasiveness || 0,
+      description: media.description || null,
+      createdAt
     };
+    
     this.mediaShared.set(id, newMedia);
     return newMedia;
   }
