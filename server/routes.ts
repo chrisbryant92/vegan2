@@ -34,34 +34,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user!.id;
       console.log("Donation request body:", req.body);
       
-      // Process the data before validation
+      // Process the data with direct type conversions
       const processedData = {
-        ...req.body,
-        userId,
-        // Ensure isMonthly is treated as a boolean
+        organization: req.body.organization,
+        amount: Number(req.body.amount),
+        donationType: req.body.donationType,
+        date: new Date(req.body.date),
         isMonthly: req.body.isMonthly === true || req.body.isMonthly === "true",
-        // Convert date strings to Date objects
-        date: req.body.date ? new Date(req.body.date) : new Date(),
         dateStarted: req.body.dateStarted ? new Date(req.body.dateStarted) : null,
         dateEnded: req.body.dateEnded ? new Date(req.body.dateEnded) : null,
-        notes: req.body.notes || null
+        notes: req.body.notes || null,
+        animalsSaved: Number(req.body.animalsSaved),
+        userId
       };
       
       console.log("Processed donation data:", processedData);
       
-      // Since we've already manually processed the data, including date conversions,
-      // we can use a more direct approach to avoid further type issues
+      // Skip schema validation completely and pass to storage directly
       const donation = await storage.createDonation(processedData);
       console.log("Created donation:", donation);
       
       res.status(201).json(donation);
     } catch (error) {
       console.error("Error creating donation:", error);
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ error: error.errors });
-      } else {
-        res.status(500).json({ error: "Failed to create donation: " + (error instanceof Error ? error.message : String(error)) });
-      }
+      res.status(500).json({ error: "Failed to create donation: " + (error instanceof Error ? error.message : String(error)) });
     }
   });
 
@@ -107,25 +103,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: "Not authorized to update this donation" });
       }
       
-      // Process the data before validation
-      const processedData = {
-        ...req.body,
-        // Ensure isMonthly is treated as a boolean
-        isMonthly: req.body.isMonthly === true || req.body.isMonthly === "true",
-        // Convert date strings to Date objects if they exist
-        date: req.body.date ? new Date(req.body.date) : undefined,
-        dateStarted: req.body.dateStarted ? new Date(req.body.dateStarted) : undefined,
-        dateEnded: req.body.dateEnded ? new Date(req.body.dateEnded) : undefined,
-      };
+      // Create a processed data object with only fields that are present in the body
+      const processedData: any = {};
+      
+      if (req.body.organization) processedData.organization = req.body.organization;
+      if (req.body.amount) processedData.amount = Number(req.body.amount);
+      if (req.body.donationType) processedData.donationType = req.body.donationType;
+      if (req.body.isMonthly !== undefined) processedData.isMonthly = req.body.isMonthly === true || req.body.isMonthly === "true";
+      if (req.body.date) processedData.date = new Date(req.body.date);
+      if (req.body.dateStarted) processedData.dateStarted = new Date(req.body.dateStarted);
+      if (req.body.dateEnded) processedData.dateEnded = new Date(req.body.dateEnded);
+      if (req.body.notes !== undefined) processedData.notes = req.body.notes || null;
+      if (req.body.animalsSaved) processedData.animalsSaved = Number(req.body.animalsSaved);
       
       const updatedDonation = await storage.updateDonation(id, processedData);
       res.json(updatedDonation);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ error: error.errors });
-      } else {
-        res.status(500).json({ error: "Failed to update donation: " + (error instanceof Error ? error.message : String(error)) });
-      }
+      console.error("Error updating donation:", error);
+      res.status(500).json({ error: "Failed to update donation: " + (error instanceof Error ? error.message : String(error)) });
     }
   });
 
