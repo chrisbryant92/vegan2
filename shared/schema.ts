@@ -17,10 +17,13 @@ export const donations = pgTable("donations", {
   userId: integer("user_id").notNull().references(() => users.id),
   organization: text("organization").notNull(),
   amount: doublePrecision("amount").notNull(),
-  donationType: text("donation_type").notNull(),
-  date: timestamp("date").notNull(),
+  donationType: text("donation_type").notNull(), // "One-Off" or "Monthly"
+  date: timestamp("date").notNull(), // Main date (for One-Off) or last donation date
+  isMonthly: boolean("is_monthly").default(false), // Whether this is a monthly donation
+  dateStarted: timestamp("date_started"), // When the monthly donation started
+  dateEnded: timestamp("date_ended"), // When the monthly donation ended (if applicable)
   notes: text("notes"),
-  animalsSaved: integer("animals_saved").notNull(),
+  animalsSaved: integer("animals_saved").notNull(), // Calculated as (amount*1.35)*4.056
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

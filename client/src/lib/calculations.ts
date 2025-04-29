@@ -1,7 +1,9 @@
 // Animal impact calculation utilities
 
 // Constants for animal saving calculations
-const ANIMALS_SAVED_PER_DOLLAR = 0.24; // Approximate number of animals saved per dollar donated
+// Formula: (Total Amount Donated*1.35)*4.056
+const DONATION_MULTIPLIER = 1.35;
+const ANIMALS_SAVED_MULTIPLIER = 4.056;
 
 const VEGAN_CONVERSION_FACTORS = {
   fullVegan: 365, // animals saved per year
@@ -29,8 +31,9 @@ const CAMPAIGN_PARTICIPATION_FACTORS = {
 };
 
 // Calculate animals saved from charitable donations
+// Using formula: (Total Amount Donated*1.35)*4.056
 export function calculateDonationImpact(amount: number): number {
-  return Math.round(amount * ANIMALS_SAVED_PER_DOLLAR);
+  return Math.round((amount * DONATION_MULTIPLIER) * ANIMALS_SAVED_MULTIPLIER);
 }
 
 // Calculate animals saved from vegan conversions
