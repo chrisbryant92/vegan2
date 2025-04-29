@@ -187,57 +187,20 @@ export default function LandingPage() {
             </motion.div>
           </motion.div>
           
-          {/* Spacer */}
-          <div className="my-16"></div>
-          
-          {/* Call to Action Section */}
+          {/* Simple Call to Action */}
           <motion.div 
-            className="py-16 px-6 bg-indigo-600 rounded-3xl shadow-xl"
-            initial={{ opacity: 0, y: 50 }}
+            className="mt-16 mb-12 flex justify-center"
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.3, duration: 0.5 }}
-            whileHover={{ boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2)" }}
+            transition={{ delay: 0.9, duration: 0.5 }}
           >
-            <div className="max-w-3xl mx-auto text-center">
-              <motion.h2 
-                className="text-3xl md:text-4xl font-bold text-white mb-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.4 }}
-              >
-                Start Tracking Your Impact Today
-              </motion.h2>
-              <motion.p 
-                className="text-indigo-100 text-lg mb-8 max-w-2xl mx-auto"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.5 }}
-              >
-                Join thousands of animal advocates who are measuring and maximizing their positive impact on animal welfare. Every action counts!
-              </motion.p>
-              <motion.div 
-                className="flex flex-wrap justify-center gap-4"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.6 }}
-              >
-                <Link href="/auth">
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button size="lg" className="bg-white hover:bg-gray-100 text-indigo-700 font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
-                      Create Free Account
-                    </Button>
-                  </motion.div>
-                </Link>
+            <Link href="/auth">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white font-medium px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
+                  Get Started Now
+                </Button>
               </motion.div>
-              <motion.p 
-                className="text-indigo-200 text-sm mt-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.7 }}
-              >
-                No credit card required. Start making a difference in just 60 seconds.
-              </motion.p>
-            </div>
+            </Link>
           </motion.div>
         </motion.div>
       </div>
