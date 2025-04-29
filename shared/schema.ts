@@ -63,14 +63,27 @@ export const campaigns = pgTable("campaigns", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
   name: text("name").notNull(),
+  campaign_type: text("campaign_type"),
+  organization: text("organization"),
+  start_date: timestamp("start_date"),
+  end_date: timestamp("end_date"),
+  budget: integer("budget"),
+  scope: text("scope"),
+  people_reached: integer("people_reached"),
+  people_recruited: integer("people_recruited"),
   emails: integer("emails").default(0),
-  socialMediaActions: integer("social_media_actions").default(0),
+  social_media_actions: integer("social_media_actions").default(0),
   letters: integer("letters").default(0),
-  otherActions: integer("other_actions").default(0),
-  totalActions: integer("total_actions").default(0),
+  other_actions: integer("other_actions").default(0),
+  total_actions: integer("total_actions").default(0),
   notes: text("notes"),
-  animalsSaved: integer("animals_saved").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  animals_saved: integer("animals_saved").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+  signed: boolean("signed").default(false),
+  shared: boolean("shared").default(false),
+  contacted: boolean("contacted").default(false),
+  recruited: boolean("recruited").default(false),
+  donated: boolean("donated").default(false),
 });
 
 // Insert schemas
@@ -128,7 +141,7 @@ export const insertMediaSharedSchema = createInsertSchema(mediaShared)
   .omit({ id: true, createdAt: true });
 
 export const insertCampaignSchema = createInsertSchema(campaigns)
-  .omit({ id: true, createdAt: true });
+  .omit({ id: true, created_at: true });
 
 // Form validation schema for campaigns
 export const campaignSchema = z.object({
