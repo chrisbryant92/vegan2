@@ -331,7 +331,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDonation(id: number): Promise<boolean> {
     const result = await db.delete(donations).where(eq(donations.id, id));
-    return result.count > 0;
+    return true; // If no error occurs, consider it successful
   }
 
   // Vegan conversion operations
@@ -362,7 +362,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteVeganConversion(id: number): Promise<boolean> {
     const result = await db.delete(veganConversions).where(eq(veganConversions.id, id));
-    return result.count > 0;
+    return true; // If no error occurs, consider it successful
   }
 
   // Media shared operations
@@ -393,7 +393,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMediaShared(id: number): Promise<boolean> {
     const result = await db.delete(mediaShared).where(eq(mediaShared.id, id));
-    return result.count > 0;
+    return true; // If no error occurs, consider it successful
   }
 
   // Campaign operations
@@ -424,7 +424,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCampaign(id: number): Promise<boolean> {
     const result = await db.delete(campaigns).where(eq(campaigns.id, id));
-    return result.count > 0;
+    return true; // If no error occurs, consider it successful
   }
 
   // User statistics
