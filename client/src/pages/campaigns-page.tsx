@@ -9,9 +9,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -131,44 +128,23 @@ export default function CampaignsPage() {
   // Calculate total animals saved
   const totalAnimalsSaved = campaigns.reduce((sum, campaign) => sum + campaign.animalsSaved, 0);
   
-  // Calculate total people recruited
-  const totalPeopleRecruited = campaigns.reduce((sum, campaign) => sum + (campaign.peopleRecruited || 0), 0);
+  // Prepare data for chart - group by type of campaign (email, social media, etc.)
+  const actionTypes = {
+    emails: "Email Campaigns",
+    socialMedia: "Social Media",
+    letters: "Letter Writing",
+    other: "Other Actions"
+  };
   
-  // Prepare data for chart
-  const campaignsByType = campaigns.reduce((acc, campaign) => {
-    acc[campaign.campaignType] = (acc[campaign.campaignType] || 0) + campaign.animalsSaved;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const chartData = Object.entries(campaignsByType).map(([name, value]) => ({
-    name,
-    value,
-  }));
+  const chartData = [
+    { name: actionTypes.emails, value: calculateCampaignImpact(1, 0, 0, 0) * campaigns.reduce((sum, c) => sum + (c.emails || 0), 0) },
+    { name: actionTypes.socialMedia, value: calculateCampaignImpact(0, 1, 0, 0) * campaigns.reduce((sum, c) => sum + (c.socialMediaActions || 0), 0) },
+    { name: actionTypes.letters, value: calculateCampaignImpact(0, 0, 1, 0) * campaigns.reduce((sum, c) => sum + (c.letters || 0), 0) },
+    { name: actionTypes.other, value: calculateCampaignImpact(0, 0, 0, 1) * campaigns.reduce((sum, c) => sum + (c.otherActions || 0), 0) }
+  ].filter(item => item.value > 0);
 
   // Colors for the chart
   const COLORS = ["#F59E0B", "#FBBF24", "#FCD34D", "#F97316", "#4F46E5"];
-
-  // Format campaign type for display
-  const formatCampaignType = (type: string) => {
-    switch (type) {
-      case "petition": return "Petition";
-      case "boycott": return "Boycott";
-      case "protest": return "Virtual Protest";
-      case "callToAction": return "Call to Action";
-      case "fundraiser": return "Fundraiser";
-      case "awareness": return "Awareness Campaign";
-      default: return type;
-    }
-  };
-
-  // Count campaigns by participation
-  const participationStats = {
-    signed: campaigns.filter(c => c.signed).length,
-    shared: campaigns.filter(c => c.shared).length,
-    contacted: campaigns.filter(c => c.contacted).length,
-    recruited: campaigns.filter(c => c.recruited).length,
-    donated: campaigns.filter(c => c.donated).length,
-  };
 
   // Calculate success rate (campaigns with animals saved > median)
   const calculateSuccessRate = () => {
@@ -185,43 +161,33 @@ export default function CampaignsPage() {
   const columns = [
     {
       header: "Campaign",
-      accessorKey: "name",
+      accessorKey: "name" as keyof Campaign,
     },
     {
-      header: "Type",
-      accessorKey: "campaignType",
-      cell: (campaign: Campaign) => formatCampaignType(campaign.campaignType),
+      header: "Actions Taken",
+      accessorKey: "totalActions" as keyof Campaign,
+      cell: (campaign: Campaign) => (
+        <div className="flex flex-col">
+          <span className="font-medium">{campaign.totalActions || 0} total</span>
+          <span className="text-xs text-gray-500">
+            {campaign.emails || 0} emails, {campaign.socialMediaActions || 0} social
+          </span>
+        </div>
+      ),
     },
     {
-      header: "Organization",
-      accessorKey: "organization",
-      cell: (campaign: Campaign) => campaign.organization || "N/A",
+      header: "Letters",
+      accessorKey: "letters" as keyof Campaign,
+      cell: (campaign: Campaign) => campaign.letters || 0,
     },
     {
-      header: "Start Date",
-      accessorKey: "startDate",
-      cell: (campaign: Campaign) => formatDate(campaign.startDate),
-    },
-    {
-      header: "Participation",
-      accessorKey: "signed",
-      cell: (campaign: Campaign) => {
-        const activities = [
-          campaign.signed && "Signed",
-          campaign.shared && "Shared",
-          campaign.contacted && "Contacted",
-          campaign.recruited && "Recruited",
-          campaign.donated && "Donated"
-        ].filter(Boolean);
-        
-        return activities.length > 0
-          ? activities.join(", ")
-          : "Not specified";
-      },
+      header: "Other",
+      accessorKey: "otherActions" as keyof Campaign,
+      cell: (campaign: Campaign) => campaign.otherActions || 0,
     },
     {
       header: "Impact",
-      accessorKey: "animalsSaved",
+      accessorKey: "animalsSaved" as keyof Campaign,
       cell: (campaign: Campaign) => (
         <Badge variant="outline" className="bg-amber-100 text-amber-800 hover:bg-amber-100">
           {campaign.animalsSaved} animals
@@ -230,7 +196,7 @@ export default function CampaignsPage() {
     },
     {
       header: "Actions",
-      accessorKey: "id",
+      accessorKey: "id" as keyof Campaign,
       cell: (campaign: Campaign) => (
         <Button
           variant="ghost"
@@ -242,11 +208,6 @@ export default function CampaignsPage() {
       ),
     },
   ];
-
-  // Get active campaigns (no end date or end date in the future)
-  const activeCampaigns = campaigns.filter(campaign => 
-    !campaign.endDate || new Date(campaign.endDate) > new Date()
-  );
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
@@ -283,149 +244,127 @@ export default function CampaignsPage() {
                       )}
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="campaignType">Campaign Type</Label>
-                        <Select
-                          onValueChange={(value) => form.setValue("campaignType", value)}
-                          defaultValue={form.getValues("campaignType")}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="petition">Petition</SelectItem>
-                            <SelectItem value="boycott">Boycott</SelectItem>
-                            <SelectItem value="protest">Virtual Protest</SelectItem>
-                            <SelectItem value="callToAction">Call to Action</SelectItem>
-                            <SelectItem value="fundraiser">Fundraiser</SelectItem>
-                            <SelectItem value="awareness">Awareness Campaign</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {form.formState.errors.campaignType && (
-                          <p className="text-sm text-red-500">
-                            {form.formState.errors.campaignType.message}
-                          </p>
-                        )}
+                    <div className="space-y-4">
+                      <Label className="text-lg font-medium">Campaign Actions</Label>
+                      <p className="text-sm text-gray-500">Enter the number of actions you've taken in this campaign</p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="emails">Emails Sent</Label>
+                          <Input
+                            id="emails"
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            {...form.register("emails", { 
+                              valueAsNumber: true,
+                              setValueAs: (value) => value === "" ? 0 : parseInt(value, 10) 
+                            })}
+                          />
+                          {form.formState.errors.emails && (
+                            <p className="text-sm text-red-500">
+                              {form.formState.errors.emails.message}
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-500">Each email saves approximately 5 animals</p>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="socialMediaActions">Social Media Actions</Label>
+                          <Input
+                            id="socialMediaActions"
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            {...form.register("socialMediaActions", { 
+                              valueAsNumber: true,
+                              setValueAs: (value) => value === "" ? 0 : parseInt(value, 10) 
+                            })}
+                          />
+                          {form.formState.errors.socialMediaActions && (
+                            <p className="text-sm text-red-500">
+                              {form.formState.errors.socialMediaActions.message}
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-500">Each social media action saves approximately 7 animals</p>
+                        </div>
                       </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="organization">Organization (Optional)</Label>
-                        <Input
-                          id="organization"
-                          placeholder="Organization running the campaign"
-                          {...form.register("organization")}
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="letters">Letters Written</Label>
+                          <Input
+                            id="letters"
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            {...form.register("letters", { 
+                              valueAsNumber: true,
+                              setValueAs: (value) => value === "" ? 0 : parseInt(value, 10) 
+                            })}
+                          />
+                          {form.formState.errors.letters && (
+                            <p className="text-sm text-red-500">
+                              {form.formState.errors.letters.message}
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-500">Each letter saves approximately 50 animals</p>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="otherActions">Other Actions</Label>
+                          <Input
+                            id="otherActions"
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            {...form.register("otherActions", { 
+                              valueAsNumber: true,
+                              setValueAs: (value) => value === "" ? 0 : parseInt(value, 10) 
+                            })}
+                          />
+                          {form.formState.errors.otherActions && (
+                            <p className="text-sm text-red-500">
+                              {form.formState.errors.otherActions.message}
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-500">Each other action saves approximately 7 animals</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-2">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-medium">Total Actions</span>
+                          <span className="text-sm font-medium">
+                            {(form.watch("emails") || 0) + 
+                             (form.watch("socialMediaActions") || 0) + 
+                             (form.watch("letters") || 0) + 
+                             (form.watch("otherActions") || 0)} actions
+                          </span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-medium">Animals Saved</span>
+                          <span className="text-sm font-bold">
+                            {calculateCampaignImpact(
+                              form.watch("emails") || 0,
+                              form.watch("socialMediaActions") || 0,
+                              form.watch("letters") || 0,
+                              form.watch("otherActions") || 0
+                            )} animals
+                          </span>
+                        </div>
+                        <Progress
+                          value={Math.min(100, calculateCampaignImpact(
+                            form.watch("emails") || 0,
+                            form.watch("socialMediaActions") || 0,
+                            form.watch("letters") || 0,
+                            form.watch("otherActions") || 0
+                          ) / 10)}
+                          className="h-2"
                         />
+                        <p className="text-xs text-gray-500 mt-1">Formula: (Emails×5)+(Social Media×7)+(Letters×50)+(Other Actions×7)</p>
                       </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="startDate">Start Date</Label>
-                        <Input
-                          id="startDate"
-                          type="date"
-                          {...form.register("startDate")}
-                        />
-                        {form.formState.errors.startDate && (
-                          <p className="text-sm text-red-500">
-                            {form.formState.errors.startDate.message}
-                          </p>
-                        )}
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="endDate">End Date (Optional)</Label>
-                        <Input
-                          id="endDate"
-                          type="date"
-                          {...form.register("endDate")}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Your Participation</Label>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="signed"
-                            checked={form.watch("signed")}
-                            onCheckedChange={(checked) => 
-                              form.setValue("signed", checked as boolean)
-                            }
-                          />
-                          <Label htmlFor="signed" className="font-normal">Signed/Supported</Label>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="shared"
-                            checked={form.watch("shared")}
-                            onCheckedChange={(checked) => 
-                              form.setValue("shared", checked as boolean)
-                            }
-                          />
-                          <Label htmlFor="shared" className="font-normal">Shared on social media</Label>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="contacted"
-                            checked={form.watch("contacted")}
-                            onCheckedChange={(checked) => 
-                              form.setValue("contacted", checked as boolean)
-                            }
-                          />
-                          <Label htmlFor="contacted" className="font-normal">Contacted officials/companies</Label>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="recruited"
-                            checked={form.watch("recruited")}
-                            onCheckedChange={(checked) => 
-                              form.setValue("recruited", checked as boolean)
-                            }
-                          />
-                          <Label htmlFor="recruited" className="font-normal">Recruited others</Label>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="donated"
-                            checked={form.watch("donated")}
-                            onCheckedChange={(checked) => 
-                              form.setValue("donated", checked as boolean)
-                            }
-                          />
-                          <Label htmlFor="donated" className="font-normal">Donated to campaign</Label>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="peopleRecruited">People Recruited (if any)</Label>
-                      <Input
-                        id="peopleRecruited"
-                        type="number"
-                        placeholder="Number of people"
-                        {...form.register("peopleRecruited", { valueAsNumber: true })}
-                      />
-                      {form.formState.errors.peopleRecruited && (
-                        <p className="text-sm text-red-500">
-                          {form.formState.errors.peopleRecruited.message}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="notes">Notes (Optional)</Label>
-                      <Textarea
-                        id="notes"
-                        placeholder="Additional details about the campaign and your participation"
-                        {...form.register("notes")}
-                      />
                     </div>
                     
                     <Button
@@ -486,10 +425,12 @@ export default function CampaignsPage() {
                   
                   <div>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="font-medium">People Recruited</span>
-                      <span className="font-bold">{totalPeopleRecruited}</span>
+                      <span className="font-medium">Total Actions</span>
+                      <span className="font-bold">
+                        {campaigns.reduce((sum, c) => sum + (c.totalActions || 0), 0)}
+                      </span>
                     </div>
-                    <Progress value={Math.min(totalPeopleRecruited * 2, 100)} className="h-2" indicatorClassName="bg-green-600" />
+                    <Progress value={Math.min(campaigns.reduce((sum, c) => sum + (c.totalActions || 0), 0) / 2, 100)} className="h-2" />
                   </div>
                   
                   <div>
@@ -497,84 +438,16 @@ export default function CampaignsPage() {
                       <span className="font-medium">Success Rate</span>
                       <span className="font-bold">{calculateSuccessRate()}%</span>
                     </div>
-                    <Progress value={calculateSuccessRate()} className="h-2" indicatorClassName="bg-blue-600" />
+                    <Progress value={calculateSuccessRate()} className="h-2" />
                   </div>
                 </div>
                 
                 <div className="mt-6 p-4 bg-amber-50 rounded-md">
                   <h4 className="font-medium text-sm mb-2">Did you know?</h4>
                   <p className="text-sm text-gray-700">
-                    Online petitions with over 100,000 signatures are 50% more likely to achieve their stated goals.
+                    Letter writing is the most impactful online action, with each letter saving approximately 50 animals on average.
                   </p>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          {/* Active Campaigns */}
-          <div className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Active Campaigns</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {activeCampaigns.length === 0 ? (
-                  <p className="text-center py-6 text-muted-foreground">
-                    No active campaigns found. Start logging your campaign participation!
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {activeCampaigns.slice(0, 4).map((campaign) => (
-                      <div key={campaign.id} className="border border-gray-200 rounded-md overflow-hidden">
-                        <div className="h-40 bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-white">
-                          <Megaphone className="h-16 w-16 opacity-50" />
-                        </div>
-                        <div className="p-4">
-                          <div className="flex justify-between items-start">
-                            <h4 className="font-semibold text-lg">{campaign.name}</h4>
-                            <Badge variant="outline" className="bg-green-100 text-green-800">Active</Badge>
-                          </div>
-                          <p className="text-sm text-gray-600 my-2">
-                            {formatCampaignType(campaign.campaignType)}
-                            {campaign.organization ? ` by ${campaign.organization}` : ''}
-                          </p>
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-xs text-gray-500">Your impact: {campaign.animalsSaved} animals</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-                            <div
-                              className="bg-green-500 h-2 rounded-full"
-                              style={{ width: `${Math.min(campaign.animalsSaved, 100)}%` }}
-                            ></div>
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button
-                              size="sm"
-                              className="bg-primary hover:bg-primary/90"
-                              onClick={() => setSelectedCampaign(campaign)}
-                            >
-                              View Details
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                            >
-                              Share
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {activeCampaigns.length > 4 && (
-                  <div className="mt-4 text-center">
-                    <Button variant="link" className="text-primary">
-                      Browse More Campaigns
-                    </Button>
-                  </div>
-                )}
               </CardContent>
             </Card>
           </div>
@@ -586,13 +459,25 @@ export default function CampaignsPage() {
                 <CardTitle>Campaign History</CardTitle>
               </CardHeader>
               <CardContent>
-                <DataTable
-                  data={campaigns}
-                  columns={columns}
-                  searchable
-                  searchField="name"
-                  searchPlaceholder="Search campaigns..."
-                />
+                {isLoading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-amber-600"></div>
+                  </div>
+                ) : campaigns.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Megaphone className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                    <p className="text-lg font-medium mb-1">No campaigns yet</p>
+                    <p className="text-sm">Start logging your online activism to see your impact!</p>
+                  </div>
+                ) : (
+                  <DataTable
+                    data={campaigns}
+                    columns={columns}
+                    searchable
+                    searchField="name"
+                    searchPlaceholder="Search campaigns..."
+                  />
+                )}
               </CardContent>
             </Card>
           </div>
@@ -609,67 +494,41 @@ export default function CampaignsPage() {
                     <Label className="font-semibold">Campaign Name</Label>
                     <p>{selectedCampaign.name}</p>
                   </div>
+                  
                   <div>
-                    <Label className="font-semibold">Type</Label>
-                    <p>{formatCampaignType(selectedCampaign.campaignType)}</p>
-                  </div>
-                  {selectedCampaign.organization && (
-                    <div>
-                      <Label className="font-semibold">Organization</Label>
-                      <p>{selectedCampaign.organization}</p>
-                    </div>
-                  )}
-                  <div>
-                    <Label className="font-semibold">Start Date</Label>
-                    <p>{formatDate(selectedCampaign.startDate)}</p>
-                  </div>
-                  {selectedCampaign.endDate && (
-                    <div>
-                      <Label className="font-semibold">End Date</Label>
-                      <p>{formatDate(selectedCampaign.endDate)}</p>
-                    </div>
-                  )}
-                  <div>
-                    <Label className="font-semibold">Your Participation</Label>
-                    <div className="grid grid-cols-2 gap-2 mt-1">
-                      <div className="flex items-center">
-                        <Checkbox id="view-signed" checked={selectedCampaign.signed} disabled />
-                        <Label htmlFor="view-signed" className="ml-2 font-normal">Signed</Label>
+                    <Label className="font-semibold">Action Summary</Label>
+                    <div className="mt-2 space-y-2">
+                      <div className="flex justify-between">
+                        <span>Email Actions:</span>
+                        <span className="font-medium">{selectedCampaign.emails || 0}</span>
                       </div>
-                      <div className="flex items-center">
-                        <Checkbox id="view-shared" checked={selectedCampaign.shared} disabled />
-                        <Label htmlFor="view-shared" className="ml-2 font-normal">Shared</Label>
+                      <div className="flex justify-between">
+                        <span>Social Media Actions:</span>
+                        <span className="font-medium">{selectedCampaign.socialMediaActions || 0}</span>
                       </div>
-                      <div className="flex items-center">
-                        <Checkbox id="view-contacted" checked={selectedCampaign.contacted} disabled />
-                        <Label htmlFor="view-contacted" className="ml-2 font-normal">Contacted</Label>
+                      <div className="flex justify-between">
+                        <span>Letters Written:</span>
+                        <span className="font-medium">{selectedCampaign.letters || 0}</span>
                       </div>
-                      <div className="flex items-center">
-                        <Checkbox id="view-recruited" checked={selectedCampaign.recruited} disabled />
-                        <Label htmlFor="view-recruited" className="ml-2 font-normal">Recruited</Label>
+                      <div className="flex justify-between">
+                        <span>Other Actions:</span>
+                        <span className="font-medium">{selectedCampaign.otherActions || 0}</span>
                       </div>
-                      <div className="flex items-center">
-                        <Checkbox id="view-donated" checked={selectedCampaign.donated} disabled />
-                        <Label htmlFor="view-donated" className="ml-2 font-normal">Donated</Label>
+                      <div className="flex justify-between border-t pt-2 mt-2">
+                        <span className="font-medium">Total Actions:</span>
+                        <span className="font-medium">{selectedCampaign.totalActions || 0}</span>
                       </div>
                     </div>
                   </div>
-                  {selectedCampaign.peopleRecruited > 0 && (
-                    <div>
-                      <Label className="font-semibold">People Recruited</Label>
-                      <p>{selectedCampaign.peopleRecruited}</p>
-                    </div>
-                  )}
+                
                   <div>
                     <Label className="font-semibold">Impact</Label>
-                    <p>{selectedCampaign.animalsSaved} animals saved</p>
+                    <p className="text-xl font-bold text-amber-600">{selectedCampaign.animalsSaved} animals saved</p>
+                    <Progress 
+                      value={Math.min(selectedCampaign.animalsSaved / 5, 100)} 
+                      className="h-2 mt-2"
+                    />
                   </div>
-                  {selectedCampaign.notes && (
-                    <div>
-                      <Label className="font-semibold">Notes</Label>
-                      <p>{selectedCampaign.notes}</p>
-                    </div>
-                  )}
                   
                   <div className="flex justify-end space-x-2 pt-4">
                     <Button
