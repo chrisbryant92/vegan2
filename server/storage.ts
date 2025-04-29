@@ -167,7 +167,17 @@ export class MemStorage implements IStorage {
   async createVeganConversion(conversion: InsertVeganConversion): Promise<VeganConversion> {
     const id = this.veganConversionIdCounter++;
     const createdAt = new Date();
-    const newConversion: VeganConversion = { ...conversion, id, createdAt };
+    const newConversion: VeganConversion = { 
+      ...conversion,
+      id, 
+      createdAt,
+      personName: conversion.personName ?? null,
+      notes: conversion.notes ?? null,
+      conversation: conversion.conversation ?? null,
+      documentary: conversion.documentary ?? null,
+      cookedMeal: conversion.cookedMeal ?? null,
+      restaurant: conversion.restaurant ?? null
+    };
     this.veganConversions.set(id, newConversion);
     return newConversion;
   }
@@ -199,7 +209,14 @@ export class MemStorage implements IStorage {
   async createMediaShared(media: InsertMediaShared): Promise<MediaShared> {
     const id = this.mediaSharedIdCounter++;
     const createdAt = new Date();
-    const newMedia: MediaShared = { ...media, id, createdAt };
+    const newMedia: MediaShared = { 
+      ...media, 
+      id, 
+      createdAt,
+      reach: media.reach ?? null,
+      engagement: media.engagement ?? null,
+      description: media.description ?? null
+    };
     this.mediaShared.set(id, newMedia);
     return newMedia;
   }
@@ -231,7 +248,20 @@ export class MemStorage implements IStorage {
   async createCampaign(campaign: InsertCampaign): Promise<Campaign> {
     const id = this.campaignIdCounter++;
     const createdAt = new Date();
-    const newCampaign: Campaign = { ...campaign, id, createdAt };
+    const newCampaign: Campaign = { 
+      ...campaign, 
+      id, 
+      createdAt,
+      organization: campaign.organization ?? null,
+      notes: campaign.notes ?? null,
+      endDate: campaign.endDate ?? null,
+      signed: campaign.signed ?? false,
+      shared: campaign.shared ?? false,
+      contacted: campaign.contacted ?? false,
+      recruited: campaign.recruited ?? false,
+      donated: campaign.donated ?? false,
+      peopleRecruited: campaign.peopleRecruited ?? 0
+    };
     this.campaigns.set(id, newCampaign);
     return newCampaign;
   }

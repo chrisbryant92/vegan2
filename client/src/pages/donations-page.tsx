@@ -147,20 +147,20 @@ export default function DonationsPage() {
   const columns = [
     {
       header: "Organization",
-      accessorKey: "organization",
+      accessorKey: "organization" as const,
     },
     {
       header: "Amount",
-      accessorKey: "amount",
+      accessorKey: "amount" as const,
       cell: (donation: Donation) => formatCurrency(donation.amount),
     },
     {
       header: "Org Type",
-      accessorKey: "donationType",
+      accessorKey: "donationType" as const,
     },
     {
       header: "Frequency",
-      accessorKey: "isMonthly",
+      accessorKey: "isMonthly" as const,
       cell: (donation: Donation) => (
         <Badge variant={donation.isMonthly ? "secondary" : "outline"}>
           {donation.isMonthly ? "Monthly" : "One-Off"}
@@ -169,12 +169,12 @@ export default function DonationsPage() {
     },
     {
       header: "Date",
-      accessorKey: "date",
+      accessorKey: "date" as const,
       cell: (donation: Donation) => formatDate(donation.date),
     },
     {
       header: "Impact",
-      accessorKey: "animalsSaved",
+      accessorKey: "animalsSaved" as const,
       cell: (donation: Donation) => (
         <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
           {donation.animalsSaved} animals
@@ -183,7 +183,7 @@ export default function DonationsPage() {
     },
     {
       header: "Actions",
-      accessorKey: "id",
+      accessorKey: "id" as const,
       cell: (donation: Donation) => (
         <Button
           variant="ghost"
