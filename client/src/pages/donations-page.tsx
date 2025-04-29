@@ -56,6 +56,8 @@ export default function DonationsPage() {
       dateEnded: null,
       notes: "",
     },
+    // Enable form watching for reactive UI updates
+    mode: "onChange"
   });
 
   // Create donation mutation
@@ -289,12 +291,12 @@ export default function DonationsPage() {
                     <div className="space-y-4">
                       <Label>Donation Frequency</Label>
                       <div className="flex flex-col space-y-3">
-                        <div className="flex items-center space-x-2">
+                        <label className="flex items-center space-x-2 cursor-pointer">
                           <input 
                             type="radio" 
                             id="one-off" 
-                            value="one-off"
-                            checked={!form.getValues("isMonthly")}
+                            name="donationType"
+                            checked={!form.watch("isMonthly")}
                             onChange={() => {
                               form.setValue("isMonthly", false);
                               form.setValue("dateStarted", null);
@@ -302,27 +304,27 @@ export default function DonationsPage() {
                             }}
                             className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
                           />
-                          <Label htmlFor="one-off" className="font-normal">One-Off Donation</Label>
-                        </div>
+                          <span className="font-normal">One-Off Donation</span>
+                        </label>
                         
-                        <div className="flex items-center space-x-2">
+                        <label className="flex items-center space-x-2 cursor-pointer">
                           <input 
                             type="radio" 
                             id="monthly" 
-                            value="monthly"
-                            checked={form.getValues("isMonthly")}
+                            name="donationType"
+                            checked={!!form.watch("isMonthly")}
                             onChange={() => {
                               form.setValue("isMonthly", true);
                               form.setValue("dateStarted", new Date().toISOString().split("T")[0]);
                             }}
                             className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
                           />
-                          <Label htmlFor="monthly" className="font-normal">Monthly Donation</Label>
-                        </div>
+                          <span className="font-normal">Monthly Donation</span>
+                        </label>
                       </div>
                     </div>
                     
-                    {!form.getValues("isMonthly") ? (
+                    {!form.watch("isMonthly") ? (
                       <div className="space-y-2">
                         <Label htmlFor="date">Donation Date</Label>
                         <Input
