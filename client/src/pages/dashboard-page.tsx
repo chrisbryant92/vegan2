@@ -79,8 +79,8 @@ export default function DashboardPage() {
           id: `campaign-${c.id}`,
           type: "campaign" as const,
           title: `Participated in campaign: ${c.name}`,
-          animalsSaved: c.animalsSaved,
-          date: c.startDate,
+          animalsSaved: c.animals_saved,
+          date: c.start_date || c.created_at,
         })),
       ];
 

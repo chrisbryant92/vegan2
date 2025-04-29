@@ -519,11 +519,11 @@ export class DatabaseStorage implements IStorage {
       .from(mediaShared)
       .where(eq(mediaShared.userId, userId));
     
-    // Campaigns stats
+    // Campaigns stats - Note: using animals_saved (snake_case) to match database column
     const campaignsResult = await db
       .select({
         count: count(),
-        totalSaved: sum(campaigns.animalsSaved)
+        totalSaved: sum(campaigns.animals_saved)
       })
       .from(campaigns)
       .where(eq(campaigns.userId, userId));
