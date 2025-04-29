@@ -153,25 +153,26 @@ export default function MediaPage() {
     return `${start} - ${formatDate(endDate)}`;
   };
 
-  // Define column types
-  type Column = {
+  // Data table columns with required accessorKey
+  type DataTableColumn = {
     header: string;
-    accessorKey?: keyof MediaShared;
-    cell?: (media: MediaShared) => React.ReactNode;
+    accessorKey: keyof MediaShared;
+    cell?: (item: MediaShared) => React.ReactNode;
   };
-
-  // Data table columns
-  const columns: Column[] = [
+  
+  const columns: DataTableColumn[] = [
     {
       header: "Title",
       accessorKey: "title",
     },
     {
       header: "Date Range",
+      accessorKey: "dateStarted",
       cell: (media: MediaShared) => formatDateRange(media.dateStarted, media.dateEnded),
     },
     {
       header: "Posts",
+      accessorKey: "oneOffPieces",
       cell: (media: MediaShared) => `${media.oneOffPieces} one-off + ${media.postsPerMonth}/month`,
     },
     {
@@ -180,6 +181,7 @@ export default function MediaPage() {
     },
     {
       header: "Persuasiveness",
+      accessorKey: "estimatedPersuasiveness",
       cell: (media: MediaShared) => `${media.estimatedPersuasiveness}%`,
     },
     {
