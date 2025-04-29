@@ -86,24 +86,18 @@ export const insertUserSchema = createInsertSchema(users)
 export const insertDonationSchema = createInsertSchema(donations)
   .omit({ id: true, createdAt: true });
 
-// Extended donation schema with custom validations for monthly donations
-export const donationSchema = insertDonationSchema.extend({
-  // Ensure isMonthly is always treated as a boolean
+// Form validation schema for donations
+export const donationSchema = z.object({
+  organization: z.string().min(1, "Organization name is required"),
+  amount: z.number().positive("Amount must be positive"),
+  donationType: z.string().min(1, "Donation type is required"),
+  date: z.string().min(1, "Date is required"),
   isMonthly: z.boolean().default(false),
-  // dateStarted is required if isMonthly is true
-  dateStarted: z.string().nullable().refine(
-    (val, ctx) => {
-      if (ctx.parent.isMonthly === true && !val) {
-        return false;
-      }
-      return true;
-    },
-    { message: "Date Started is required for monthly donations" }
-  ),
-  // dateEnded is optional
+  dateStarted: z.string().nullable().optional(),
   dateEnded: z.string().nullable().optional(),
-  // Notes is optional
   notes: z.string().nullable().optional(),
+  userId: z.number().optional(),
+  animalsSaved: z.number().optional(),
 });
 
 export const insertVeganConversionSchema = createInsertSchema(veganConversions)

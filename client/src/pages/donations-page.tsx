@@ -15,22 +15,12 @@ import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Donation } from "@shared/schema";
+import { Donation, donationSchema } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { calculateDonationImpact } from "@/lib/calculations";
 
-// Zod schema for donation form
-const donationSchema = z.object({
-  organization: z.string().min(1, "Organization name is required"),
-  amount: z.number().positive("Amount must be positive"),
-  donationType: z.string().min(1, "Donation type is required"), // "One-Off" or "Monthly"
-  date: z.string().min(1, "Date is required"),
-  isMonthly: z.boolean().default(false),
-  dateStarted: z.string().optional().nullable(),
-  dateEnded: z.string().optional().nullable(),
-  notes: z.string().optional(),
-});
+// Use the shared donation schema imported from schema.ts
 
 type DonationFormValues = z.infer<typeof donationSchema>;
 
@@ -298,9 +288,14 @@ export default function DonationsPage() {
                             name="donationType"
                             checked={!form.watch("isMonthly")}
                             onChange={() => {
-                              form.setValue("isMonthly", false);
+                              console.log("Setting one-off donation (isMonthly: false)");
+                              form.setValue("isMonthly", false, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
                               form.setValue("dateStarted", null);
                               form.setValue("dateEnded", null);
+                              // Force a re-render to ensure conditional fields update
+                              setTimeout(() => {
+                                console.log("Monthly donation set to:", form.getValues("isMonthly"));
+                              }, 100);
                             }}
                             className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
                           />
@@ -314,8 +309,14 @@ export default function DonationsPage() {
                             name="donationType"
                             checked={!!form.watch("isMonthly")}
                             onChange={() => {
-                              form.setValue("isMonthly", true);
+                              console.log("Setting monthly donation to true");
+                              form.setValue("isMonthly", true, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
                               form.setValue("dateStarted", new Date().toISOString().split("T")[0]);
+                              // Force a re-render to ensure conditional fields update
+                              setTimeout(() => {
+                                console.log("Monthly donation set to:", form.getValues("isMonthly"));
+                                console.log("Date started set to:", form.getValues("dateStarted"));
+                              }, 100);
                             }}
                             className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
                           />
