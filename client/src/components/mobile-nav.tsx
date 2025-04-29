@@ -23,7 +23,7 @@ export function MobileNav() {
   const navItems = [
     {
       label: "Dashboard",
-      href: "/",
+      href: "/dashboard",
       icon: <Home className="h-5 w-5" />,
     },
     {

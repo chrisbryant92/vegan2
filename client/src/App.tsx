@@ -11,14 +11,16 @@ import DonationsPage from "@/pages/donations-page";
 import VeganPage from "@/pages/vegan-page";
 import MediaPage from "@/pages/media-page";
 import CampaignsPage from "@/pages/campaigns-page";
+import LandingPage from "@/pages/landing-page";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { AuthProvider } from "@/hooks/use-auth";
 
 function Router() {
   return (
     <Switch>
+      <Route path="/" component={LandingPage} />
       <Route path="/auth" component={AuthPage} />
-      <ProtectedRoute path="/" component={DashboardPage} />
+      <ProtectedRoute path="/dashboard" component={DashboardPage} />
       <ProtectedRoute path="/donations" component={DonationsPage} />
       <ProtectedRoute path="/vegan-conversions" component={VeganPage} />
       <ProtectedRoute path="/media-shared" component={MediaPage} />
