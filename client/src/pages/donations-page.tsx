@@ -176,9 +176,20 @@ export default function DonationsPage() {
     }
   }, 0);
   
+  // Calculate total animals saved based on the total amounts
+  const totalAnimalsSaved = donations.reduce((sum, donation) => {
+    // Get total amount for this donation (considering monthly calculations)
+    const totalAmount = calculateTotalAmount(donation);
+    // Calculate animals saved using our formula from calculations.ts
+    return sum + calculateDonationImpact(totalAmount);
+  }, 0);
+  
   // Prepare data for chart
   const donationsByType = donations.reduce((acc, donation) => {
-    acc[donation.donationType] = (acc[donation.donationType] || 0) + donation.animalsSaved;
+    // Use the total amount to calculate animals saved for this donation type
+    const totalAmount = calculateTotalAmount(donation);
+    const recalculatedImpact = calculateDonationImpact(totalAmount);
+    acc[donation.donationType] = (acc[donation.donationType] || 0) + recalculatedImpact;
     return acc;
   }, {} as Record<string, number>);
 
