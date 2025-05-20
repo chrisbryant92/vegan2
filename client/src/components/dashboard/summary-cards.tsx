@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { HandHeart, Leaf, Share2, Megaphone } from "lucide-react";
-import { calculateProgress } from "@/lib/utils";
+import { calculateProgress, formatNumber } from "@/lib/utils";
 import { EditGoalsDialog } from "./edit-goals-dialog";
 
 interface SummaryCardProps {
@@ -22,7 +22,7 @@ function SummaryCard({ title, value, icon, progress, progressColor, goal }: Summ
         <div className="flex justify-between items-start mb-2">
           <div>
             <p className="text-sm font-medium text-gray-500">{title}</p>
-            <h3 className="text-2xl font-bold">{value}</h3>
+            <h3 className="text-2xl font-bold">{formatNumber(value)}</h3>
           </div>
           <div className="w-10 h-10 rounded-full flex items-center justify-center bg-opacity-20" style={{ backgroundColor: `${progressColor}20` }}>
             {icon}
@@ -31,7 +31,7 @@ function SummaryCard({ title, value, icon, progress, progressColor, goal }: Summ
         <Progress value={progress} className="h-2" style={{ backgroundColor: `${progressColor}20` }} />
         {goal && (
           <p className="text-xs text-gray-500 mt-1">
-            {progress.toFixed(2)}% of your goal ({goal})
+            {progress.toFixed(2)}% of your goal ({formatNumber(goal)})
           </p>
         )}
       </CardContent>
