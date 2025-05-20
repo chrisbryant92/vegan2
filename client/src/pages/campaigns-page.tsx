@@ -449,7 +449,6 @@ export default function CampaignsPage() {
                             <li><span className="font-medium">Social Media:</span> Each action saves 2 animals (lower effort but broad reach)</li>
                             <li><span className="font-medium">Phone/Letters:</span> Each saves 10 animals (high effort, personalized contact)</li>
                             <li><span className="font-medium">Other Actions:</span> Each worth 5 animals (average impact across action types)</li>
-                            <li><span className="font-medium">Time Value:</span> Roughly equivalent to 1 animal saved per minute of advocacy time</li>
                           </ul>
                         </div>
                         <Progress
