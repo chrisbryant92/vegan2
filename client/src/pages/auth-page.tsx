@@ -103,11 +103,11 @@ export default function AuthPage() {
               <TabsContent value="login">
                 <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-username">Username</Label>
+                    <Label htmlFor="login-username">Email</Label>
                     <Input
                       id="login-username"
-                      type="text"
-                      placeholder="your.username"
+                      type="email"
+                      placeholder="your.email@example.com"
                       {...loginForm.register("username")}
                     />
                     {loginForm.formState.errors.username && (
@@ -161,11 +161,11 @@ export default function AuthPage() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="register-username">Username</Label>
+                    <Label htmlFor="register-username">Email</Label>
                     <Input
                       id="register-username"
-                      type="text"
-                      placeholder="your.username"
+                      type="email"
+                      placeholder="your.email@example.com"
                       {...registerForm.register("username")}
                     />
                     {registerForm.formState.errors.username && (

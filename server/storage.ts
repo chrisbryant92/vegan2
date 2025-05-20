@@ -62,6 +62,7 @@ export interface IStorage {
   getLeaderboard(): Promise<{
     id: number;
     username: string;
+    name: string;
     totalAnimalsSaved: number;
     donationsAnimalsSaved: number;
     veganAnimalsSaved: number;

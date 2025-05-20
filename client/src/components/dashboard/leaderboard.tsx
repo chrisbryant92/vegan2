@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/use-auth";
 type LeaderboardEntry = {
   id: number;
   username: string;
+  name: string;
   totalAnimalsSaved: number;
   donationsAnimalsSaved: number;
   veganAnimalsSaved: number;
@@ -137,7 +138,7 @@ export function Leaderboard() {
                       </div>
                       <div className="flex-1 truncate">
                         <span className={`${isCurrentUser ? 'font-semibold' : ''}`}>
-                          {entry.username}
+                          {entry.name || entry.username}
                           {isCurrentUser && ' (You)'}
                         </span>
                       </div>
