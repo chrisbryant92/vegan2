@@ -65,9 +65,9 @@ export function Leaderboard() {
     switch (selectedCategory) {
       case "donations":
         return entry.donationsAnimalsSaved;
-      case "vegan":
+      case "conversions":
         return entry.veganAnimalsSaved;
-      case "media":
+      case "sharing":
         return entry.mediaAnimalsSaved;
       case "campaigns":
         return entry.campaignsAnimalsSaved;
