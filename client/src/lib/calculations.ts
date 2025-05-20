@@ -93,10 +93,11 @@ export function calculateMediaImpact(
   
   // Calculate total animal impact
   // Each person saves 120 animals per year on average when converted
-  // Divide by 500 to account for:
-  // 1) Realistically only about 1% of people will be persuaded enough to go vegan (not 100%)
-  // 2) Estimated reach is often overestimated (only ~20% of friends actually see posts)
-  const impact = (totalPosts * persuasiveness * estimatedReach * 120) / 500;
+  // Divide by 10000 to account for:
+  // 1) Realistically only about 0.5% of people will be persuaded enough to go vegan (not 100%)
+  // 2) Estimated reach is often overestimated (only ~10% of friends actually see posts)
+  // 3) Aligning our numbers to be more realistic based on time-value analysis
+  const impact = (totalPosts * persuasiveness * estimatedReach * 120) / 10000;
   
   return Math.max(0, Math.round(impact));
 }
