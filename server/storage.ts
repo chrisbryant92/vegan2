@@ -581,6 +581,7 @@ export class DatabaseStorage implements IStorage {
   async getLeaderboard(): Promise<{
     id: number;
     username: string;
+    name: string;
     totalAnimalsSaved: number;
     donationsAnimalsSaved: number;
     veganAnimalsSaved: number;
@@ -601,6 +602,7 @@ export class DatabaseStorage implements IStorage {
         leaderboard.push({
           id: user.id,
           username: user.username,
+          name: user.name,
           totalAnimalsSaved: stats.totalAnimalsSaved,
           donationsAnimalsSaved: stats.donationsAnimalsSaved,
           veganAnimalsSaved: stats.veganAnimalsSaved,

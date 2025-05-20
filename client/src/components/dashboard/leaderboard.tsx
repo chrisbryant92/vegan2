@@ -81,9 +81,9 @@ export function Leaderboard() {
       case "donations":
         return "Donations";
       case "vegan":
-        return "Vegan Conversions";
+        return "Conversions";
       case "media":
-        return "Media Shared";
+        return "Sharing";
       case "campaigns":
         return "Campaigns";
       default:
@@ -108,8 +108,8 @@ export function Leaderboard() {
           <TabsList className="grid grid-cols-5 mb-4">
             <TabsTrigger value="total">Total</TabsTrigger>
             <TabsTrigger value="donations">Donations</TabsTrigger>
-            <TabsTrigger value="vegan">Vegan</TabsTrigger>
-            <TabsTrigger value="media">Media</TabsTrigger>
+            <TabsTrigger value="vegan">Conversions</TabsTrigger>
+            <TabsTrigger value="media">Sharing</TabsTrigger>
             <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
           </TabsList>
           
