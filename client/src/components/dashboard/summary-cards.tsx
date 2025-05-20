@@ -6,6 +6,14 @@ import { HandHeart, Leaf, Share2, Megaphone } from "lucide-react";
 import { calculateProgress, formatNumber } from "@/lib/utils";
 import { EditGoalsDialog } from "./edit-goals-dialog";
 
+// Define category colors
+const CATEGORY_COLORS = {
+  charitable: "#22c55e", // Green
+  vegan: "#eab308", // Yellow
+  media: "#3b82f6", // Blue
+  campaigns: "#ef4444", // Red
+};
+
 interface SummaryCardProps {
   title: string;
   value: number;
@@ -16,19 +24,28 @@ interface SummaryCardProps {
 }
 
 function SummaryCard({ title, value, icon, progress, progressColor, goal }: SummaryCardProps) {
+  // Get color based on title
+  let color = "";
+  if (title === "Charitable Donations") color = CATEGORY_COLORS.charitable;
+  else if (title === "Conversions") color = CATEGORY_COLORS.vegan;
+  else if (title === "Sharing") color = CATEGORY_COLORS.media;
+  else if (title === "Online Campaigns") color = CATEGORY_COLORS.campaigns;
+  
   return (
-    <Card>
+    <Card className="border-t-4" style={{ borderTopColor: color }}>
       <CardContent className="pt-6">
         <div className="flex justify-between items-start mb-2">
           <div>
             <p className="text-sm font-medium text-gray-500">{title}</p>
-            <h3 className="text-2xl font-bold">{formatNumber(value)}</h3>
+            <h3 className="text-2xl font-bold" style={{ color }}>{formatNumber(value)}</h3>
           </div>
-          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-opacity-20" style={{ backgroundColor: `${progressColor}20` }}>
-            {icon}
+          <div className="w-10 h-10 rounded-full flex items-center justify-center" 
+               style={{ backgroundColor: `${color}20` }}>
+            <div style={{ color }}>{icon}</div>
           </div>
         </div>
-        <Progress value={progress} className="h-2" style={{ backgroundColor: `${progressColor}20` }} />
+        <Progress value={progress} className="h-2" style={{ backgroundColor: `${color}20` }} 
+                 indicatorClassName="h-full" indicatorStyle={{ backgroundColor: color }} />
         {goal && (
           <p className="text-xs text-gray-500 mt-1">
             {progress.toFixed(2)}% of your goal ({formatNumber(goal)})
@@ -63,29 +80,57 @@ interface GoalsData {
   campaigns: number;
 }
 
-// Total Impact Card component
-function TotalImpactCard({ totalValue, progressValue }: { totalValue: number, progressValue: number }) {
+// Total Impact Card component with stacked bar graph
+function TotalImpactCard({ totalValue, progressValue }: { 
+  totalValue: number, 
+  progressValue: number 
+}) {
   return (
-    <Card className="col-span-1 md:col-span-2 lg:col-span-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200">
+    <Card className="col-span-1 md:col-span-2 lg:col-span-4 bg-gradient-to-r from-slate-50 to-slate-100 border-slate-200">
       <CardContent className="pt-6">
         <div className="flex justify-between items-start mb-2">
           <div>
-            <p className="text-sm font-medium text-purple-700">Total Animals Saved</p>
-            <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600" style={{ WebkitBackgroundClip: "text" }}>
+            <p className="text-sm font-medium text-slate-700">Total Animals Saved</p>
+            <h3 className="text-3xl font-bold text-slate-900">
               {formatNumber(totalValue)}
             </h3>
           </div>
-          <div className="w-12 h-12 rounded-full flex items-center justify-center bg-purple-100">
-            <HandHeart className="h-5 w-5 text-primary absolute opacity-75" style={{ transform: 'translate(-8px, -8px)' }} />
-            <Leaf className="h-5 w-5 text-green-600 absolute opacity-75" style={{ transform: 'translate(8px, -8px)' }} />
-            <Share2 className="h-5 w-5 text-blue-600 absolute opacity-75" style={{ transform: 'translate(-8px, 8px)' }} />
-            <Megaphone className="h-5 w-5 text-amber-600 absolute opacity-75" style={{ transform: 'translate(8px, 8px)' }} />
+          <div className="flex space-x-1 items-center">
+            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: CATEGORY_COLORS.charitable }}></div>
+            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: CATEGORY_COLORS.vegan }}></div>
+            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: CATEGORY_COLORS.media }}></div>
+            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: CATEGORY_COLORS.campaigns }}></div>
           </div>
         </div>
-        <Progress value={progressValue} className="h-2.5" style={{ backgroundColor: `rgba(147, 51, 234, 0.2)` }} />
-        <p className="text-xs text-purple-700 mt-1">
+        
+        {/* Stacked bar graph */}
+        <div className="h-4 w-full bg-slate-200 rounded-full flex overflow-hidden mt-2">
+          {/* Widths will be dynamically calculated in SummaryCards */}
+        </div>
+        
+        <p className="text-xs text-slate-700 mt-2">
           {progressValue.toFixed(2)}% of your combined goal
         </p>
+        
+        {/* Legend */}
+        <div className="grid grid-cols-2 gap-2 mt-3 text-xs text-slate-600">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3" style={{ backgroundColor: CATEGORY_COLORS.charitable }}></div>
+            <span>Charitable</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3" style={{ backgroundColor: CATEGORY_COLORS.vegan }}></div>
+            <span>Conversions</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3" style={{ backgroundColor: CATEGORY_COLORS.media }}></div>
+            <span>Sharing</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3" style={{ backgroundColor: CATEGORY_COLORS.campaigns }}></div>
+            <span>Campaigns</span>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
