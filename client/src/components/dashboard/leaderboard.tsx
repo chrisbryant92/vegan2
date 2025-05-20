@@ -24,7 +24,7 @@ export function Leaderboard() {
   const { user } = useAuth();
   
   const { data: leaderboard = [], isLoading } = useQuery<LeaderboardEntry[]>({
-    queryKey: ["/api/leaderboard"],
+    queryKey: ["/api/leaderboard"]
   });
   
   // Sort leaderboard based on selected category
@@ -138,8 +138,8 @@ export function Leaderboard() {
                       </div>
                       <div className="flex-1 truncate">
                         <span className={`${isCurrentUser ? 'font-semibold' : ''}`}>
-                          {/* Display name if available, otherwise show username */}
-                          {entry.name || entry.username}
+                          {/* Force display name even if it's empty string */}
+                          {entry.name ? entry.name : entry.username.split('@')[0]}
                           {isCurrentUser && ' (You)'}
                         </span>
                       </div>
