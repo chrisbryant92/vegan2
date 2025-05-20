@@ -133,8 +133,9 @@ function TotalImpactCard({
         
         {/* Combined progress bar: colored by category + gray for remaining */}
         <div className="h-8 w-full bg-slate-200 rounded-full overflow-hidden mt-2 mb-1">
-          <div className="h-full flex">
-            {/* Each segment represents its proportion of the progress bar */}
+          {/* This div is limited to progressValue width, showing actual progress toward goal */}
+          <div className="h-full flex" style={{ width: `${Math.min(progressValue, 100)}%` }}>
+            {/* Calculate each segment as a percentage of the total progress */}
             <div className="h-full" style={{ 
               width: `${(stats.charitable / totalValue) * 100}%`, 
               backgroundColor: CATEGORY_COLORS.charitable 
