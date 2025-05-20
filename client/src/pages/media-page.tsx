@@ -16,7 +16,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recha
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { MediaShared, mediaSharedSchema } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatNumber } from "@/lib/utils";
 import { calculateMediaImpact } from "@/lib/calculations";
 import { FileEdit, Info, Trash2 } from "lucide-react";
 
@@ -283,7 +283,7 @@ export default function MediaPage() {
       accessorKey: "animalsSaved",
       cell: (media: MediaShared) => (
         <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-          {media.animalsSaved} animals
+          {formatNumber(media.animalsSaved)} animals
         </Badge>
       ),
     },
@@ -557,10 +557,10 @@ export default function MediaPage() {
                           Your media impact is calculated using this formula:
                         </p>
                         <code className="text-xs bg-blue-100 p-1 rounded mt-1 block overflow-x-auto">
-                          (((Date Ended-Date Started)*Posts Per Month/30)+One-Off Pieces)*Persuasiveness*Reach*120
+                          (((Date Ended-Date Started)*Posts Per Month/30)+One-Off Pieces)*Persuasiveness*Reach*120/5000
                         </code>
                         <p className="text-xs text-blue-600 mt-1">
-                          The average meat-eater consumes approximately 120 animals per year.
+                          The average meat-eater consumes approximately 120 animals per year. The formula is divided by 5000 to account for realistic conversion rates (roughly 1%) and actual reach limitations (many followers don't see posts).
                         </p>
                       </div>
                     </div>
