@@ -116,19 +116,11 @@ function TotalImpactCard({
   return (
     <Card className="col-span-1 md:col-span-2 lg:col-span-4 bg-gradient-to-r from-slate-50 to-slate-100 border-slate-200">
       <CardContent className="pt-6">
-        <div className="flex justify-between items-start mb-2">
-          <div>
-            <p className="text-sm font-medium text-slate-700">Total Animals Saved</p>
-            <h3 className="text-3xl font-bold text-slate-900">
-              {formatNumber(totalValue)}
-            </h3>
-          </div>
-          <div className="flex space-x-1 items-center">
-            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: CATEGORY_COLORS.charitable }}></div>
-            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: CATEGORY_COLORS.vegan }}></div>
-            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: CATEGORY_COLORS.media }}></div>
-            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: CATEGORY_COLORS.campaigns }}></div>
-          </div>
+        <div className="mb-2">
+          <p className="text-sm font-medium text-slate-700">Total Animals Saved</p>
+          <h3 className="text-3xl font-bold text-slate-900">
+            {formatNumber(totalValue)}
+          </h3>
         </div>
         
         {/* Combined progress bar: colored by category + gray for remaining */}
