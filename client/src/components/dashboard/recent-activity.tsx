@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { HandHeart, Leaf, Share2, Megaphone } from "lucide-react";
-import { getRelativeTimeString } from "@/lib/utils";
+import { getRelativeTimeString, formatNumber } from "@/lib/utils";
 
 type ActivityType = "donation" | "vegan" | "media" | "campaign";
 
@@ -94,7 +94,7 @@ export function RecentActivity({ activities, loading = false }: RecentActivityPr
                   <p className="text-sm text-gray-500">
                     Saved approximately{" "}
                     <Badge variant="outline" className="ml-1 font-semibold">
-                      {activity.animalsSaved} {activity.animalsSaved === 1 ? "animal" : "animals"}
+                      {formatNumber(activity.animalsSaved)} {activity.animalsSaved === 1 ? "animal" : "animals"}
                     </Badge>
                   </p>
                   <p className="text-xs text-gray-400 mt-1">
