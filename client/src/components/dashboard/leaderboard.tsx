@@ -138,8 +138,8 @@ export function Leaderboard() {
                       </div>
                       <div className="flex-1 truncate">
                         <span className={`${isCurrentUser ? 'font-semibold' : ''}`}>
-                          {/* Always display name and never the email address */}
-                          {entry.name || 'Unknown user'}
+                          {/* Display name if available, otherwise show username */}
+                          {entry.name || entry.username}
                           {isCurrentUser && ' (You)'}
                         </span>
                       </div>
@@ -159,7 +159,7 @@ export function Leaderboard() {
                     <span className="w-5 h-5 inline-flex items-center justify-center text-xs font-medium">{currentUserRank}</span>
                   </div>
                   <div className="flex-1 truncate font-semibold">
-                    {user?.name || 'Unknown user'} (You)
+                    {user?.name || user?.username} (You)
                   </div>
                   <div className="font-medium text-right">
                     {formatNumber(getCategoryValue(sortedLeaderboard.find(entry => entry.id === user?.id) || { totalAnimalsSaved: 0, donationsAnimalsSaved: 0, veganAnimalsSaved: 0, mediaAnimalsSaved: 0, campaignsAnimalsSaved: 0 } as LeaderboardEntry))}
