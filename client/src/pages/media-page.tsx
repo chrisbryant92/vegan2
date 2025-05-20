@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -25,6 +25,7 @@ type MediaSharedFormValues = typeof mediaSharedSchema._type;
 export default function MediaPage() {
   const { toast } = useToast();
   const [selectedMedia, setSelectedMedia] = useState<MediaShared | null>(null);
+  const [editingMedia, setEditingMedia] = useState<MediaShared | null>(null);
 
   // Fetch media shared
   const { data: mediaShared = [], isLoading } = useQuery<MediaShared[]>({
@@ -96,6 +97,59 @@ export default function MediaPage() {
     },
   });
 
+  // Update media shared mutation
+  const updateMediaShared = useMutation({
+    mutationFn: async (data: MediaSharedFormValues & { id: number }) => {
+      const { id, ...formData } = data;
+      
+      // Parse dates
+      const dateStarted = new Date(formData.dateStarted);
+      const dateEnded = formData.dateEnded ? new Date(formData.dateEnded) : null;
+      
+      // Calculate impact based on the formula
+      const animalsSaved = calculateMediaImpact(
+        dateStarted,
+        dateEnded,
+        formData.oneOffPieces,
+        formData.postsPerMonth,
+        formData.estimatedReach,
+        formData.estimatedPersuasiveness
+      );
+      
+      const res = await apiRequest("PATCH", `/api/media-shared/${id}`, {
+        ...formData,
+        animalsSaved,
+      });
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Media updated",
+        description: "Your media campaign has been updated successfully.",
+      });
+      form.reset({
+        title: "",
+        oneOffPieces: 0,
+        postsPerMonth: 0,
+        estimatedReach: 0,
+        estimatedPersuasiveness: 50,
+        dateStarted: new Date().toISOString().split("T")[0],
+        dateEnded: "",
+        description: "",
+      });
+      setEditingMedia(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/media-shared"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to update media: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Delete media shared mutation
   const deleteMediaShared = useMutation({
     mutationFn: async (id: number) => {
@@ -119,9 +173,49 @@ export default function MediaPage() {
     },
   });
 
+  // Effect to update form when editing a media
+  useEffect(() => {
+    if (editingMedia) {
+      form.reset({
+        title: editingMedia.title,
+        oneOffPieces: editingMedia.oneOffPieces || 0,
+        postsPerMonth: editingMedia.postsPerMonth || 0,
+        estimatedReach: editingMedia.estimatedReach || 0,
+        estimatedPersuasiveness: editingMedia.estimatedPersuasiveness || 50,
+        dateStarted: new Date(editingMedia.dateStarted).toISOString().split("T")[0],
+        dateEnded: editingMedia.dateEnded ? new Date(editingMedia.dateEnded).toISOString().split("T")[0] : "",
+        description: editingMedia.description || "",
+      });
+    }
+  }, [editingMedia, form]);
+
   // Form submission handler
   const onSubmit = (data: MediaSharedFormValues) => {
-    createMediaShared.mutate(data);
+    if (editingMedia) {
+      // Update existing media
+      updateMediaShared.mutate({
+        ...data,
+        id: editingMedia.id
+      });
+    } else {
+      // Create new media
+      createMediaShared.mutate(data);
+    }
+  };
+  
+  // Cancel editing and reset form
+  const cancelEdit = () => {
+    setEditingMedia(null);
+    form.reset({
+      title: "",
+      oneOffPieces: 0,
+      postsPerMonth: 0,
+      estimatedReach: 0,
+      estimatedPersuasiveness: 50,
+      dateStarted: new Date().toISOString().split("T")[0],
+      dateEnded: "",
+      description: "",
+    });
   };
 
   // Calculate total animals saved
@@ -203,8 +297,17 @@ export default function MediaPage() {
             size="sm"
             onClick={() => setSelectedMedia(media)}
           >
-            <FileEdit className="h-4 w-4 mr-1" />
+            <Info className="h-4 w-4 mr-1" />
             View
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-blue-600"
+            onClick={() => setEditingMedia(media)}
+          >
+            <FileEdit className="h-4 w-4 mr-1" />
+            Edit
           </Button>
           <Button
             variant="ghost"
@@ -236,9 +339,9 @@ export default function MediaPage() {
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Log Media Campaign</CardTitle>
+                  <CardTitle>{editingMedia ? 'Edit Media Campaign' : 'Log Media Campaign'}</CardTitle>
                   <CardDescription>
-                    Record your media campaigns and content sharing to track their animal impact
+                    {editingMedia ? 'Update your media campaign details' : 'Record your media campaigns and content sharing to track their animal impact'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -370,13 +473,28 @@ export default function MediaPage() {
                       />
                     </div>
                     
-                    <Button
-                      type="submit"
-                      className="bg-blue-600 hover:bg-blue-700"
-                      disabled={createMediaShared.isPending}
-                    >
-                      {createMediaShared.isPending ? "Saving..." : "Save Campaign"}
-                    </Button>
+                    <div className="flex gap-2">
+                      {editingMedia && (
+                        <Button 
+                          type="button" 
+                          variant="outline"
+                          onClick={cancelEdit}
+                          className="w-1/3"
+                        >
+                          Cancel
+                        </Button>
+                      )}
+                      <Button
+                        type="submit"
+                        className={`${editingMedia ? 'w-2/3' : 'w-full'} bg-blue-600 hover:bg-blue-700`}
+                        disabled={createMediaShared.isPending || updateMediaShared.isPending}
+                      >
+                        {createMediaShared.isPending || updateMediaShared.isPending 
+                          ? "Saving..." 
+                          : editingMedia ? "Update Campaign" : "Save Campaign"
+                        }
+                      </Button>
+                    </div>
                   </form>
                 </CardContent>
               </Card>
