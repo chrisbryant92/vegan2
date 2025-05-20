@@ -17,7 +17,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recha
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { VeganConversion, veganConversionSchema } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatNumber } from "@/lib/utils";
 import { calculateVeganImpact } from "@/lib/calculations";
 
 type VeganConversionFormValues = z.infer<typeof veganConversionSchema>;
@@ -509,7 +509,7 @@ export default function VeganPage() {
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip formatter={(value) => [`${value} animals`, 'Impact']} />
+                        <Tooltip formatter={(value) => [`${formatNumber(value as number)} animals`, 'Impact']} />
                         <Legend layout="horizontal" verticalAlign="bottom" align="center" />
                       </PieChart>
                     </ResponsiveContainer>

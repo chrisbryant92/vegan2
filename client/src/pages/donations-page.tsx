@@ -17,7 +17,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recha
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Donation, donationSchema } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { formatDate, formatCurrency } from "@/lib/utils";
+import { formatDate, formatCurrency, formatNumber } from "@/lib/utils";
 import { calculateDonationImpact } from "@/lib/calculations";
 
 // Use the shared donation schema imported from schema.ts
@@ -648,7 +648,7 @@ export default function DonationsPage() {
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip formatter={(value) => [`${value} animals`, 'Impact']} />
+                        <Tooltip formatter={(value) => [`${formatNumber(value as number)} animals`, 'Impact']} />
                         <Legend />
                       </PieChart>
                     </ResponsiveContainer>
@@ -785,7 +785,7 @@ export default function DonationsPage() {
                   )}
                   <div>
                     <Label className="font-semibold">Impact</Label>
-                    <p>{calculateDonationImpact(calculateTotalAmount(selectedDonation))} animals saved</p>
+                    <p>{formatNumber(calculateDonationImpact(calculateTotalAmount(selectedDonation)))} animals saved</p>
                   </div>
                   {selectedDonation.notes && (
                     <div>
