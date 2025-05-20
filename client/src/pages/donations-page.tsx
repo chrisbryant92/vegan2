@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -27,6 +27,7 @@ type DonationFormValues = z.infer<typeof donationSchema>;
 export default function DonationsPage() {
   const { toast } = useToast();
   const [selectedDonation, setSelectedDonation] = useState<Donation | null>(null);
+  const [editingDonation, setEditingDonation] = useState<Donation | null>(null);
 
   // Fetch donations
   const { data: donations = [], isLoading } = useQuery<Donation[]>({
@@ -50,6 +51,23 @@ export default function DonationsPage() {
     // Enable form watching for reactive UI updates
     mode: "onChange"
   });
+  
+  // Effect to update form when editing a donation
+  useEffect(() => {
+    if (editingDonation) {
+      form.reset({
+        organization: editingDonation.organization,
+        amount: editingDonation.amount,
+        organizationImpact: (editingDonation.organizationImpact || "Average") as "Highest" | "High" | "Average" | "Low",
+        donationType: editingDonation.donationType,
+        date: new Date(editingDonation.date).toISOString().split("T")[0],
+        isMonthly: editingDonation.isMonthly || false,
+        dateStarted: editingDonation.dateStarted ? new Date(editingDonation.dateStarted).toISOString().split("T")[0] : null,
+        dateEnded: editingDonation.dateEnded ? new Date(editingDonation.dateEnded).toISOString().split("T")[0] : null,
+        notes: editingDonation.notes || "",
+      });
+    }
+  }, [editingDonation, form]);
 
   // Create donation mutation
   const createDonation = useMutation({
@@ -86,6 +104,48 @@ export default function DonationsPage() {
       toast({
         title: "Error",
         description: `Failed to save donation: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update donation mutation
+  const updateDonation = useMutation({
+    mutationFn: async (data: DonationFormValues & { id: number }) => {
+      const { id, ...formData } = data;
+      // Calculate impact using organization impact factor
+      const animalsSaved = calculateDonationImpact(formData.amount, formData.organizationImpact as "Highest" | "High" | "Average" | "Low");
+      
+      const res = await apiRequest("PATCH", `/api/donations/${id}`, {
+        ...formData,
+        animalsSaved,
+      });
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Donation updated",
+        description: "Your donation has been updated successfully.",
+      });
+      form.reset({
+        organization: "",
+        amount: 0,
+        organizationImpact: "Average",
+        donationType: "",
+        date: new Date().toISOString().split("T")[0],
+        isMonthly: false,
+        dateStarted: null,
+        dateEnded: null,
+        notes: "",
+      });
+      setEditingDonation(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/donations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to update donation: ${error.message}`,
         variant: "destructive",
       });
     },
@@ -129,7 +189,33 @@ export default function DonationsPage() {
     };
     
     console.log("Formatted data:", formattedData);
-    createDonation.mutate(formattedData);
+    
+    if (editingDonation) {
+      // Update existing donation
+      updateDonation.mutate({
+        ...formattedData,
+        id: editingDonation.id
+      });
+    } else {
+      // Create new donation
+      createDonation.mutate(formattedData);
+    }
+  };
+  
+  // Cancel editing and reset form
+  const cancelEdit = () => {
+    setEditingDonation(null);
+    form.reset({
+      organization: "",
+      amount: 0,
+      organizationImpact: "Average",
+      donationType: "",
+      date: new Date().toISOString().split("T")[0],
+      isMonthly: false,
+      dateStarted: null,
+      dateEnded: null,
+      notes: "",
+    });
   };
 
   // Helper function to calculate total amount for a donation 
@@ -307,7 +393,7 @@ export default function DonationsPage() {
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Log Your Donation</CardTitle>
+                  <CardTitle>{editingDonation ? 'Edit Donation' : 'Log Your Donation'}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
