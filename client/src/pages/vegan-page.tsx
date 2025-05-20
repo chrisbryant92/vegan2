@@ -439,10 +439,17 @@ export default function VeganPage() {
                     </div>
                     
                     <div className="pt-2">
-                      <div className="p-3 bg-green-50 border border-green-100 rounded-md mb-4">
-                        <p className="text-sm text-gray-700">
-                          <span className="font-medium">Impact Calculation:</span> ((Date Ended - Date Started) / 3) × (Meatiness Before - Meatiness After) × Influence
+                      <div className="p-4 bg-green-50 border border-green-100 rounded-md mb-4">
+                        <h4 className="text-sm font-semibold mb-2">Impact Calculation Explained:</h4>
+                        <p className="text-sm text-gray-700 mb-2">
+                          <span className="font-medium">Formula: </span>((Date Ended - Date Started) / 3) × ((Meatiness Before - Meatiness After)/100) × (Influence/100)
                         </p>
+                        <ul className="text-xs text-gray-600 space-y-1 pl-4 list-disc">
+                          <li><span className="font-medium">Time Period:</span> We divide by 3 because the average person consumes about 1 animal every 3 days</li>
+                          <li><span className="font-medium">Diet Change:</span> The meatiness difference (as %) represents how much their diet improved</li>
+                          <li><span className="font-medium">Your Influence:</span> Adjusts the credit based on how much you personally contributed to their change</li>
+                          <li><span className="font-medium">Example:</span> 2 years (730 days) going from 100% to 15% meat consumption with 50% influence = 379 animals saved</li>
+                        </ul>
                       </div>
                       
                       <div className="flex gap-2">
