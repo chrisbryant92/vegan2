@@ -6,6 +6,7 @@ import connectPg from "connect-pg-simple";
 import { db } from "./db";
 import { eq, and, desc, sql, count, sum } from "drizzle-orm";
 import { pool } from "./db";
+import { calculateDonationImpact } from "./utils";
 
 const MemoryStore = createMemoryStore(session);
 const PostgresSessionStore = connectPg(session);
@@ -492,14 +493,8 @@ export class DatabaseStorage implements IStorage {
     campaignsCount: number;
     campaignsAnimalsSaved: number;
   }> {
-    // Donations stats
-    const donationsResult = await db
-      .select({
-        count: count(),
-        totalSaved: sum(donations.animalsSaved)
-      })
-      .from(donations)
-      .where(eq(donations.userId, userId));
+    // Get all user data for accurate calculations
+    const userDonations = await this.getDonations(userId);
     
     // Vegan conversions stats
     const veganResult = await db
@@ -528,8 +523,26 @@ export class DatabaseStorage implements IStorage {
       .from(campaigns)
       .where(eq(campaigns.userId, userId));
 
-    const donationsCount = Number(donationsResult[0]?.count || 0);
-    const donationsAnimalsSaved = Number(donationsResult[0]?.totalSaved || 0);
+    // Calculate donations impact using the same formula as the donations page
+    const donationsCount = userDonations.length;
+    let donationsAnimalsSaved = 0;
+    
+    // Calculate total animals saved for donations using the same method as the donations page
+    for (const donation of userDonations) {
+      // Get the total amount for this donation
+      let totalAmount = donation.amount;
+      if (donation.isMonthly && donation.dateStarted) {
+        const startDate = new Date(donation.dateStarted);
+        const endDate = donation.dateEnded ? new Date(donation.dateEnded) : new Date();
+        const daysDiff = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+        const monthsDiff = daysDiff / 30;
+        totalAmount = monthsDiff * donation.amount;
+      }
+      
+      // Calculate animals saved for this donation based on its impact level
+      const impactLevel = donation.organizationImpact || "Average";
+      donationsAnimalsSaved += calculateDonationImpact(totalAmount, impactLevel);
+    }
     
     const veganCount = Number(veganResult[0]?.count || 0);
     const veganAnimalsSaved = Number(veganResult[0]?.totalSaved || 0);
