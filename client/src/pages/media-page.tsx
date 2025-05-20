@@ -467,13 +467,13 @@ export default function MediaPage() {
                     <div className="p-4 bg-purple-50 border border-purple-100 rounded-md mt-2 mb-4">
                       <h4 className="text-sm font-semibold mb-2">Impact Calculation Explained:</h4>
                       <p className="text-sm text-gray-700 mb-2">
-                        <span className="font-medium">Formula: </span>(((Date Ended - Date Started) × Posts Per Month / 30) + One-Off Pieces) × (Estimated Persuasiveness / 100) × (Estimated Reach × 120 / 5000)
+                        <span className="font-medium">Formula: </span>(((Date Ended - Date Started) × Posts Per Month / 30) + One-Off Pieces) × (Estimated Persuasiveness / 100) × (Estimated Reach × 120 / 500)
                       </p>
                       <ul className="text-xs text-gray-600 space-y-1 pl-4 list-disc">
                         <li><span className="font-medium">Ongoing Content:</span> We calculate the total number of posts over the time period</li>
                         <li><span className="font-medium">One-Off Content:</span> Added directly to the total content count</li>
                         <li><span className="font-medium">Persuasiveness Factor:</span> How compelling your content is (as percentage)</li>
-                        <li><span className="font-medium">Reach Calculation:</span> We estimate that for every 5,000 people who see content, about 120 may change behavior</li>
+                        <li><span className="font-medium">Reach Calculation:</span> We estimate that for every 500 people who see content, about 120 may change behavior</li>
                         <li><span className="font-medium">Example:</span> 3 years of monthly posting (5 posts/month) with 50% persuasiveness and 350 people reached = 767 animals saved</li>
                       </ul>
                     </div>
@@ -557,10 +557,10 @@ export default function MediaPage() {
                           Your media impact is calculated using this formula:
                         </p>
                         <code className="text-xs bg-blue-100 p-1 rounded mt-1 block overflow-x-auto">
-                          (((Date Ended-Date Started)*Posts Per Month/30)+One-Off Pieces)*Persuasiveness*Reach*120/5000
+                          (((Date Ended-Date Started)*Posts Per Month/30)+One-Off Pieces)*Persuasiveness*Reach*120/500
                         </code>
                         <p className="text-xs text-blue-600 mt-1">
-                          The average meat-eater consumes approximately 120 animals per year. The formula is divided by 5000 to account for realistic conversion rates (roughly 1%) and actual reach limitations (many followers don't see posts).
+                          The average meat-eater consumes approximately 120 animals per year. The formula is divided by 500 to account for realistic conversion rates (roughly 10%) and actual reach limitations (many followers don't see posts).
                         </p>
                       </div>
                     </div>
