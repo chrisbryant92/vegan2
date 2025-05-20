@@ -16,7 +16,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recha
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Campaign } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatNumber } from "@/lib/utils";
 import { calculateCampaignImpact } from "@/lib/calculations";
 import { Megaphone } from "lucide-react";
 
@@ -273,7 +273,7 @@ export default function CampaignsPage() {
       accessorKey: "animals_saved" as keyof Campaign,
       cell: (campaign: Campaign) => (
         <Badge variant="outline" className="bg-amber-100 text-amber-800 hover:bg-amber-100">
-          {campaign.animals_saved} animals
+          {formatNumber(campaign.animals_saved)} animals
         </Badge>
       ),
     },
@@ -510,7 +510,7 @@ export default function CampaignsPage() {
                 <div className="flex justify-center mb-6">
                   <div className="relative w-48 h-48">
                     <div className="absolute inset-0 flex items-center justify-center flex-col">
-                      <span className="text-4xl font-bold text-amber-600">{totalAnimalsSaved}</span>
+                      <span className="text-4xl font-bold text-amber-600">{formatNumber(totalAnimalsSaved)}</span>
                       <span className="text-sm text-gray-500">Animals Impacted</span>
                     </div>
                     
@@ -564,12 +564,7 @@ export default function CampaignsPage() {
                   </div>
                 </div>
                 
-                <div className="mt-6 p-4 bg-amber-50 rounded-md">
-                  <h4 className="font-medium text-sm mb-2">Did you know?</h4>
-                  <p className="text-sm text-gray-700">
-                    Letter writing is the most impactful online action, with each letter saving approximately 50 animals on average.
-                  </p>
-                </div>
+
               </CardContent>
             </Card>
           </div>
