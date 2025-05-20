@@ -467,7 +467,7 @@ export default function MediaPage() {
                     <div className="p-4 bg-purple-50 border border-purple-100 rounded-md mt-2 mb-4">
                       <h4 className="text-sm font-semibold mb-2">Impact Calculation Explained:</h4>
                       <p className="text-sm text-gray-700 mb-2">
-                        <span className="font-medium">Formula: </span>(((Date Ended - Date Started) × Posts Per Month / 30) + One-Off Pieces) × (Estimated Persuasiveness / 100) × (Estimated Reach × 120 / 500)
+                        <span className="font-medium">Formula: </span>(((Date Ended - Date Started) × Posts Per Month / 30) + One-Off Pieces) × (Estimated Persuasiveness / 100) × (Estimated Reach / 5) × 120
                       </p>
                       <ul className="text-xs text-gray-600 space-y-1 pl-4 list-disc">
                         <li><span className="font-medium">Ongoing Content:</span> We calculate the total number of posts over the time period</li>
