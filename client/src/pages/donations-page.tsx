@@ -415,7 +415,7 @@ export default function DonationsPage() {
                         <Label htmlFor="organization">Organization</Label>
                         <Input
                           id="organization"
-                          placeholder="E.g., ASPCA, WWF"
+                          placeholder="E.g., Animal Charity Evaluators, EA Animal Welfare Fund"
                           {...form.register("organization")}
                         />
                         {form.formState.errors.organization && (
