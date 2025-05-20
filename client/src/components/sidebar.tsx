@@ -91,17 +91,19 @@ export function Sidebar() {
       <nav className="p-4 flex-grow">
         <div className="space-y-1">
           {navItems.map((item) => (
-            <Link key={item.href} href={item.href}>
-              <a
-                className={cn(
-                  "flex items-center p-2 rounded-md hover:bg-indigo-50 text-gray-700 hover:text-primary",
-                  location === item.href && "bg-indigo-50 text-primary"
-                )}
-              >
-                <div className="w-6">{item.icon}</div>
-                <span className="ml-2">{item.label}</span>
-              </a>
-            </Link>
+            <div key={item.href}>
+              <Link href={item.href}>
+                <div
+                  className={cn(
+                    "flex items-center p-2 rounded-md hover:bg-indigo-50 text-gray-700 hover:text-primary cursor-pointer",
+                    location === item.href && "bg-indigo-50 text-primary"
+                  )}
+                >
+                  <div className="w-6">{item.icon}</div>
+                  <span className="ml-2">{item.label}</span>
+                </div>
+              </Link>
+            </div>
           ))}
         </div>
       </nav>
