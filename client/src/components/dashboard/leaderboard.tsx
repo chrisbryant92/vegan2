@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowUp, Medal, Trophy, Award } from "lucide-react";
-import { formatNumber } from "@/lib/utils";
+import { ArrowUp, Medal, Trophy } from "lucide-react";
+import { formatNumber, formatCurrency } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 
 type LeaderboardEntry = {
