@@ -472,7 +472,7 @@ export default function MediaPage() {
                       <ul className="text-xs text-gray-600 space-y-1 pl-4 list-disc">
                         <li><span className="font-medium">Ongoing Content:</span> We calculate the total number of posts over the time period</li>
                         <li><span className="font-medium">One-Off Content:</span> Added directly to the total content count</li>
-                        <li><span className="font-medium">Persuasiveness Factor:</span> How compelling your content is (as percentage)</li>
+                        <li><span className="font-medium">Persuasiveness Factor:</span> Divided by 100 to adjust for the modest impact of social media posts</li>
                         <li><span className="font-medium">Reach:</span> Divided by 5 to adjust for typical overestimations in audience size</li>
                         <li><span className="font-medium">Impact Factor:</span> 120 represents the number of animals saved if one person goes vegan for a year</li>
                         <li><span className="font-medium">Example:</span> 3 years of monthly posting (5 posts/month) with 50% persuasiveness and 350 people reached = 767 animals saved</li>
