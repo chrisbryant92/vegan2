@@ -558,10 +558,10 @@ export default function MediaPage() {
                           Your media impact is calculated using this formula:
                         </p>
                         <code className="text-xs bg-blue-100 p-1 rounded mt-1 block overflow-x-auto">
-                          (((Date Ended-Date Started)*Posts Per Month/30)+One-Off Pieces)*Persuasiveness*Reach*120/500
+                          (((Date Ended-Date Started)*Posts Per Month/30)+One-Off Pieces)*(Persuasiveness/100)*(Reach/5)*120
                         </code>
                         <p className="text-xs text-blue-600 mt-1">
-                          The average meat-eater consumes approximately 120 animals per year. The formula is divided by 500 to account for realistic conversion rates (roughly 10%) and actual reach limitations (many followers don't see posts).
+                          Each person who goes vegan saves approximately 120 animals per year. Persuasiveness is divided by 100 to adjust for the modest impact of social media posts. Reach is divided by 5 to account for typical overestimations in audience size.
                         </p>
                       </div>
                     </div>
