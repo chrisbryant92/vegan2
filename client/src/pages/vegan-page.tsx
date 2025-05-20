@@ -185,7 +185,30 @@ export default function VeganPage() {
 
   // Form submission handler
   const onSubmit = (data: VeganConversionFormValues) => {
-    createVeganConversion.mutate(data);
+    if (editingConversion) {
+      // Update existing conversion
+      updateVeganConversion.mutate({
+        ...data,
+        id: editingConversion.id
+      });
+    } else {
+      // Create new conversion
+      createVeganConversion.mutate(data);
+    }
+  };
+  
+  // Cancel editing and reset form
+  const cancelEdit = () => {
+    setEditingConversion(null);
+    form.reset({
+      personName: "",
+      dateStarted: new Date().toISOString().split("T")[0],
+      dateEnded: "",
+      meatinessBefore: 100,
+      meatinessAfter: 0,
+      influence: 100,
+      notes: "",
+    });
   };
 
   // Calculate total animals saved
@@ -307,7 +330,7 @@ export default function VeganPage() {
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Log a Conversion</CardTitle>
+                  <CardTitle>{editingConversion ? 'Edit Conversion' : 'Log a Conversion'}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -412,13 +435,28 @@ export default function VeganPage() {
                         </p>
                       </div>
                       
-                      <Button
-                        type="submit"
-                        className="w-full bg-green-600 hover:bg-green-700"
-                        disabled={createVeganConversion.isPending}
-                      >
-                        {createVeganConversion.isPending ? "Saving..." : "Save Conversion"}
-                      </Button>
+                      <div className="flex gap-2">
+                        {editingConversion && (
+                          <Button 
+                            type="button" 
+                            variant="outline"
+                            onClick={cancelEdit}
+                            className="w-1/3"
+                          >
+                            Cancel
+                          </Button>
+                        )}
+                        <Button
+                          type="submit"
+                          className={`${editingConversion ? 'w-2/3' : 'w-full'} bg-green-600 hover:bg-green-700`}
+                          disabled={createVeganConversion.isPending || updateVeganConversion.isPending}
+                        >
+                          {createVeganConversion.isPending || updateVeganConversion.isPending 
+                            ? "Saving..." 
+                            : editingConversion ? "Update Conversion" : "Save Conversion"
+                          }
+                        </Button>
+                      </div>
                     </div>
                   </form>
                 </CardContent>
