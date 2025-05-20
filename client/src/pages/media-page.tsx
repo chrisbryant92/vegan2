@@ -519,7 +519,7 @@ export default function MediaPage() {
               <CardHeader>
                 <CardTitle>Your Media Impact</CardTitle>
                 <CardDescription>
-                  You've saved approximately {totalAnimalsSaved} animals through media campaigns
+                  You've saved approximately {formatNumber(totalAnimalsSaved)} animals through media campaigns
                 </CardDescription>
               </CardHeader>
               <CardContent>
