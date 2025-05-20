@@ -178,19 +178,22 @@ export default function DonationsPage() {
     }
   }, 0);
   
-  // Calculate total animals saved based on the total amounts
+  // Calculate total animals saved based on the total amounts and organization impact
   const totalAnimalsSaved = donations.reduce((sum, donation) => {
     // Get total amount for this donation (considering monthly calculations)
     const totalAmount = calculateTotalAmount(donation);
+    // Use the organization impact to calculate animals saved
+    const impactLevel = donation.organizationImpact || "Average";
     // Calculate animals saved using our formula from calculations.ts
-    return sum + calculateDonationImpact(totalAmount);
+    return sum + calculateDonationImpact(totalAmount, impactLevel);
   }, 0);
   
   // Prepare data for chart
   const donationsByType = donations.reduce((acc, donation) => {
     // Use the total amount to calculate animals saved for this donation type
     const totalAmount = calculateTotalAmount(donation);
-    const recalculatedImpact = calculateDonationImpact(totalAmount);
+    const impactLevel = donation.organizationImpact || "Average";
+    const recalculatedImpact = calculateDonationImpact(totalAmount, impactLevel);
     acc[donation.donationType] = (acc[donation.donationType] || 0) + recalculatedImpact;
     return acc;
   }, {} as Record<string, number>);
@@ -224,19 +227,23 @@ export default function DonationsPage() {
       cell: (donation: Donation) => formatCurrency(calculateTotalAmount(donation)),
     },
     {
-      header: "Org Type",
+      header: "Donation Type",
       accessorKey: "donationType" as const,
       cell: (donation: Donation) => {
-        // Format the organization type to be user-friendly
+        // Format the donation type to be user-friendly
         const typeMap: Record<string, string> = {
-          animalShelter: "Animal Shelter",
-          wildlifeConservation: "Wildlife Conservation",
-          rescueOperation: "Rescue Operation",
-          animalRights: "Animal Rights Organization",
+          oneTime: "One-time",
+          recurring: "Recurring",
+          matching: "Matching",
+          corporate: "Corporate",
           other: "Other"
         };
         return typeMap[donation.donationType] || donation.donationType;
       },
+    },
+    {
+      header: "Impact Level",
+      accessorKey: "organizationImpact" as const,
     },
     {
       header: "Frequency",
@@ -256,9 +263,11 @@ export default function DonationsPage() {
       header: "Impact",
       accessorKey: "animalsSaved" as const,
       cell: (donation: Donation) => {
-        // Calculate the real impact based on the total amount
+        // Calculate the real impact based on the total amount and organization impact
         const totalAmount = calculateTotalAmount(donation);
-        const recalculatedImpact = calculateDonationImpact(totalAmount);
+        // Use the organizationImpact field, or default to "Average" if not present
+        const impactLevel = donation.organizationImpact || "Average";
+        const recalculatedImpact = calculateDonationImpact(totalAmount, impactLevel);
         return (
           <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
             {recalculatedImpact} animals
@@ -362,7 +371,7 @@ export default function DonationsPage() {
                       <div className="space-y-2">
                         <Label htmlFor="organizationImpact">Organization Impact</Label>
                         <Select
-                          onValueChange={(value) => form.setValue("organizationImpact", value)}
+                          onValueChange={(value: "Highest" | "High" | "Average" | "Low") => form.setValue("organizationImpact", value)}
                           defaultValue={form.getValues("organizationImpact") || "Average"}
                         >
                           <SelectTrigger>
