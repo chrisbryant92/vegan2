@@ -31,7 +31,7 @@ function SummaryCard({ title, value, icon, progress, progressColor, goal }: Summ
         <Progress value={progress} className="h-2" style={{ backgroundColor: `${progressColor}20` }} />
         {goal && (
           <p className="text-xs text-gray-500 mt-1">
-            {progress}% of your goal ({goal})
+            {progress.toFixed(2)}% of your goal ({goal})
           </p>
         )}
       </CardContent>
