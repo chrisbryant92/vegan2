@@ -108,9 +108,8 @@ export default function DashboardPage() {
           {/* Summary Cards */}
           <SummaryCards stats={summaryData} loading={isLoading} />
           
-          {/* Chart and Recent Activity */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-            <ImpactChart data={chartData} loading={isLoading} />
+          {/* Recent Activity */}
+          <div className="grid grid-cols-1 gap-6 mt-8">
             <RecentActivity activities={recentActivities} loading={isLoading} />
           </div>
           

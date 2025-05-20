@@ -131,17 +131,28 @@ function TotalImpactCard({
           </div>
         </div>
         
-        {/* Stacked bar graph */}
-        <div className="h-5 w-full bg-slate-200 rounded-full flex overflow-hidden mt-2">
+        {/* Progress bar to goal */}
+        <div className="h-2.5 w-full bg-slate-200 rounded-full mt-2 mb-1">
+          <div 
+            className="h-full rounded-full" 
+            style={{ 
+              width: `${Math.min(progressValue, 100)}%`,
+              backgroundColor: '#6366f1' 
+            }}
+          ></div>
+        </div>
+        
+        <p className="text-xs text-slate-700 mb-3">
+          {progressValue.toFixed(2)}% of your combined goal
+        </p>
+        
+        {/* Stacked bar graph showing contribution proportions */}
+        <div className="h-6 w-full bg-slate-200 rounded-full flex overflow-hidden">
           <div className="h-full" style={{ width: `${percentages.charitable}%`, backgroundColor: CATEGORY_COLORS.charitable }}></div>
           <div className="h-full" style={{ width: `${percentages.vegan}%`, backgroundColor: CATEGORY_COLORS.vegan }}></div>
           <div className="h-full" style={{ width: `${percentages.media}%`, backgroundColor: CATEGORY_COLORS.media }}></div>
           <div className="h-full" style={{ width: `${percentages.campaigns}%`, backgroundColor: CATEGORY_COLORS.campaigns }}></div>
         </div>
-        
-        <p className="text-xs text-slate-700 mt-2">
-          {progressValue.toFixed(2)}% of your combined goal
-        </p>
         
         {/* Legend with counts */}
         <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
