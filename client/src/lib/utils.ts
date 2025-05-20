@@ -87,11 +87,13 @@ export function getRelativeTimeString(date: Date | string | null | undefined): s
 }
 
 export function formatNumber(num: number): string {
+  // For large numbers, still use shorthand (1M, 2.5K, etc.)
   if (num >= 1000000) {
     return (num / 1000000).toFixed(1) + 'M';
-  } else if (num >= 1000) {
+  } else if (num >= 10000) {
     return (num / 1000).toFixed(1) + 'K';
   } else {
-    return num.toString();
+    // Add commas for all numbers below 10,000
+    return new Intl.NumberFormat('en-US').format(num);
   }
 }
