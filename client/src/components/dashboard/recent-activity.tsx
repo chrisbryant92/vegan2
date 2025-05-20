@@ -91,12 +91,12 @@ export function RecentActivity({ activities, loading = false }: RecentActivityPr
                 </div>
                 <div>
                   <h4 className="font-medium">{activity.title}</h4>
-                  <p className="text-sm text-gray-500">
+                  <div className="text-sm text-gray-500">
                     Saved approximately{" "}
                     <Badge variant="outline" className="ml-1 font-semibold">
                       {formatNumber(activity.animalsSaved)} {activity.animalsSaved === 1 ? "animal" : "animals"}
                     </Badge>
-                  </p>
+                  </div>
                   <p className="text-xs text-gray-400 mt-1">
                     {getRelativeTimeString(activity.date)}
                   </p>

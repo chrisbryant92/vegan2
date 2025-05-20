@@ -96,18 +96,20 @@ export function MobileNav() {
             <nav className="p-4">
               <div className="space-y-3">
                 {navItems.map((item) => (
-                  <Link key={item.href} href={item.href}>
-                    <a
-                      className={cn(
-                        "flex items-center p-2 rounded-md hover:bg-indigo-50 text-gray-700 hover:text-primary",
-                        location === item.href && "bg-indigo-50 text-primary"
-                      )}
-                      onClick={() => setOpen(false)}
-                    >
-                      <div className="w-6">{item.icon}</div>
-                      <span className="ml-2">{item.label}</span>
-                    </a>
-                  </Link>
+                  <div key={item.href}>
+                    <Link href={item.href}>
+                      <div
+                        className={cn(
+                          "flex items-center p-2 rounded-md hover:bg-indigo-50 text-gray-700 hover:text-primary cursor-pointer",
+                          location === item.href && "bg-indigo-50 text-primary"
+                        )}
+                        onClick={() => setOpen(false)}
+                      >
+                        <div className="w-6">{item.icon}</div>
+                        <span className="ml-2">{item.label}</span>
+                      </div>
+                    </Link>
+                  </div>
                 ))}
                 
                 <Button
@@ -129,15 +131,17 @@ export function MobileNav() {
       <div className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 z-30">
         <div className="grid grid-cols-4">
           {navItems.slice(0, 4).map((item) => (
-            <Link key={item.href} href={item.href}>
-              <a className={cn(
-                "flex flex-col items-center py-2 text-gray-500 hover:text-primary",
-                location === item.href && "text-primary"
-              )}>
-                {item.icon}
-                <span className="text-xs mt-1">{item.label.split(' ')[0]}</span>
-              </a>
-            </Link>
+            <div key={item.href}>
+              <Link href={item.href}>
+                <div className={cn(
+                  "flex flex-col items-center py-2 text-gray-500 hover:text-primary cursor-pointer",
+                  location === item.href && "text-primary"
+                )}>
+                  {item.icon}
+                  <span className="text-xs mt-1">{item.label.split(' ')[0]}</span>
+                </div>
+              </Link>
+            </div>
           ))}
         </div>
       </div>
