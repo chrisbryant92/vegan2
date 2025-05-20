@@ -294,13 +294,23 @@ export default function VeganPage() {
       header: "Actions",
       accessorKey: "id",
       cell: (conversion: VeganConversion) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setSelectedConversion(conversion)}
-        >
-          View
-        </Button>
+        <div className="flex space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelectedConversion(conversion)}
+          >
+            View
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-blue-600"
+            onClick={() => setEditingConversion(conversion)}
+          >
+            Edit
+          </Button>
+        </div>
       ),
     },
   ];
