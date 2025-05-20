@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -34,6 +34,7 @@ type CampaignFormValues = z.infer<typeof campaignSchema>;
 export default function CampaignsPage() {
   const { toast } = useToast();
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
 
   // Fetch campaigns
   const { data: campaigns = [], isLoading } = useQuery<Campaign[]>({
@@ -97,6 +98,54 @@ export default function CampaignsPage() {
     },
   });
 
+  // Update campaign mutation
+  const updateCampaign = useMutation({
+    mutationFn: async (data: CampaignFormValues & { id: number }) => {
+      const { id, ...formData } = data;
+      
+      // Calculate the total actions
+      const totalActions = formData.emails + formData.socialMediaActions + formData.letters + formData.otherActions;
+      
+      // Calculate impact using the formula
+      const animalsSaved = calculateCampaignImpact(
+        formData.emails,
+        formData.socialMediaActions,
+        formData.letters,
+        formData.otherActions
+      );
+      
+      const res = await apiRequest("PATCH", `/api/campaigns/${id}`, {
+        ...formData,
+        totalActions,
+        animalsSaved,
+      });
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Campaign updated",
+        description: "Your campaign has been updated successfully.",
+      });
+      form.reset({
+        name: "",
+        emails: 0,
+        socialMediaActions: 0,
+        letters: 0,
+        otherActions: 0,
+      });
+      setEditingCampaign(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/campaigns"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to update campaign: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Delete campaign mutation
   const deleteCampaign = useMutation({
     mutationFn: async (id: number) => {
@@ -120,9 +169,43 @@ export default function CampaignsPage() {
     },
   });
 
+  // Effect to update form when editing a campaign
+  useEffect(() => {
+    if (editingCampaign) {
+      form.reset({
+        name: editingCampaign.name,
+        emails: editingCampaign.emails || 0,
+        socialMediaActions: editingCampaign.social_media_actions || 0,
+        letters: editingCampaign.letters || 0,
+        otherActions: editingCampaign.other_actions || 0,
+      });
+    }
+  }, [editingCampaign, form]);
+
   // Form submission handler
   const onSubmit = (data: CampaignFormValues) => {
-    createCampaign.mutate(data);
+    if (editingCampaign) {
+      // Update existing campaign
+      updateCampaign.mutate({
+        ...data,
+        id: editingCampaign.id
+      });
+    } else {
+      // Create new campaign
+      createCampaign.mutate(data);
+    }
+  };
+  
+  // Cancel editing and reset form
+  const cancelEdit = () => {
+    setEditingCampaign(null);
+    form.reset({
+      name: "",
+      emails: 0,
+      socialMediaActions: 0,
+      letters: 0,
+      otherActions: 0,
+    });
   };
 
   // Calculate total animals saved
@@ -198,13 +281,23 @@ export default function CampaignsPage() {
       header: "Actions",
       accessorKey: "id" as keyof Campaign,
       cell: (campaign: Campaign) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setSelectedCampaign(campaign)}
-        >
-          View
-        </Button>
+        <div className="flex space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelectedCampaign(campaign)}
+          >
+            View
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-amber-600"
+            onClick={() => setEditingCampaign(campaign)}
+          >
+            Edit
+          </Button>
+        </div>
       ),
     },
   ];
@@ -226,7 +319,7 @@ export default function CampaignsPage() {
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Log Campaign Participation</CardTitle>
+                  <CardTitle>{editingCampaign ? 'Edit Campaign' : 'Log Campaign Participation'}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -367,13 +460,28 @@ export default function CampaignsPage() {
                       </div>
                     </div>
                     
-                    <Button
-                      type="submit"
-                      className="bg-amber-600 hover:bg-amber-700"
-                      disabled={createCampaign.isPending}
-                    >
-                      {createCampaign.isPending ? "Saving..." : "Save Campaign"}
-                    </Button>
+                    <div className="flex gap-2">
+                      {editingCampaign && (
+                        <Button 
+                          type="button" 
+                          variant="outline"
+                          onClick={cancelEdit}
+                          className="w-1/3"
+                        >
+                          Cancel
+                        </Button>
+                      )}
+                      <Button
+                        type="submit"
+                        className={`${editingCampaign ? 'w-2/3' : 'w-full'} bg-amber-600 hover:bg-amber-700`}
+                        disabled={createCampaign.isPending || updateCampaign.isPending}
+                      >
+                        {createCampaign.isPending || updateCampaign.isPending 
+                          ? "Saving..." 
+                          : editingCampaign ? "Update Campaign" : "Save Campaign"
+                        }
+                      </Button>
+                    </div>
                   </form>
                 </CardContent>
               </Card>
