@@ -609,29 +609,29 @@ export default function MediaPage() {
                     </div>
                     <div>
                       <h4 className="text-sm font-medium">Animals Saved</h4>
-                      <p className="font-bold text-blue-600">{selectedMedia.animalsSaved} animals</p>
+                      <p className="font-bold text-blue-600">{formatNumber(selectedMedia.animalsSaved)} animals</p>
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <h4 className="text-sm font-medium">One-Off Pieces</h4>
-                      <p>{selectedMedia.oneOffPieces}</p>
+                      <p>{formatNumber(selectedMedia.oneOffPieces || 0)}</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-medium">Posts Per Month</h4>
-                      <p>{selectedMedia.postsPerMonth}</p>
+                      <p>{formatNumber(selectedMedia.postsPerMonth || 0)}</p>
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <h4 className="text-sm font-medium">Estimated Reach</h4>
-                      <p>{selectedMedia.estimatedReach} people</p>
+                      <p>{formatNumber(selectedMedia.estimatedReach || 0)} people</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-medium">Persuasiveness</h4>
-                      <p>{selectedMedia.estimatedPersuasiveness}%</p>
+                      <p>{formatNumber(selectedMedia.estimatedPersuasiveness || 0)}%</p>
                     </div>
                   </div>
                   
