@@ -447,6 +447,20 @@ export default function CampaignsPage() {
                             )} animals
                           </span>
                         </div>
+                        
+                        <div className="p-4 bg-blue-50 border border-blue-100 rounded-md my-3">
+                          <h4 className="text-sm font-semibold mb-2">Impact Calculation Explained:</h4>
+                          <p className="text-sm text-gray-700 mb-2">
+                            <span className="font-medium">Formula: </span>(Emails × 5) + (Social Media Actions × 2) + (Phone Calls/Letters × 10) + (Other Actions × 5)
+                          </p>
+                          <ul className="text-xs text-gray-600 space-y-1 pl-4 list-disc">
+                            <li><span className="font-medium">Emails:</span> Each email is worth 5 animals (quick but moderate impact)</li>
+                            <li><span className="font-medium">Social Media:</span> Each action saves 2 animals (lower effort but broad reach)</li>
+                            <li><span className="font-medium">Phone/Letters:</span> Each saves 10 animals (high effort, personalized contact)</li>
+                            <li><span className="font-medium">Other Actions:</span> Each worth 5 animals (average impact across action types)</li>
+                            <li><span className="font-medium">Time Value:</span> Roughly equivalent to 1 animal saved per minute of advocacy time</li>
+                          </ul>
+                        </div>
                         <Progress
                           value={Math.min(100, calculateCampaignImpact(
                             form.watch("emails") || 0,
