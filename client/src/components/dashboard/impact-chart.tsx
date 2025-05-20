@@ -22,12 +22,12 @@ export function ImpactChart({ data, loading = false }: ImpactChartProps) {
       color: "#4F46E5" // primary
     },
     {
-      name: "Vegan",
+      name: "Conversions",
       animals: data.vegan,
       color: "#10B981" // secondary/green
     },
     {
-      name: "Media",
+      name: "Sharing",
       animals: data.media,
       color: "#3B82F6" // blue
     },

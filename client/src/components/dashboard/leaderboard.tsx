@@ -32,9 +32,9 @@ export function Leaderboard() {
     switch (selectedCategory) {
       case "donations":
         return b.donationsAnimalsSaved - a.donationsAnimalsSaved;
-      case "vegan":
+      case "conversions":
         return b.veganAnimalsSaved - a.veganAnimalsSaved;
-      case "media":
+      case "sharing":
         return b.mediaAnimalsSaved - a.mediaAnimalsSaved;
       case "campaigns":
         return b.campaignsAnimalsSaved - a.campaignsAnimalsSaved;
@@ -108,8 +108,8 @@ export function Leaderboard() {
           <TabsList className="grid grid-cols-5 mb-4">
             <TabsTrigger value="total">Total</TabsTrigger>
             <TabsTrigger value="donations">Donations</TabsTrigger>
-            <TabsTrigger value="vegan">Conversions</TabsTrigger>
-            <TabsTrigger value="media">Sharing</TabsTrigger>
+            <TabsTrigger value="conversions">Conversions</TabsTrigger>
+            <TabsTrigger value="sharing">Sharing</TabsTrigger>
             <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
           </TabsList>
           
