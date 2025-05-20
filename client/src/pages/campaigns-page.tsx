@@ -519,7 +519,7 @@ export default function CampaignsPage() {
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip formatter={(value) => [`${value} animals`, 'Impact']} />
+                        <Tooltip formatter={(value) => [`${formatNumber(value as number)} animals`, 'Impact']} />
                         <Legend />
                       </PieChart>
                     </ResponsiveContainer>
