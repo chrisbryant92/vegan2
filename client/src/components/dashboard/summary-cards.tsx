@@ -44,8 +44,16 @@ function SummaryCard({ title, value, icon, progress, progressColor, goal }: Summ
             <div style={{ color }}>{icon}</div>
           </div>
         </div>
-        <Progress value={progress} className="h-2" style={{ backgroundColor: `${color}20` }} 
-                 indicatorClassName="h-full" indicatorStyle={{ backgroundColor: color }} />
+        <div className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: `${color}20` }}>
+          <div 
+            className="h-full" 
+            style={{ 
+              width: `${progress}%`, 
+              backgroundColor: color,
+              maxWidth: '100%'
+            }}
+          ></div>
+        </div>
         {goal && (
           <p className="text-xs text-gray-500 mt-1">
             {progress.toFixed(2)}% of your goal ({formatNumber(goal)})
@@ -81,10 +89,30 @@ interface GoalsData {
 }
 
 // Total Impact Card component with stacked bar graph
-function TotalImpactCard({ totalValue, progressValue }: { 
+function TotalImpactCard({ 
+  totalValue, 
+  progressValue, 
+  stats
+}: { 
   totalValue: number, 
-  progressValue: number 
+  progressValue: number,
+  stats: {
+    charitable: number;
+    vegan: number;
+    media: number;
+    campaigns: number;
+  }
 }) {
+  // Calculate percentages of each category for the stacked bar
+  const getPercentage = (value: number) => (totalValue > 0 ? (value / totalValue) * 100 : 0);
+  
+  const percentages = {
+    charitable: getPercentage(stats.charitable),
+    vegan: getPercentage(stats.vegan),
+    media: getPercentage(stats.media),
+    campaigns: getPercentage(stats.campaigns)
+  };
+
   return (
     <Card className="col-span-1 md:col-span-2 lg:col-span-4 bg-gradient-to-r from-slate-50 to-slate-100 border-slate-200">
       <CardContent className="pt-6">
@@ -104,31 +132,38 @@ function TotalImpactCard({ totalValue, progressValue }: {
         </div>
         
         {/* Stacked bar graph */}
-        <div className="h-4 w-full bg-slate-200 rounded-full flex overflow-hidden mt-2">
-          {/* Widths will be dynamically calculated in SummaryCards */}
+        <div className="h-5 w-full bg-slate-200 rounded-full flex overflow-hidden mt-2">
+          <div className="h-full" style={{ width: `${percentages.charitable}%`, backgroundColor: CATEGORY_COLORS.charitable }}></div>
+          <div className="h-full" style={{ width: `${percentages.vegan}%`, backgroundColor: CATEGORY_COLORS.vegan }}></div>
+          <div className="h-full" style={{ width: `${percentages.media}%`, backgroundColor: CATEGORY_COLORS.media }}></div>
+          <div className="h-full" style={{ width: `${percentages.campaigns}%`, backgroundColor: CATEGORY_COLORS.campaigns }}></div>
         </div>
         
         <p className="text-xs text-slate-700 mt-2">
           {progressValue.toFixed(2)}% of your combined goal
         </p>
         
-        {/* Legend */}
-        <div className="grid grid-cols-2 gap-2 mt-3 text-xs text-slate-600">
+        {/* Legend with counts */}
+        <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
           <div className="flex items-center gap-1">
             <div className="w-3 h-3" style={{ backgroundColor: CATEGORY_COLORS.charitable }}></div>
-            <span>Charitable</span>
+            <span className="text-slate-600">Charitable: </span>
+            <span className="font-medium" style={{ color: CATEGORY_COLORS.charitable }}>{formatNumber(stats.charitable)}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3" style={{ backgroundColor: CATEGORY_COLORS.vegan }}></div>
-            <span>Conversions</span>
+            <span className="text-slate-600">Conversions: </span>
+            <span className="font-medium" style={{ color: CATEGORY_COLORS.vegan }}>{formatNumber(stats.vegan)}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3" style={{ backgroundColor: CATEGORY_COLORS.media }}></div>
-            <span>Sharing</span>
+            <span className="text-slate-600">Sharing: </span>
+            <span className="font-medium" style={{ color: CATEGORY_COLORS.media }}>{formatNumber(stats.media)}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3" style={{ backgroundColor: CATEGORY_COLORS.campaigns }}></div>
-            <span>Campaigns</span>
+            <span className="text-slate-600">Campaigns: </span>
+            <span className="font-medium" style={{ color: CATEGORY_COLORS.campaigns }}>{formatNumber(stats.campaigns)}</span>
           </div>
         </div>
       </CardContent>
@@ -190,6 +225,13 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
     setCustomGoals(newGoals);
   };
 
+  const emptyStats = {
+    charitable: 0,
+    vegan: 0,
+    media: 0,
+    campaigns: 0
+  };
+  
   if (loading) {
     return (
       <div className="space-y-4">
@@ -202,7 +244,7 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
         </div>
         {/* Loading skeleton for Total card */}
         <div className="grid grid-cols-1 gap-4">
-          <Card className="bg-gradient-to-r from-purple-50 to-indigo-50">
+          <Card className="bg-gradient-to-r from-slate-50 to-slate-100">
             <CardContent className="pt-6">
               <div className="flex justify-between items-start mb-2">
                 <div>
@@ -211,8 +253,14 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
                 </div>
                 <Skeleton className="w-12 h-12 rounded-full" />
               </div>
-              <Skeleton className="h-2.5 w-full mt-4" />
+              <Skeleton className="h-5 w-full mt-4" />
               <Skeleton className="h-3 w-40 mt-2" />
+              <div className="grid grid-cols-2 gap-2 mt-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -255,6 +303,7 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
         <TotalImpactCard 
           totalValue={totalAnimalsSaved}
           progressValue={totalProgressPercentage}
+          stats={stats}
         />
       </div>
       

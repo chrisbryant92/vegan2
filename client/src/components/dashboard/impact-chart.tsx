@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatNumber } from "@/lib/utils";
 
@@ -20,22 +20,22 @@ export function ImpactChart({ data, loading = false }: ImpactChartProps) {
     {
       name: "Charitable",
       animals: data.charitable,
-      color: "#4F46E5" // primary
+      color: "#22c55e" // Green - match with summary cards
     },
     {
       name: "Conversions",
       animals: data.vegan,
-      color: "#10B981" // secondary/green
+      color: "#eab308" // Yellow - match with summary cards
     },
     {
       name: "Sharing",
       animals: data.media,
-      color: "#3B82F6" // blue
+      color: "#3b82f6" // Blue - match with summary cards
     },
     {
       name: "Campaigns",
       animals: data.campaigns,
-      color: "#F59E0B" // amber/accent
+      color: "#ef4444" // Red - match with summary cards
     }
   ];
 
@@ -55,8 +55,7 @@ export function ImpactChart({ data, loading = false }: ImpactChartProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle>Total Animals Saved</CardTitle>
-        <div className="text-2xl font-bold text-primary">{formatNumber(data.total)}</div>
+        <CardTitle>Animals Saved by Category</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
@@ -81,9 +80,13 @@ export function ImpactChart({ data, loading = false }: ImpactChartProps) {
               <Bar 
                 dataKey="animals" 
                 name="Animals Saved" 
-                fill="var(--primary)"
                 radius={[4, 4, 0, 0]}
-              />
+                fill="#4F46E5"
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
