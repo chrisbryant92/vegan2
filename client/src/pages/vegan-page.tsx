@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -25,6 +25,7 @@ type VeganConversionFormValues = z.infer<typeof veganConversionSchema>;
 export default function VeganPage() {
   const { toast } = useToast();
   const [selectedConversion, setSelectedConversion] = useState<VeganConversion | null>(null);
+  const [editingConversion, setEditingConversion] = useState<VeganConversion | null>(null);
 
   // Fetch vegan conversions
   const { data: veganConversions = [], isLoading } = useQuery<VeganConversion[]>({
@@ -44,6 +45,21 @@ export default function VeganPage() {
       notes: "",
     },
   });
+  
+  // Effect to update form when editing a conversion
+  useEffect(() => {
+    if (editingConversion) {
+      form.reset({
+        personName: editingConversion.personName || "",
+        dateStarted: new Date(editingConversion.dateStarted).toISOString().split("T")[0],
+        dateEnded: editingConversion.dateEnded ? new Date(editingConversion.dateEnded).toISOString().split("T")[0] : "",
+        meatinessBefore: editingConversion.meatinessBefore,
+        meatinessAfter: editingConversion.meatinessAfter,
+        influence: editingConversion.influence,
+        notes: editingConversion.notes || "",
+      });
+    }
+  }, [editingConversion, form]);
 
   // Create vegan conversion mutation
   const createVeganConversion = useMutation({
@@ -88,6 +104,57 @@ export default function VeganPage() {
       toast({
         title: "Error",
         description: `Failed to save conversion: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Update vegan conversion mutation
+  const updateVeganConversion = useMutation({
+    mutationFn: async (data: VeganConversionFormValues & { id: number }) => {
+      const { id, ...formData } = data;
+      
+      // Parse dates
+      const dateStarted = new Date(formData.dateStarted);
+      const dateEnded = formData.dateEnded ? new Date(formData.dateEnded) : null;
+      
+      // Calculate impact based on formula
+      const animalsSaved = calculateVeganImpact(
+        dateStarted,
+        dateEnded,
+        formData.meatinessBefore,
+        formData.meatinessAfter,
+        formData.influence
+      );
+      
+      const res = await apiRequest("PATCH", `/api/vegan-conversions/${id}`, {
+        ...formData,
+        animalsSaved,
+      });
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Conversion updated",
+        description: "The vegan conversion has been updated successfully.",
+      });
+      form.reset({
+        personName: "",
+        dateStarted: new Date().toISOString().split("T")[0],
+        dateEnded: "",
+        meatinessBefore: 100,
+        meatinessAfter: 0,
+        influence: 100,
+        notes: "",
+      });
+      setEditingConversion(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/vegan-conversions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to update conversion: ${error.message}`,
         variant: "destructive",
       });
     },
