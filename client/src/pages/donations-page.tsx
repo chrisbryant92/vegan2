@@ -39,6 +39,7 @@ export default function DonationsPage() {
     defaultValues: {
       organization: "",
       amount: 0,
+      organizationImpact: "Average",
       donationType: "",
       date: new Date().toISOString().split("T")[0],
       isMonthly: false,
@@ -53,8 +54,8 @@ export default function DonationsPage() {
   // Create donation mutation
   const createDonation = useMutation({
     mutationFn: async (data: DonationFormValues) => {
-      // Calculate impact
-      const animalsSaved = calculateDonationImpact(data.amount);
+      // Calculate impact using organization impact factor
+      const animalsSaved = calculateDonationImpact(data.amount, data.organizationImpact);
       
       const res = await apiRequest("POST", "/api/donations", {
         ...data,
@@ -70,6 +71,7 @@ export default function DonationsPage() {
       form.reset({
         organization: "",
         amount: 0,
+        organizationImpact: "Average",
         donationType: "",
         date: new Date().toISOString().split("T")[0],
         isMonthly: false,
@@ -332,28 +334,53 @@ export default function DonationsPage() {
                       </div>
                     </div>
                     
-                    <div className="space-y-2">
-                      <Label htmlFor="donationType">Organization Type</Label>
-                      <Select
-                        onValueChange={(value) => form.setValue("donationType", value)}
-                        defaultValue={form.getValues("donationType")}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select organization type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="animalShelter">Animal Shelter</SelectItem>
-                          <SelectItem value="wildlifeConservation">Wildlife Conservation</SelectItem>
-                          <SelectItem value="rescueOperation">Rescue Operation</SelectItem>
-                          <SelectItem value="animalRights">Animal Rights Organization</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {form.formState.errors.donationType && (
-                        <p className="text-sm text-red-500">
-                          {form.formState.errors.donationType.message}
-                        </p>
-                      )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="donationType">Donation Type</Label>
+                        <Select
+                          onValueChange={(value) => form.setValue("donationType", value)}
+                          defaultValue={form.getValues("donationType")}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select donation type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="oneTime">One-time</SelectItem>
+                            <SelectItem value="recurring">Recurring</SelectItem>
+                            <SelectItem value="matching">Matching</SelectItem>
+                            <SelectItem value="corporate">Corporate</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {form.formState.errors.donationType && (
+                          <p className="text-sm text-red-500">
+                            {form.formState.errors.donationType.message}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="organizationImpact">Organization Impact</Label>
+                        <Select
+                          onValueChange={(value) => form.setValue("organizationImpact", value)}
+                          defaultValue={form.getValues("organizationImpact") || "Average"}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select impact level" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Highest">Highest (4.89 animals per $)</SelectItem>
+                            <SelectItem value="High">High (3.1 animals per $)</SelectItem>
+                            <SelectItem value="Average">Average (0.007 animals per $)</SelectItem>
+                            <SelectItem value="Low">Low (0.001 animals per $)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {form.formState.errors.organizationImpact && (
+                          <p className="text-sm text-red-500">
+                            {form.formState.errors.organizationImpact.message}
+                          </p>
+                        )}
+                      </div>
                     </div>
                     
                     <div className="space-y-4">
