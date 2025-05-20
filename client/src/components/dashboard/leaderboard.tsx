@@ -80,9 +80,9 @@ export function Leaderboard() {
     switch (selectedCategory) {
       case "donations":
         return "Donations";
-      case "vegan":
+      case "conversions":
         return "Conversions";
-      case "media":
+      case "sharing":
         return "Sharing";
       case "campaigns":
         return "Campaigns";

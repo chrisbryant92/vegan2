@@ -104,7 +104,7 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
       />
       
       <SummaryCard
-        title="Vegan Conversions"
+        title="Conversions"
         value={stats.vegan}
         icon={<Leaf className="h-5 w-5 text-green-600" />}
         progress={progressPercentages.vegan}
@@ -113,7 +113,7 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
       />
       
       <SummaryCard
-        title="Media Shared"
+        title="Sharing"
         value={stats.media}
         icon={<Share2 className="h-5 w-5 text-blue-600" />}
         progress={progressPercentages.media}
