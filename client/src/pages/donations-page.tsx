@@ -365,13 +365,26 @@ export default function DonationsPage() {
       header: "Actions",
       accessorKey: "id" as const,
       cell: (donation: Donation) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setSelectedDonation(donation)}
-        >
-          View
-        </Button>
+        <div className="flex space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelectedDonation(donation)}
+          >
+            View
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setEditingDonation(donation);
+              // Scroll to the form
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          >
+            Edit
+          </Button>
+        </div>
       ),
     },
   ];
@@ -583,13 +596,25 @@ export default function DonationsPage() {
                       />
                     </div>
                     
-                    <Button
-                      type="submit"
-                      className="bg-primary hover:bg-primary/90"
-                      disabled={createDonation.isPending}
-                    >
-                      {createDonation.isPending ? "Saving..." : "Save Donation"}
-                    </Button>
+                    <div className="flex gap-2 justify-end">
+                      {editingDonation && (
+                        <Button 
+                          type="button" 
+                          variant="outline"
+                          onClick={cancelEdit}
+                        >
+                          Cancel
+                        </Button>
+                      )}
+                      <Button
+                        type="submit"
+                        className="bg-primary hover:bg-primary/90"
+                        disabled={createDonation.isPending || updateDonation.isPending}
+                      >
+                        {createDonation.isPending || updateDonation.isPending ? "Saving..." : 
+                          editingDonation ? "Update Donation" : "Save Donation"}
+                      </Button>
+                    </div>
                   </form>
                 </CardContent>
               </Card>
