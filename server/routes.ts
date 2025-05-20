@@ -43,6 +43,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const processedData: {
         organization: string;
         amount: number;
+        organizationImpact: string;
         donationType: string;
         date: Date;
         isMonthly: boolean;
@@ -54,6 +55,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } = {
         organization: req.body.organization,
         amount: Number(req.body.amount),
+        organizationImpact: req.body.organizationImpact || "Average",
         donationType: req.body.donationType,
         date: new Date(req.body.date),
         isMonthly: req.body.isMonthly === true || req.body.isMonthly === "true",
@@ -133,6 +135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (req.body.organization) processedData.organization = req.body.organization;
       if (req.body.amount) processedData.amount = Number(req.body.amount);
+      if (req.body.organizationImpact) processedData.organizationImpact = req.body.organizationImpact;
       if (req.body.donationType) processedData.donationType = req.body.donationType;
       if (req.body.isMonthly !== undefined) processedData.isMonthly = req.body.isMonthly === true || req.body.isMonthly === "true";
       if (req.body.date) processedData.date = new Date(req.body.date);
