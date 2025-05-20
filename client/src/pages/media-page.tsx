@@ -473,7 +473,7 @@ export default function MediaPage() {
                         <li><span className="font-medium">Ongoing Content:</span> We calculate the total number of posts over the time period</li>
                         <li><span className="font-medium">One-Off Content:</span> Added directly to the total content count</li>
                         <li><span className="font-medium">Persuasiveness Factor:</span> How compelling your content is (as percentage)</li>
-                        <li><span className="font-medium">Reach Calculation:</span> We estimate that for every 500 people who see content, about 120 may change behavior</li>
+                        <li><span className="font-medium">Reach Calculation:</span> Each person who converts saves ~120 animals/year, divided by 500 to account for modest social media impact (factor of 100) and reach overestimations (factor of 5)</li>
                         <li><span className="font-medium">Example:</span> 3 years of monthly posting (5 posts/month) with 50% persuasiveness and 350 people reached = 767 animals saved</li>
                       </ul>
                     </div>
