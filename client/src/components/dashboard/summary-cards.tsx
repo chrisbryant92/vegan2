@@ -63,6 +63,34 @@ interface GoalsData {
   campaigns: number;
 }
 
+// Total Impact Card component
+function TotalImpactCard({ totalValue, progressValue }: { totalValue: number, progressValue: number }) {
+  return (
+    <Card className="col-span-1 md:col-span-2 lg:col-span-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200">
+      <CardContent className="pt-6">
+        <div className="flex justify-between items-start mb-2">
+          <div>
+            <p className="text-sm font-medium text-purple-700">Total Animals Saved</p>
+            <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600" style={{ WebkitBackgroundClip: "text" }}>
+              {formatNumber(totalValue)}
+            </h3>
+          </div>
+          <div className="w-12 h-12 rounded-full flex items-center justify-center bg-purple-100">
+            <HandHeart className="h-5 w-5 text-primary absolute opacity-75" style={{ transform: 'translate(-8px, -8px)' }} />
+            <Leaf className="h-5 w-5 text-green-600 absolute opacity-75" style={{ transform: 'translate(8px, -8px)' }} />
+            <Share2 className="h-5 w-5 text-blue-600 absolute opacity-75" style={{ transform: 'translate(-8px, 8px)' }} />
+            <Megaphone className="h-5 w-5 text-amber-600 absolute opacity-75" style={{ transform: 'translate(8px, 8px)' }} />
+          </div>
+        </div>
+        <Progress value={progressValue} className="h-2.5" style={{ backgroundColor: `rgba(147, 51, 234, 0.2)` }} />
+        <p className="text-xs text-purple-700 mt-1">
+          {progressValue.toFixed(2)}% of your combined goal
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCardsProps) {
   // Initial default goals
   const initialDefaultGoals = {
@@ -107,6 +135,11 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
     campaigns: calculateProgress(stats.campaigns, activeGoals.campaigns)
   };
   
+  // Calculate total animals saved and total goal
+  const totalAnimalsSaved = stats.charitable + stats.vegan + stats.media + stats.campaigns;
+  const totalGoal = activeGoals.charitable + activeGoals.vegan + activeGoals.media + activeGoals.campaigns;
+  const totalProgressPercentage = calculateProgress(totalAnimalsSaved, totalGoal);
+  
   // Handle saving new goals
   const handleSaveGoals = (newGoals: GoalsData) => {
     setCustomGoals(newGoals);
@@ -122,6 +155,23 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
             <Skeleton className="h-full w-full rounded-md" />
           </div>
         </div>
+        {/* Loading skeleton for Total card */}
+        <div className="grid grid-cols-1 gap-4">
+          <Card className="bg-gradient-to-r from-purple-50 to-indigo-50">
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <Skeleton className="h-5 w-40 mb-2" />
+                  <Skeleton className="h-9 w-32" />
+                </div>
+                <Skeleton className="w-12 h-12 rounded-full" />
+              </div>
+              <Skeleton className="h-2.5 w-full mt-4" />
+              <Skeleton className="h-3 w-40 mt-2" />
+            </CardContent>
+          </Card>
+        </div>
+        {/* Loading skeleton for category cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Card key={i}>
@@ -155,6 +205,15 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
         />
       </div>
       
+      {/* Total Animals Saved card */}
+      <div className="grid grid-cols-1 gap-4">
+        <TotalImpactCard 
+          totalValue={totalAnimalsSaved}
+          progressValue={totalProgressPercentage}
+        />
+      </div>
+      
+      {/* Individual category cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <SummaryCard
           title="Charitable Donations"
