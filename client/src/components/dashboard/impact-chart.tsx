@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatNumber } from "@/lib/utils";
 
 interface ImpactChartProps {
   data: {
@@ -55,7 +56,7 @@ export function ImpactChart({ data, loading = false }: ImpactChartProps) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle>Total Animals Saved</CardTitle>
-        <div className="text-2xl font-bold text-primary">{data.total}</div>
+        <div className="text-2xl font-bold text-primary">{formatNumber(data.total)}</div>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
@@ -73,7 +74,7 @@ export function ImpactChart({ data, loading = false }: ImpactChartProps) {
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip 
-                formatter={(value) => [`${value} animals`, 'Impact']}
+                formatter={(value) => [`${formatNumber(value as number)} animals`, 'Impact']}
                 labelFormatter={(name) => `${name} Impact`}
               />
               <Legend />
