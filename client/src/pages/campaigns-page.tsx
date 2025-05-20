@@ -229,16 +229,7 @@ export default function CampaignsPage() {
   // Colors for the chart
   const COLORS = ["#F59E0B", "#FBBF24", "#FCD34D", "#F97316", "#4F46E5"];
 
-  // Calculate success rate (campaigns with animals saved > median)
-  const calculateSuccessRate = () => {
-    if (campaigns.length === 0) return 0;
-    
-    const animalsSaved = campaigns.map(c => c.animals_saved || 0);
-    const median = animalsSaved.sort((a, b) => a - b)[Math.floor(animalsSaved.length / 2)];
-    const successfulCampaigns = campaigns.filter(c => (c.animals_saved || 0) > median).length;
-    
-    return Math.round((successfulCampaigns / campaigns.length) * 100);
-  };
+
 
   // Data table columns
   const columns = [
@@ -555,13 +546,6 @@ export default function CampaignsPage() {
                     <Progress value={Math.min(campaigns.reduce((sum, c) => sum + (c.total_actions || 0), 0) / 2, 100)} className="h-2" />
                   </div>
                   
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="font-medium">Success Rate</span>
-                      <span className="font-bold">{calculateSuccessRate()}%</span>
-                    </div>
-                    <Progress value={calculateSuccessRate()} className="h-2" />
-                  </div>
                 </div>
                 
 
