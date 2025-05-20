@@ -379,13 +379,13 @@ export default function CampaignsPage() {
                               {form.formState.errors.socialMediaActions.message}
                             </p>
                           )}
-                          <p className="text-xs text-gray-500">Each social media action saves approximately 7 animals</p>
+                          <p className="text-xs text-gray-500">Each social media action saves approximately 2 animals</p>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="letters">Letters Written</Label>
+                          <Label htmlFor="letters">Phone Calls/Letters</Label>
                           <Input
                             id="letters"
                             type="number"
@@ -401,7 +401,7 @@ export default function CampaignsPage() {
                               {form.formState.errors.letters.message}
                             </p>
                           )}
-                          <p className="text-xs text-gray-500">Each letter saves approximately 50 animals</p>
+                          <p className="text-xs text-gray-500">Each phone call or letter saves approximately 10 animals</p>
                         </div>
                         
                         <div className="space-y-2">
@@ -421,7 +421,7 @@ export default function CampaignsPage() {
                               {form.formState.errors.otherActions.message}
                             </p>
                           )}
-                          <p className="text-xs text-gray-500">Each other action saves approximately 7 animals</p>
+                          <p className="text-xs text-gray-500">Each other action saves approximately 5 animals</p>
                         </div>
                       </div>
 
@@ -456,7 +456,7 @@ export default function CampaignsPage() {
                           ) / 10)}
                           className="h-2"
                         />
-                        <p className="text-xs text-gray-500 mt-1">Formula: (Emails×5)+(Social Media×7)+(Letters×50)+(Other Actions×7)</p>
+                        <p className="text-xs text-gray-500 mt-1">Formula: (Emails×5)+(Social Media×2)+(Phone Calls/Letters×10)+(Other Actions×5)</p>
                       </div>
                     </div>
                     
