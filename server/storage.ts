@@ -57,6 +57,17 @@ export interface IStorage {
     campaignsCount: number;
     campaignsAnimalsSaved: number;
   }>;
+  
+  // Leaderboard operations
+  getLeaderboard(): Promise<{
+    id: number;
+    username: string;
+    totalAnimalsSaved: number;
+    donationsAnimalsSaved: number;
+    veganAnimalsSaved: number;
+    mediaAnimalsSaved: number;
+    campaignsAnimalsSaved: number;
+  }[]>;
 
   // Session store
   sessionStore: any;
