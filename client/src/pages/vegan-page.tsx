@@ -489,7 +489,7 @@ export default function VeganPage() {
                 <div className="flex justify-center mb-6">
                   <div className="relative w-48 h-48">
                     <div className="absolute inset-0 flex items-center justify-center flex-col z-10">
-                      <span className="text-4xl font-bold text-green-600">{totalAnimalsSaved}</span>
+                      <span className="text-4xl font-bold text-green-600">{formatNumber(totalAnimalsSaved)}</span>
                       <span className="text-sm text-gray-500">Animals Saved</span>
                     </div>
                     

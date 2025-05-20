@@ -629,7 +629,7 @@ export default function DonationsPage() {
                 <div className="flex justify-center mb-6">
                   <div className="relative w-48 h-48">
                     <div className="absolute inset-0 flex items-center justify-center flex-col">
-                      <span className="text-4xl font-bold text-primary">{totalAnimalsSaved}</span>
+                      <span className="text-4xl font-bold text-primary">{formatNumber(totalAnimalsSaved)}</span>
                       <span className="text-sm text-gray-500">Animals Saved</span>
                     </div>
                     
