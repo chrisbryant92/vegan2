@@ -576,6 +576,45 @@ export class DatabaseStorage implements IStorage {
       campaignsAnimalsSaved
     };
   }
+  
+  async getLeaderboard(): Promise<{
+    id: number;
+    username: string;
+    totalAnimalsSaved: number;
+    donationsAnimalsSaved: number;
+    veganAnimalsSaved: number;
+    mediaAnimalsSaved: number;
+    campaignsAnimalsSaved: number;
+  }[]> {
+    try {
+      // Get all users
+      const allUsers = await db.select().from(users);
+      
+      // Get stats for each user and create leaderboard
+      const leaderboard = [];
+      
+      for (const user of allUsers) {
+        // Get user stats
+        const stats = await this.getUserStats(user.id);
+        
+        leaderboard.push({
+          id: user.id,
+          username: user.username,
+          totalAnimalsSaved: stats.totalAnimalsSaved,
+          donationsAnimalsSaved: stats.donationsAnimalsSaved,
+          veganAnimalsSaved: stats.veganAnimalsSaved,
+          mediaAnimalsSaved: stats.mediaAnimalsSaved,
+          campaignsAnimalsSaved: stats.campaignsAnimalsSaved
+        });
+      }
+      
+      // Sort by total animals saved (highest first)
+      return leaderboard.sort((a, b) => b.totalAnimalsSaved - a.totalAnimalsSaved);
+    } catch (error) {
+      console.error("Error getting leaderboard:", error);
+      return [];
+    }
+  }
 }
 
 // Switch from MemStorage to DatabaseStorage

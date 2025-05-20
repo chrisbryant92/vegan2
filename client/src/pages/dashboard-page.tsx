@@ -5,6 +5,7 @@ import { MobileNav } from "@/components/mobile-nav";
 import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { ImpactChart } from "@/components/dashboard/impact-chart";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
+import { Leaderboard } from "@/components/dashboard/leaderboard";
 import { Donation, VeganConversion, MediaShared, Campaign } from "@shared/schema";
 import { formatDate } from "@/lib/utils";
 
@@ -111,6 +112,11 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
             <ImpactChart data={chartData} loading={isLoading} />
             <RecentActivity activities={recentActivities} loading={isLoading} />
+          </div>
+          
+          {/* Leaderboard */}
+          <div className="mt-8">
+            <Leaderboard />
           </div>
         </div>
       </main>

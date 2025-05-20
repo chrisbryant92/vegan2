@@ -31,6 +31,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to get statistics" });
     }
   });
+  
+  // Get leaderboard
+  app.get("/api/leaderboard", ensureAuthenticated, async (req, res) => {
+    try {
+      const leaderboard = await storage.getLeaderboard();
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      res.status(500).json({ error: "Failed to get leaderboard data" });
+    }
+  });
 
   // Donations routes
   app.post("/api/donations", ensureAuthenticated, async (req, res) => {
