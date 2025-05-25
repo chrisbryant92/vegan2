@@ -558,10 +558,10 @@ export default function MediaPage() {
                           Your media impact is calculated using this formula:
                         </p>
                         <code className="text-xs bg-blue-100 p-1 rounded mt-1 block overflow-x-auto">
-                          (((Date Ended-Date Started)*Posts Per Month/30)+One-Off Pieces)*(Persuasiveness/100)*(Reach/5)*120
+                          Total Posts × (Persuasiveness/100) × Reach × 0.001 × 120
                         </code>
                         <p className="text-xs text-blue-600 mt-1">
-                          Each person who goes vegan saves approximately 120 animals per year. Persuasiveness is divided by 100 to adjust for the modest impact of social media posts. Reach is divided by 5 to account for typical overestimations in audience size.
+                          Uses a realistic 0.1% conversion rate (0.001) for social media influence. Each person who reduces meat consumption saves approximately 120 animals per year. This accounts for the fact that only a tiny fraction of people who see social media posts actually change their behavior.
                         </p>
                       </div>
                     </div>

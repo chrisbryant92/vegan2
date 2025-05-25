@@ -71,7 +71,8 @@ export function calculateVeganImpact(
 }
 
 // Calculate animals saved from media sharing
-// Formula: (((Date Ended-Date Started)*Posts Per Month/30)+One-Off Pieces)*Estimated Persuasiveness*Estimated Reach*120
+// Formula: Total Posts * (Persuasiveness/100) * Reach * 0.001 * 120
+// Uses 0.1% conversion rate (0.001) for realistic social media impact
 export function calculateMediaImpact(
   dateStarted: Date,
   dateEnded: Date | null,
@@ -92,11 +93,13 @@ export function calculateMediaImpact(
   // Convert persuasiveness percentage to decimal
   const persuasiveness = estimatedPersuasiveness / 100;
   
-  // Calculate total animal impact with clearer separation of factors:
-  // 1) Persuasiveness already divided by 100 above (to adjust for modest impact of social media)
-  // 2) Divide reach by 5 to adjust for typical overestimations in audience size
-  // 3) Multiply by 120 (animals saved per year if one person goes vegan)
-  const impact = totalPosts * persuasiveness * (estimatedReach / 5) * 120;
+  // Calculate total animal impact with realistic conversion rate:
+  // 1) Total posts over the time period
+  // 2) Persuasiveness factor (how compelling the content is)
+  // 3) Estimated reach per post
+  // 4) 0.1% conversion rate (0.001) - realistic for social media influence
+  // 5) 120 animals saved per person per year if they reduce meat consumption
+  const impact = totalPosts * persuasiveness * estimatedReach * 0.001 * 120;
   
   return Math.max(0, Math.round(impact));
 }
