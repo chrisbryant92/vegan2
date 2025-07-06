@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import { desc } from "drizzle-orm";
 import { donations, campaigns, insertDonationSchema, insertVeganConversionSchema, insertMediaSharedSchema, insertCampaignSchema, campaignSchema } from "@shared/schema";
 import { sum, count } from "drizzle-orm";
+import { calculateDonationImpact } from "./utils";
 
 // Authentication middleware
 const ensureAuthenticated = (req: Request, res: Response, next: Function) => {
@@ -51,6 +52,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create a donation object directly without relying on schema types
       // This avoids the automatic validation that happens when using InsertDonation type
+      const amount = Number(req.body.amount);
+      const organizationImpact = req.body.organizationImpact || "Average";
+      
       const processedData: {
         organization: string;
         amount: number;
@@ -65,15 +69,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: number;
       } = {
         organization: req.body.organization,
-        amount: Number(req.body.amount),
-        organizationImpact: req.body.organizationImpact || "Average",
+        amount: amount,
+        organizationImpact: organizationImpact,
         donationType: req.body.donationType,
         date: new Date(req.body.date),
         isMonthly: req.body.isMonthly === true || req.body.isMonthly === "true",
         dateStarted: req.body.dateStarted ? new Date(req.body.dateStarted) : null,
         dateEnded: req.body.dateEnded ? new Date(req.body.dateEnded) : null,
         notes: req.body.notes || null,
-        animalsSaved: Number(req.body.animalsSaved),
+        animalsSaved: calculateDonationImpact(amount, organizationImpact),
         userId
       };
       
