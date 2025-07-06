@@ -42,32 +42,47 @@ export function calculateDonationImpact(amount: number, organizationImpact: stri
   return Math.round(amount * impactFactor);
 }
 
+// Diet type animals saved per year mapping
+const DIET_ANIMALS_PER_YEAR = {
+  'meat-heavy': -60,    // Costs 60 animals/year (baseline is worse than omnivore)
+  'omnivore': 0,        // Baseline - saves 0 animals/year
+  'flexitarian': 60,    // Saves 60 animals/year
+  'pescetarian': 75,    // Saves 75 animals/year
+  'vegetarian': 90,     // Saves 90 animals/year
+  'vegan': 120          // Saves 120 animals/year
+} as const;
+
+export type DietType = keyof typeof DIET_ANIMALS_PER_YEAR;
+
 // Calculate animals saved from vegan conversions
-// Formula: ((Date Ended-Date Started)/3)*(Meatiness Before Conversion-Meatiness After Conversion)*Influence
+// Formula: (Years × Diet Difference in animals/year) × Influence
 export function calculateVeganImpact(
   dateStarted: Date,
   dateEnded: Date | null,
-  meatinessBefore: number,
-  meatinessAfter: number,
+  dietBefore: DietType,
+  dietAfter: DietType,
   influence: number
 ): number {
   // If dateEnded is not provided, use current date
   const endDate = dateEnded || new Date();
   
-  // Calculate days between dates
+  // Calculate years between dates
   const daysDiff = Math.max(1, Math.floor((endDate.getTime() - dateStarted.getTime()) / (1000 * 60 * 60 * 24)));
+  const years = daysDiff / 365;
   
-  // Convert days to 3-day units (days / 3)
-  const timeUnits = daysDiff / 3;
-  
-  // Calculate meatiness difference (as decimal - divide by 100 to convert from percentage)
-  const meatinessDiff = (meatinessBefore - meatinessAfter) / 100;
+  // Calculate diet difference in animals saved per year
+  const animalsBefore = DIET_ANIMALS_PER_YEAR[dietBefore];
+  const animalsAfter = DIET_ANIMALS_PER_YEAR[dietAfter];
+  const dietDifference = animalsAfter - animalsBefore;
   
   // Calculate influence as decimal - divide by 100 to convert from percentage
   const influenceFactor = influence / 100;
   
-  // Calculate and round the result
-  return Math.round(timeUnits * meatinessDiff * influenceFactor);
+  // Calculate total impact: years × diet difference × influence
+  const impact = years * dietDifference * influenceFactor;
+  
+  // Return rounded result, minimum 0
+  return Math.max(0, Math.round(impact));
 }
 
 // Calculate animals saved from media sharing

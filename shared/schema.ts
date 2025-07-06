@@ -35,8 +35,8 @@ export const veganConversions = pgTable("vegan_conversions", {
   personName: text("person_name"),
   dateStarted: timestamp("date_started").notNull(),
   dateEnded: timestamp("date_ended"),
-  meatinessBefore: integer("meatiness_before").notNull(), // Percentage
-  meatinessAfter: integer("meatiness_after").notNull(), // Percentage
+  dietBefore: text("diet_before").notNull(), // Diet type before conversion
+  dietAfter: text("diet_after").notNull(), // Diet type after conversion
   influence: integer("influence").notNull(), // Percentage
   notes: text("notes"),
   animalsSaved: integer("animals_saved").notNull(),
@@ -116,8 +116,8 @@ export const veganConversionSchema = z.object({
   personName: z.string().optional(),
   dateStarted: z.string().min(1, "Start date is required"),
   dateEnded: z.string().nullable().optional(),
-  meatinessBefore: z.number().min(0, "Must be between 0-100").max(100, "Must be between 0-100"),
-  meatinessAfter: z.number().min(0, "Must be between 0-100").max(100, "Must be between 0-100"),
+  dietBefore: z.enum(["meat-heavy", "omnivore", "flexitarian", "pescetarian", "vegetarian", "vegan"]),
+  dietAfter: z.enum(["meat-heavy", "omnivore", "flexitarian", "pescetarian", "vegetarian", "vegan"]),
   influence: z.number().min(0, "Must be between 0-100").max(100, "Must be between 0-100"),
   notes: z.string().optional(),
   userId: z.number().optional(),
