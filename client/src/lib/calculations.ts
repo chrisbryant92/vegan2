@@ -4,9 +4,9 @@
 // Donation impact values based on organization effectiveness
 // These values represent the number of animals saved per dollar donated
 const DONATION_IMPACT_FACTORS = {
-  highest: 0.007, // For the most effective animal welfare charities (0.007 animals per dollar)
-  high: 0.005,    // For highly effective charities (0.005 animals per dollar)
-  average: 0.003, // For average effectiveness charities (0.003 animals per dollar)
+  highest: 4.89,  // For the most effective animal welfare charities (4.89 animals per dollar)
+  high: 3.1,      // For highly effective charities (3.1 animals per dollar)
+  average: 0.007, // For average effectiveness charities (0.007 animals per dollar)
   low: 0.001,     // For lower effectiveness charities (0.001 animals per dollar)
 };
 
