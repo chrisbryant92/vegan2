@@ -116,6 +116,12 @@ export default function DonationsPage() {
       // Calculate impact using organization impact factor
       const animalsSaved = calculateDonationImpact(formData.amount, formData.organizationImpact as "Highest" | "High" | "Average" | "Low");
       
+      console.log("Update donation calculation:", {
+        amount: formData.amount,
+        organizationImpact: formData.organizationImpact,
+        animalsSaved,
+      });
+      
       const res = await apiRequest("PATCH", `/api/donations/${id}`, {
         ...formData,
         animalsSaved,

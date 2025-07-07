@@ -38,8 +38,19 @@ const CAMPAIGN_PARTICIPATION_FACTORS = {
 // Calculate animals saved from charitable donations
 // Using new formula based on organization impact
 export function calculateDonationImpact(amount: number, organizationImpact: string = 'average'): number {
-  const impactFactor = DONATION_IMPACT_FACTORS[organizationImpact.toLowerCase() as keyof typeof DONATION_IMPACT_FACTORS] || DONATION_IMPACT_FACTORS.average;
-  return Math.round(amount * impactFactor);
+  const impactKey = organizationImpact.toLowerCase() as keyof typeof DONATION_IMPACT_FACTORS;
+  const impactFactor = DONATION_IMPACT_FACTORS[impactKey] || DONATION_IMPACT_FACTORS.average;
+  const result = Math.round(amount * impactFactor);
+  
+  console.log("Donation impact calculation:", {
+    amount,
+    organizationImpact,
+    impactKey,
+    impactFactor,
+    result
+  });
+  
+  return result;
 }
 
 // Diet type animals saved per year mapping
