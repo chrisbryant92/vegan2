@@ -8,9 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Pencil, Trash2, Plus, Building2 } from "lucide-react";
+import { Pencil, Trash2, Building2 } from "lucide-react";
 import { formatDate, formatNumber } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -24,7 +23,6 @@ type ProBonoWorkFormValues = z.infer<typeof proBonoWorkSchema>;
 
 export default function ProBonoPage() {
   const [editingProBonoWork, setEditingProBonoWork] = useState<ProBonoWork | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -42,7 +40,7 @@ export default function ProBonoPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/pro-bono'] });
       queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
-      setIsDialogOpen(false);
+      form.reset();
       toast({
         title: "Success",
         description: "Pro bono work record created successfully",
@@ -58,7 +56,7 @@ export default function ProBonoPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Partial<ProBonoWorkFormValues> }) => {
+    mutationFn: async ({ id, data }: { id: number; data: ProBonoWorkFormValues }) => {
       return apiRequest(`/api/pro-bono/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
@@ -68,7 +66,7 @@ export default function ProBonoPage() {
       queryClient.invalidateQueries({ queryKey: ['/api/pro-bono'] });
       queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
       setEditingProBonoWork(null);
-      setIsDialogOpen(false);
+      form.reset();
       toast({
         title: "Success",
         description: "Pro bono work record updated successfully",
@@ -142,7 +140,6 @@ export default function ProBonoPage() {
       hourlyValue: work.hourlyValue,
       description: work.description || "",
     });
-    setIsDialogOpen(true);
   };
 
   const handleDelete = (id: number) => {
@@ -151,7 +148,7 @@ export default function ProBonoPage() {
     }
   };
 
-  const handleAddNew = () => {
+  const handleCancelEdit = () => {
     setEditingProBonoWork(null);
     form.reset({
       organization: "",
@@ -164,8 +161,28 @@ export default function ProBonoPage() {
       hourlyValue: 50,
       description: "",
     });
-    setIsDialogOpen(true);
   };
+
+  // Calculate total hours and impact
+  const totalHours = proBonoWork.reduce((sum: number, work: ProBonoWork) => {
+    const startDate = new Date(work.dateStarted);
+    const endDate = work.dateEnded ? new Date(work.dateEnded) : new Date();
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const weeks = diffDays / 7;
+    const totalWorkHours = weeks * work.daysPerWeek * work.hoursPerDay;
+    return sum + totalWorkHours;
+  }, 0);
+
+  const totalValue = proBonoWork.reduce((sum: number, work: ProBonoWork) => {
+    const startDate = new Date(work.dateStarted);
+    const endDate = work.dateEnded ? new Date(work.dateEnded) : new Date();
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const weeks = diffDays / 7;
+    const totalWorkHours = weeks * work.daysPerWeek * work.hoursPerDay;
+    return sum + (totalWorkHours * work.hourlyValue);
+  }, 0);
 
   if (isLoading) {
     return <div className="flex items-center justify-center p-6">Loading...</div>;
@@ -184,295 +201,308 @@ export default function ProBonoPage() {
           </div>
           
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-semibold text-foreground">Your Pro Bono Contributions</h3>
-                <p className="text-muted-foreground">
-                  Professional services donated to animal welfare organizations
-                </p>
-              </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={handleAddNew}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Pro Bono Work
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>
-                {editingProBonoWork ? "Edit Pro Bono Work" : "Add Pro Bono Work"}
-              </DialogTitle>
-              <DialogDescription>
-                Track your volunteer work and professional services donated to animal welfare organizations.
-              </DialogDescription>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="organization"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Organization</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., ASPCA, Farm Sanctuary" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Role/Position</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Legal Advisor, Marketing Consultant" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="dateStarted"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Start Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="dateEnded"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>End Date (Optional)</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="hoursPerDay"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Hours per Day</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            step="0.5"
-                            min="0.5"
-                            max="24"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="daysPerWeek"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Days per Week</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number"
-                            min="1"
-                            max="7"
-                            {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="organizationImpact"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Organization Impact Level</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select impact level" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Highest">Highest (4.89x)</SelectItem>
-                            <SelectItem value="High">High (3.1x)</SelectItem>
-                            <SelectItem value="Average">Average (0.007x)</SelectItem>
-                            <SelectItem value="Low">Low (0.001x)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="hourlyValue"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Hourly Value ($)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number"
-                            min="12"
-                            max="200"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description (Optional)</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Describe the work you did..."
-                          className="min-h-[80px]"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    type="submit"
-                    disabled={createMutation.isPending || updateMutation.isPending}
-                  >
-                    {createMutation.isPending || updateMutation.isPending
-                      ? "Saving..."
-                      : editingProBonoWork
-                      ? "Update"
-                      : "Add Pro Bono Work"
-                    }
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
-            </div>
-
-            <div className="grid gap-4">
-        {proBonoWork.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-8">
-              <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No pro bono work recorded yet</h3>
-              <p className="text-muted-foreground text-center mb-4">
-                Start tracking your volunteer work and professional services for animal welfare organizations.
-              </p>
-              <Button onClick={handleAddNew}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add your first pro bono work
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          proBonoWork.map((work: ProBonoWork) => (
-            <Card key={work.id}>
+            {/* Add Pro Bono Work Form */}
+            <Card>
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-lg">{work.organization}</CardTitle>
-                    <CardDescription>{work.role}</CardDescription>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(work)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(work.id)}
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
+                <CardTitle className="flex items-center text-purple-700">
+                  <Building2 className="mr-2 h-5 w-5" />
+                  {editingProBonoWork ? "Edit Pro Bono Work" : "Add Pro Bono Work"}
+                </CardTitle>
+                <CardDescription>
+                  Track your volunteer work and professional services donated to animal welfare organizations.
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Duration</p>
-                    <p className="font-medium">
-                      {formatDate(work.dateStarted)} - {work.dateEnded ? formatDate(work.dateEnded) : "Ongoing"}
-                    </p>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="organization"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Organization</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g., ASPCA, Farm Sanctuary" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="role"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Role/Position</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g., Legal Advisor, Marketing Consultant" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="dateStarted"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Start Date</FormLabel>
+                            <FormControl>
+                              <Input type="date" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="dateEnded"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>End Date (Optional)</FormLabel>
+                            <FormControl>
+                              <Input type="date" {...field} />
+                            </FormControl>
+                            <p className="text-xs text-muted-foreground">Leave blank if ongoing</p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="hoursPerDay"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Hours per Day</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                min="1" 
+                                max="24" 
+                                {...field} 
+                                onChange={(e) => field.onChange(parseFloat(e.target.value))} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="daysPerWeek"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Days per Week</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                min="1" 
+                                max="7" 
+                                {...field} 
+                                onChange={(e) => field.onChange(parseFloat(e.target.value))} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="hourlyValue"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Hourly Value ($)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                min="0" 
+                                step="0.01"
+                                {...field} 
+                                onChange={(e) => field.onChange(parseFloat(e.target.value))} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="organizationImpact"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Organization Impact Level</FormLabel>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select impact level" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Highest">Highest Impact</SelectItem>
+                                <SelectItem value="High">High Impact</SelectItem>
+                                <SelectItem value="Average">Average Impact</SelectItem>
+                                <SelectItem value="Low">Low Impact</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Describe the work you did..."
+                              rows={3}
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="flex gap-2">
+                      <Button 
+                        type="submit" 
+                        disabled={createMutation.isPending || updateMutation.isPending}
+                        className="bg-purple-600 hover:bg-purple-700"
+                      >
+                        {createMutation.isPending || updateMutation.isPending ? "Saving..." : 
+                         editingProBonoWork ? "Update Pro Bono Work" : "Add Pro Bono Work"}
+                      </Button>
+                      {editingProBonoWork && (
+                        <Button type="button" variant="outline" onClick={handleCancelEdit}>
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+
+            {/* Summary Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Pro Bono Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-purple-600">{proBonoWork.length}</p>
+                    <p className="text-sm text-muted-foreground">Organizations Helped</p>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">Time Commitment</p>
-                    <p className="font-medium">{work.hoursPerDay}h/day, {work.daysPerWeek} days/week</p>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-purple-600">{formatNumber(Math.round(totalHours))}</p>
+                    <p className="text-sm text-muted-foreground">Total Hours</p>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">Impact Level & Value</p>
-                    <p className="font-medium">{work.organizationImpact} (${work.hourlyValue}/hour)</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Animals Saved</p>
-                    <p className="font-medium text-green-600">{formatNumber(work.animalsSaved)}</p>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-purple-600">${formatNumber(Math.round(totalValue))}</p>
+                    <p className="text-sm text-muted-foreground">Estimated Value</p>
                   </div>
                 </div>
-                {work.description && (
-                  <div className="mt-4">
-                    <p className="text-muted-foreground text-sm">Description</p>
-                    <p className="text-sm">{work.description}</p>
+              </CardContent>
+            </Card>
+
+            {/* Pro Bono Work Records */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Pro Bono Work Records</CardTitle>
+                <CardDescription>
+                  Professional services donated to animal welfare organizations
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {proBonoWork.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Building2 className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
+                    <p className="text-lg font-medium mb-1">No pro bono work yet</p>
+                    <p className="text-sm">Start tracking your volunteer work and professional contributions!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {proBonoWork.map((work: ProBonoWork) => {
+                      const startDate = new Date(work.dateStarted);
+                      const endDate = work.dateEnded ? new Date(work.dateEnded) : new Date();
+                      const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                      const weeks = diffDays / 7;
+                      const totalWorkHours = weeks * work.daysPerWeek * work.hoursPerDay;
+                      const totalWorkValue = totalWorkHours * work.hourlyValue;
+
+                      return (
+                        <div key={work.id} className="border rounded-lg p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <h3 className="font-semibold text-lg">{work.organization}</h3>
+                              <p className="text-muted-foreground">{work.role}</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEdit(work)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDelete(work.id)}
+                                disabled={deleteMutation.isPending}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                            <div>
+                              <p className="text-muted-foreground">Period</p>
+                              <p>{formatDate(work.dateStarted)} - {work.dateEnded ? formatDate(work.dateEnded) : 'Ongoing'}</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Schedule</p>
+                              <p>{work.hoursPerDay}h/day, {work.daysPerWeek} days/week</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Total Hours</p>
+                              <p>{formatNumber(Math.round(totalWorkHours))}</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Value</p>
+                              <p className="font-semibold text-purple-600">${formatNumber(Math.round(totalWorkValue))}</p>
+                            </div>
+                          </div>
+                          
+                          {work.description && (
+                            <div className="mt-3">
+                              <p className="text-muted-foreground text-sm">Description</p>
+                              <p className="text-sm">{work.description}</p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>
             </Card>
-          ))
-        )}
-            </div>
           </div>
         </div>
       </main>
