@@ -547,6 +547,12 @@ export default function CampaignsPage() {
                   
                 </div>
                 
+                <div className="mt-6 p-4 bg-amber-50 rounded-md">
+                  <h4 className="font-medium text-sm mb-2">Did you know?</h4>
+                  <p className="text-sm text-gray-700">
+                    Campaign impact is calculated based on action effectiveness: Emails × 5, Social Media Actions × 2, Letters/Calls × 10, Other Actions × 5. Letters and phone calls have the highest impact as they require more direct engagement from lawmakers and organizations.
+                  </p>
+                </div>
 
               </CardContent>
             </Card>
