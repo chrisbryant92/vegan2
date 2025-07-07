@@ -52,7 +52,7 @@ export function Leaderboard() {
       case 1:
         return <Trophy className="h-5 w-5 text-yellow-500" />;
       case 2:
-        return <Medal className="h-5 w-5 text-gray-400" />;
+        return <Medal className="h-5 w-5 text-muted-foreground" />;
       case 3:
         return <Medal className="h-5 w-5 text-amber-700" />;
       default:
@@ -97,7 +97,7 @@ export function Leaderboard() {
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg">Leaderboard</CardTitle>
           {currentUserRank > 0 && (
-            <Badge variant="outline" className="ml-2 bg-green-50 text-green-700">
+            <Badge variant="outline" className="ml-2 bg-green-500/10 text-green-700">
               Your Rank: {currentUserRank}
             </Badge>
           )}
@@ -131,7 +131,7 @@ export function Leaderboard() {
                   return (
                     <div 
                       key={entry.id} 
-                      className={`flex items-center py-2 border-b ${isCurrentUser ? 'bg-blue-50 -mx-2 px-2 rounded' : ''}`}
+                      className={`flex items-center py-2 border-b ${isCurrentUser ? 'bg-blue-500/10 -mx-2 px-2 rounded' : ''}`}
                     >
                       <div className="mr-3">
                         {getMedalIcon(index + 1)}
@@ -145,7 +145,7 @@ export function Leaderboard() {
                       </div>
                       <div className="font-medium text-right">
                         {formatNumber(getCategoryValue(entry))} 
-                        <span className="text-xs text-gray-500 ml-1">animals</span>
+                        <span className="text-xs text-muted-foreground ml-1">animals</span>
                       </div>
                     </div>
                   );
@@ -154,7 +154,7 @@ export function Leaderboard() {
               
               {/* Show user's position if not in top 5 */}
               {!isLoading && currentUserRank > 5 && (
-                <div className="flex items-center py-2 mt-2 border-t border-b bg-blue-50 -mx-2 px-2 rounded">
+                <div className="flex items-center py-2 mt-2 border-t border-b bg-blue-500/10 -mx-2 px-2 rounded">
                   <div className="mr-3">
                     <span className="w-5 h-5 inline-flex items-center justify-center text-xs font-medium">{currentUserRank}</span>
                   </div>
@@ -163,13 +163,13 @@ export function Leaderboard() {
                   </div>
                   <div className="font-medium text-right">
                     {formatNumber(getCategoryValue(sortedLeaderboard.find(entry => entry.id === user?.id) || { totalAnimalsSaved: 0, donationsAnimalsSaved: 0, veganAnimalsSaved: 0, mediaAnimalsSaved: 0, campaignsAnimalsSaved: 0 } as LeaderboardEntry))}
-                    <span className="text-xs text-gray-500 ml-1">animals</span>
+                    <span className="text-xs text-muted-foreground ml-1">animals</span>
                   </div>
                 </div>
               )}
             </div>
             
-            <div className="text-xs text-gray-500 mt-2 flex items-center justify-between">
+            <div className="text-xs text-muted-foreground mt-2 flex items-center justify-between">
               <span>Top savers by {getCategoryLabel()}</span>
               <span className="flex items-center">
                 <ArrowUp className="h-3 w-3 mr-1" /> Most animals saved

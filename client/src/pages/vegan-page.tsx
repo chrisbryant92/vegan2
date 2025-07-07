@@ -447,7 +447,7 @@ export default function VeganPage() {
                           step={5}
                           className="w-full"
                         />
-                        <div className="flex justify-between text-sm text-gray-500 mt-1">
+                        <div className="flex justify-between text-sm text-muted-foreground mt-1">
                           <span>0%</span>
                           <span className="font-medium">{form.watch("influence")}%</span>
                           <span>100%</span>
@@ -465,7 +465,7 @@ export default function VeganPage() {
                       />
                     </div>
 
-                    <div className="bg-green-50 p-4 rounded-md">
+                    <div className="bg-muted/30 p-4 rounded-md">
                       <h4 className="font-medium text-sm mb-2">Estimated Impact</h4>
                       <p className="text-2xl font-bold text-green-600">{formatNumber(currentImpact)} animals saved</p>
                     </div>
@@ -536,13 +536,13 @@ export default function VeganPage() {
                       </ResponsiveContainer>
                     </div>
                   ) : (
-                    <div className="h-80 flex items-center justify-center text-gray-500">
+                    <div className="h-80 flex items-center justify-center text-muted-foreground">
                       No conversions to display yet
                     </div>
                   )}
                   
                   <div className="space-y-4 mt-6">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-md">
                       <div className="flex items-center">
                         <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
                         <span className="text-sm">Major Impact (500+ animals)</span>
@@ -550,7 +550,7 @@ export default function VeganPage() {
                       <span className="font-bold">{impactLevels.major}</span>
                     </div>
                     
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-md">
                       <div className="flex items-center">
                         <span className="w-3 h-3 bg-green-300 rounded-full mr-2"></span>
                         <span className="text-sm">Significant Impact (200-499 animals)</span>
@@ -558,7 +558,7 @@ export default function VeganPage() {
                       <span className="font-bold">{impactLevels.significant}</span>
                     </div>
                     
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-md">
                       <div className="flex items-center">
                         <span className="w-3 h-3 bg-blue-300 rounded-full mr-2"></span>
                         <span className="text-sm">Moderate Impact (50-199 animals)</span>
@@ -566,7 +566,7 @@ export default function VeganPage() {
                       <span className="font-bold">{impactLevels.moderate}</span>
                     </div>
                     
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-md">
                       <div className="flex items-center">
                         <span className="w-3 h-3 bg-yellow-300 rounded-full mr-2"></span>
                         <span className="text-sm">Minor Impact (1-49 animals)</span>
@@ -575,9 +575,9 @@ export default function VeganPage() {
                     </div>
                   </div>
                   
-                  <div className="mt-6 p-4 bg-green-50 rounded-md">
+                  <div className="mt-6 p-4 bg-muted/30 rounded-md">
                     <h4 className="font-medium text-sm mb-2">Did you know?</h4>
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm text-muted-foreground">
                       Our calculations are based on research showing different diet types save varying numbers of animals per year. Going vegan saves about 120 animals annually, while even small reductions help!
                     </p>
                   </div>
@@ -597,12 +597,12 @@ export default function VeganPage() {
                 <CardContent>
                   {isLoading ? (
                     <div className="text-center py-8">
-                      <p className="text-gray-500">Loading conversions...</p>
+                      <p className="text-muted-foreground">Loading conversions...</p>
                     </div>
                   ) : veganConversions.length === 0 ? (
                     <div className="text-center py-8">
-                      <p className="text-gray-500">No conversions recorded yet.</p>
-                      <p className="text-gray-500 text-sm mt-1">
+                      <p className="text-muted-foreground">No conversions recorded yet.</p>
+                      <p className="text-muted-foreground text-sm mt-1">
                         Start tracking your impact by logging a conversion above.
                       </p>
                     </div>

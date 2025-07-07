@@ -495,9 +495,9 @@ export default function MediaPage() {
                   </div>
                 </div>
                 
-                <div className="mt-6 p-4 bg-blue-50 rounded-md">
+                <div className="mt-6 p-4 bg-muted/30 rounded-md">
                   <h4 className="font-medium text-sm mb-2">Did you know?</h4>
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-muted-foreground">
                     Media impact uses a realistic 0.1% conversion rate for social media influence. Our formula: Total Posts × (Interactions × 20 for reach) × 0.001 × 10 animals per person influenced. We estimate reach as 20x your interactions.
                   </p>
                 </div>

@@ -579,7 +579,7 @@ export default function DonationsPage() {
                             type="date"
                             {...form.register("dateEnded")}
                           />
-                          <p className="text-xs text-gray-500">Leave blank if still active</p>
+                          <p className="text-xs text-muted-foreground">Leave blank if still active</p>
                         </div>
                         <div className="space-y-2 md:col-span-2">
                           <Label htmlFor="date">Last Donation Date</Label>
@@ -640,7 +640,7 @@ export default function DonationsPage() {
                   <div className="relative w-48 h-48">
                     <div className="absolute inset-0 flex items-center justify-center flex-col">
                       <span className="text-4xl font-bold text-primary">{formatNumber(totalAnimalsSaved)}</span>
-                      <span className="text-sm text-gray-500">Animals Saved</span>
+                      <span className="text-sm text-muted-foreground">Animals Saved</span>
                     </div>
                     
                     <ResponsiveContainer width="100%" height="100%">
@@ -690,15 +690,15 @@ export default function DonationsPage() {
                         style={{ width: `${Math.min((totalDonated / 1000) * 100, 100)}%` }}
                       ></div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {Math.round((totalDonated / 1000) * 100)}% of your monthly goal
                     </p>
                   </div>
                 </div>
                 
-                <div className="mt-6 p-4 bg-indigo-50 rounded-md">
+                <div className="mt-6 p-4 bg-muted/30 rounded-md">
                   <h4 className="font-medium text-sm mb-2">Did you know?</h4>
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-muted-foreground">
                     Donation impact varies dramatically by organization effectiveness. Our formula: Amount × Impact Factor. Highest impact organizations like those focused on farmed animals save 4.89 animals per dollar, while average organizations save 0.007 animals per dollar. Monthly donations are calculated over their specified time period.
                   </p>
                 </div>

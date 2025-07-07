@@ -38,7 +38,7 @@ function SummaryCard({ title, value, icon, progress, progressColor, goal }: Summ
       <CardContent className="pt-6">
         <div className="flex justify-between items-start mb-2">
           <div>
-            <p className="text-sm font-medium text-gray-500">{title}</p>
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
             <h3 className="text-2xl font-bold" style={{ color }}>{formatNumber(value)}</h3>
           </div>
           <div className="w-10 h-10 rounded-full flex items-center justify-center" 
@@ -57,7 +57,7 @@ function SummaryCard({ title, value, icon, progress, progressColor, goal }: Summ
           ></div>
         </div>
         {goal && (
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             {progress.toFixed(2)}% of your goal ({formatNumber(goal)})
           </p>
         )}
@@ -121,17 +121,17 @@ function TotalImpactCard({
   };
 
   return (
-    <Card className="col-span-1 md:col-span-2 lg:col-span-4 bg-gradient-to-r from-slate-50 to-slate-100 border-slate-200">
+    <Card className="col-span-1 md:col-span-2 lg:col-span-4 bg-gradient-to-r from-card to-card border-border">
       <CardContent className="pt-6">
         <div className="mb-2">
-          <p className="text-sm font-medium text-slate-700">Total Animals Saved</p>
-          <h3 className="text-3xl font-bold text-slate-900">
+          <p className="text-sm font-medium text-muted-foreground">Total Animals Saved</p>
+          <h3 className="text-3xl font-bold text-foreground">
             {formatNumber(totalValue)}
           </h3>
         </div>
         
         {/* Combined progress bar: colored by category + gray for remaining */}
-        <div className="h-8 w-full bg-slate-200 rounded-full overflow-hidden mt-2 mb-1">
+        <div className="h-8 w-full bg-muted rounded-full overflow-hidden mt-2 mb-1">
           {/* This div is limited to progressValue width, showing actual progress toward goal */}
           <div className="h-full flex" style={{ width: `${Math.min(progressValue, 100)}%` }}>
             {/* Calculate each segment as a percentage of the total progress */}
@@ -158,7 +158,7 @@ function TotalImpactCard({
           </div>
         </div>
         
-        <p className="text-xs text-slate-700 mb-3">
+        <p className="text-xs text-muted-foreground mb-3">
           {progressValue.toFixed(2)}% of your combined goal
         </p>
         
@@ -166,23 +166,28 @@ function TotalImpactCard({
         <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
           <div className="flex items-center gap-1">
             <div className="w-3 h-3" style={{ backgroundColor: CATEGORY_COLORS.charitable }}></div>
-            <span className="text-slate-600">Charitable: </span>
+            <span className="text-muted-foreground">Charitable: </span>
             <span className="font-medium" style={{ color: CATEGORY_COLORS.charitable }}>{formatNumber(stats.charitable)}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3" style={{ backgroundColor: CATEGORY_COLORS.vegan }}></div>
-            <span className="text-slate-600">Conversions: </span>
+            <span className="text-muted-foreground">Conversions: </span>
             <span className="font-medium" style={{ color: CATEGORY_COLORS.vegan }}>{formatNumber(stats.vegan)}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3" style={{ backgroundColor: CATEGORY_COLORS.media }}></div>
-            <span className="text-slate-600">Sharing: </span>
+            <span className="text-muted-foreground">Sharing: </span>
             <span className="font-medium" style={{ color: CATEGORY_COLORS.media }}>{formatNumber(stats.media)}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3" style={{ backgroundColor: CATEGORY_COLORS.campaigns }}></div>
-            <span className="text-slate-600">Campaigns: </span>
+            <span className="text-muted-foreground">Campaigns: </span>
             <span className="font-medium" style={{ color: CATEGORY_COLORS.campaigns }}>{formatNumber(stats.campaigns)}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3" style={{ backgroundColor: CATEGORY_COLORS.proBono }}></div>
+            <span className="text-muted-foreground">Pro Bono: </span>
+            <span className="font-medium" style={{ color: CATEGORY_COLORS.proBono }}>{formatNumber(stats.proBono)}</span>
           </div>
         </div>
       </CardContent>
@@ -267,7 +272,7 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
         </div>
         {/* Loading skeleton for Total card */}
         <div className="grid grid-cols-1 gap-4">
-          <Card className="bg-gradient-to-r from-slate-50 to-slate-100">
+          <Card className="bg-gradient-to-r from-card to-card">
             <CardContent className="pt-6">
               <div className="flex justify-between items-start mb-2">
                 <div>

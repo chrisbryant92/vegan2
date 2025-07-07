@@ -243,7 +243,7 @@ export default function CampaignsPage() {
       cell: (campaign: Campaign) => (
         <div className="flex flex-col">
           <span className="font-medium">{campaign.total_actions || 0} total</span>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-muted-foreground">
             {campaign.emails || 0} emails, {campaign.social_media_actions || 0} social
           </span>
         </div>
@@ -330,7 +330,7 @@ export default function CampaignsPage() {
                     
                     <div className="space-y-4">
                       <Label className="text-lg font-medium">Campaign Actions</Label>
-                      <p className="text-sm text-gray-500">Enter the number of actions you've taken in this campaign</p>
+                      <p className="text-sm text-muted-foreground">Enter the number of actions you've taken in this campaign</p>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -350,7 +350,7 @@ export default function CampaignsPage() {
                               {form.formState.errors.emails.message}
                             </p>
                           )}
-                          <p className="text-xs text-gray-500">Each email saves approximately 5 animals</p>
+                          <p className="text-xs text-muted-foreground">Each email saves approximately 5 animals</p>
                         </div>
                         
                         <div className="space-y-2">
@@ -370,7 +370,7 @@ export default function CampaignsPage() {
                               {form.formState.errors.socialMediaActions.message}
                             </p>
                           )}
-                          <p className="text-xs text-gray-500">Each social media action saves approximately 2 animals</p>
+                          <p className="text-xs text-muted-foreground">Each social media action saves approximately 2 animals</p>
                         </div>
                       </div>
 
@@ -392,7 +392,7 @@ export default function CampaignsPage() {
                               {form.formState.errors.letters.message}
                             </p>
                           )}
-                          <p className="text-xs text-gray-500">Each phone call or letter saves approximately 10 animals</p>
+                          <p className="text-xs text-muted-foreground">Each phone call or letter saves approximately 10 animals</p>
                         </div>
                         
                         <div className="space-y-2">
@@ -412,7 +412,7 @@ export default function CampaignsPage() {
                               {form.formState.errors.otherActions.message}
                             </p>
                           )}
-                          <p className="text-xs text-gray-500">Each other action saves approximately 5 animals</p>
+                          <p className="text-xs text-muted-foreground">Each other action saves approximately 5 animals</p>
                         </div>
                       </div>
 
@@ -439,9 +439,9 @@ export default function CampaignsPage() {
                           </span>
                         </div>
                         
-                        <div className="p-4 bg-blue-50 border border-blue-100 rounded-md my-3">
+                        <div className="p-4 bg-muted/30 border border-muted rounded-md my-3">
                           <h4 className="text-sm font-semibold mb-2">Impact Calculation Explained:</h4>
-                          <p className="text-sm text-gray-700 mb-2">
+                          <p className="text-sm text-muted-foreground mb-2">
                             <span className="font-medium">Formula: </span>(Emails × 5) + (Social Media Actions × 2) + (Phone Calls/Letters × 10) + (Other Actions × 5)
                           </p>
                           <ul className="text-xs text-gray-600 space-y-1 pl-4 list-disc">
@@ -460,7 +460,7 @@ export default function CampaignsPage() {
                           ) / 10)}
                           className="h-2"
                         />
-                        <p className="text-xs text-gray-500 mt-1">Formula: (Emails×5)+(Social Media×2)+(Phone Calls/Letters×10)+(Other Actions×5)</p>
+                        <p className="text-xs text-muted-foreground mt-1">Formula: (Emails×5)+(Social Media×2)+(Phone Calls/Letters×10)+(Other Actions×5)</p>
                       </div>
                     </div>
                     
@@ -501,7 +501,7 @@ export default function CampaignsPage() {
                   <div className="relative w-48 h-48">
                     <div className="absolute inset-0 flex items-center justify-center flex-col">
                       <span className="text-4xl font-bold text-amber-600">{formatNumber(totalAnimalsSaved)}</span>
-                      <span className="text-sm text-gray-500">Animals Impacted</span>
+                      <span className="text-sm text-muted-foreground">Animals Impacted</span>
                     </div>
                     
                     <ResponsiveContainer width="100%" height="100%">
@@ -547,9 +547,9 @@ export default function CampaignsPage() {
                   
                 </div>
                 
-                <div className="mt-6 p-4 bg-amber-50 rounded-md">
+                <div className="mt-6 p-4 bg-muted/30 rounded-md">
                   <h4 className="font-medium text-sm mb-2">Did you know?</h4>
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-muted-foreground">
                     Campaign impact is calculated based on action effectiveness: Emails × 5, Social Media Actions × 2, Letters/Calls × 10, Other Actions × 5. Letters and phone calls have the highest impact as they require more direct engagement from lawmakers and organizations.
                   </p>
                 </div>
@@ -570,8 +570,8 @@ export default function CampaignsPage() {
                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-amber-600"></div>
                   </div>
                 ) : campaigns.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Megaphone className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Megaphone className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
                     <p className="text-lg font-medium mb-1">No campaigns yet</p>
                     <p className="text-sm">Start logging your online activism to see your impact!</p>
                   </div>
