@@ -11,6 +11,7 @@ import {
   Home,
   LogOut,
   Menu,
+  Briefcase,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,11 @@ export function MobileNav() {
       label: "Online Campaigns",
       href: "/campaigns",
       icon: <Megaphone className="h-5 w-5" />,
+    },
+    {
+      label: "Pro Bono Work",
+      href: "/pro-bono",
+      icon: <Briefcase className="h-5 w-5" />,
     },
   ];
 
