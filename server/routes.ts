@@ -6,9 +6,11 @@ import { z } from "zod";
 import { db, pool } from "./db";
 import { eq } from "drizzle-orm";
 import { desc } from "drizzle-orm";
-import { donations, campaigns, insertDonationSchema, insertVeganConversionSchema, insertMediaSharedSchema, insertCampaignSchema, campaignSchema } from "@shared/schema";
+import { donations, campaigns, insertDonationSchema, insertVeganConversionSchema, insertMediaSharedSchema, insertCampaignSchema, campaignSchema, proBonoWorkSchema, insertProBonoWorkSchema } from "@shared/schema";
 import { sum, count } from "drizzle-orm";
 import { calculateDonationImpact } from "./utils";
+import { calculateProBonoImpact } from "../client/src/lib/calculations";
+import { z } from "zod";
 
 // Authentication middleware
 const ensureAuthenticated = (req: Request, res: Response, next: Function) => {
@@ -596,6 +598,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting campaign:", error);
       res.status(500).json({ error: "Failed to delete campaign: " + (error instanceof Error ? error.message : String(error)) });
+    }
+  });
+
+  // Pro bono work routes
+  app.get('/api/pro-bono', ensureAuthenticated, async (req, res) => {
+    try {
+      const proBonoWork = await storage.getProBonoWork(req.user.id);
+      res.json(proBonoWork);
+    } catch (error) {
+      console.error('Error getting pro bono work:', error);
+      res.status(500).json({ error: 'Failed to get pro bono work' });
+    }
+  });
+
+  app.post('/api/pro-bono', ensureAuthenticated, async (req, res) => {
+    try {
+      const validatedData = proBonoWorkSchema.parse(req.body);
+      
+      // Calculate animals saved using the new pro bono calculation
+      const animalsSaved = calculateProBonoImpact(
+        new Date(validatedData.dateStarted),
+        validatedData.dateEnded ? new Date(validatedData.dateEnded) : null,
+        validatedData.hoursPerDay,
+        validatedData.daysPerWeek,
+        validatedData.organizationImpact,
+        validatedData.hourlyValue
+      );
+
+      const proBonoWorkData = {
+        ...validatedData,
+        userId: req.user.id,
+        animalsSaved,
+        dateStarted: new Date(validatedData.dateStarted),
+        dateEnded: validatedData.dateEnded ? new Date(validatedData.dateEnded) : null,
+      };
+
+      const newProBonoWork = await storage.createProBonoWork(proBonoWorkData);
+      res.status(201).json(newProBonoWork);
+    } catch (error) {
+      console.error('Error creating pro bono work:', error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: 'Validation failed', details: error.errors });
+      } else {
+        res.status(500).json({ error: 'Failed to create pro bono work record' });
+      }
+    }
+  });
+
+  app.put('/api/pro-bono/:id', ensureAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = proBonoWorkSchema.partial().parse(req.body);
+      
+      // Recalculate animals saved if relevant fields are updated
+      let animalsSaved;
+      if (validatedData.dateStarted || validatedData.dateEnded || validatedData.hoursPerDay || validatedData.daysPerWeek || validatedData.organizationImpact || validatedData.hourlyValue) {
+        const existingWork = await storage.getProBonoWorkItem(id);
+        if (!existingWork) {
+          return res.status(404).json({ error: 'Pro bono work not found' });
+        }
+
+        animalsSaved = calculateProBonoImpact(
+          validatedData.dateStarted ? new Date(validatedData.dateStarted) : existingWork.dateStarted,
+          validatedData.dateEnded !== undefined ? (validatedData.dateEnded ? new Date(validatedData.dateEnded) : null) : existingWork.dateEnded,
+          validatedData.hoursPerDay ?? existingWork.hoursPerDay,
+          validatedData.daysPerWeek ?? existingWork.daysPerWeek,
+          validatedData.organizationImpact ?? existingWork.organizationImpact,
+          validatedData.hourlyValue ?? existingWork.hourlyValue
+        );
+      }
+
+      const updateData = {
+        ...validatedData,
+        ...(animalsSaved !== undefined && { animalsSaved }),
+        ...(validatedData.dateStarted && { dateStarted: new Date(validatedData.dateStarted) }),
+        ...(validatedData.dateEnded !== undefined && { dateEnded: validatedData.dateEnded ? new Date(validatedData.dateEnded) : null }),
+      };
+
+      const updatedProBonoWork = await storage.updateProBonoWork(id, updateData);
+      if (!updatedProBonoWork) {
+        return res.status(404).json({ error: 'Pro bono work not found' });
+      }
+      res.json(updatedProBonoWork);
+    } catch (error) {
+      console.error('Error updating pro bono work:', error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: 'Validation failed', details: error.errors });
+      } else {
+        res.status(500).json({ error: 'Failed to update pro bono work record' });
+      }
+    }
+  });
+
+  app.delete('/api/pro-bono/:id', ensureAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteProBonoWork(id);
+      if (!success) {
+        return res.status(404).json({ error: 'Pro bono work not found' });
+      }
+      res.status(200).json({ message: 'Pro bono work deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting pro bono work:', error);
+      res.status(500).json({ error: 'Failed to delete pro bono work record' });
     }
   });
 

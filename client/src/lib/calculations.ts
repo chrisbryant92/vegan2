@@ -93,8 +93,7 @@ export function calculateMediaImpact(
   dateEnded: Date | null,
   oneOffPieces: number = 0, 
   postsPerMonth: number = 0,
-  estimatedReach: number = 0,
-  estimatedPersuasiveness: number = 0
+  interactions: number = 0
 ): number {
   // If dateEnded is not provided, use current date
   const endDate = dateEnded || new Date();
@@ -105,16 +104,15 @@ export function calculateMediaImpact(
   // Calculate post count over time period: (daysDiff * postsPerMonth / 30) + oneOffPieces
   const totalPosts = (daysDiff * postsPerMonth / 30) + oneOffPieces;
   
-  // Convert persuasiveness percentage to decimal
-  const persuasiveness = estimatedPersuasiveness / 100;
+  // Calculate reach: interactions * 20 (assumption that reach is 20x interactions)
+  const estimatedReach = interactions * 20;
   
   // Calculate total animal impact with realistic conversion rate:
   // 1) Total posts over the time period
-  // 2) Persuasiveness factor (how compelling the content is)
-  // 3) Estimated reach per post
-  // 4) 0.1% conversion rate (0.001) - realistic for social media influence
-  // 5) 120 animals saved per person per year if they reduce meat consumption
-  const impact = totalPosts * persuasiveness * estimatedReach * 0.001 * 120;
+  // 2) Estimated reach per post (20x interactions)
+  // 3) 0.1% conversion rate (0.001) - realistic for social media influence
+  // 4) 10 animals saved per person per year if they reduce meat consumption
+  const impact = totalPosts * estimatedReach * 0.001 * 10;
   
   return Math.max(0, Math.round(impact));
 }
@@ -134,6 +132,41 @@ export function calculateCampaignImpact(
     (otherActions * 5);
   
   // Return as whole number, minimum 0
+  return Math.max(0, Math.round(impact));
+}
+
+// Calculate animals saved from pro bono work
+export function calculateProBonoImpact(
+  dateStarted: Date,
+  dateEnded: Date | null,
+  hoursPerDay: number,
+  daysPerWeek: number,
+  organizationImpact: string,
+  hourlyValue: number
+): number {
+  const endDate = dateEnded || new Date();
+  const daysDiff = Math.max(1, Math.floor((endDate.getTime() - dateStarted.getTime()) / (1000 * 60 * 60 * 24)));
+  const weeks = daysDiff / 7;
+  
+  // Calculate total hours worked
+  const totalHours = weeks * daysPerWeek * hoursPerDay;
+  
+  // Calculate total dollar value of work
+  const totalValue = totalHours * hourlyValue;
+  
+  // Organization impact multipliers
+  const impactMultipliers = {
+    'Highest': 4.89,
+    'High': 3.1,
+    'Average': 0.007,
+    'Low': 0.001
+  };
+  
+  const multiplier = impactMultipliers[organizationImpact as keyof typeof impactMultipliers] || 0.007;
+  
+  // Calculate animals saved: dollar value * organization impact multiplier
+  const impact = totalValue * multiplier;
+  
   return Math.max(0, Math.round(impact));
 }
 

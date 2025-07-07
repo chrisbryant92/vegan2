@@ -1,5 +1,5 @@
-import { users, donations, veganConversions, mediaShared, campaigns } from "@shared/schema";
-import type { User, InsertUser, Donation, InsertDonation, VeganConversion, InsertVeganConversion, MediaShared, InsertMediaShared, Campaign, InsertCampaign } from "@shared/schema";
+import { users, donations, veganConversions, mediaShared, campaigns, proBonoWork } from "@shared/schema";
+import type { User, InsertUser, Donation, InsertDonation, VeganConversion, InsertVeganConversion, MediaShared, InsertMediaShared, Campaign, InsertCampaign, ProBonoWork, InsertProBonoWork } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 import connectPg from "connect-pg-simple";
@@ -45,6 +45,13 @@ export interface IStorage {
   updateCampaign(id: number, campaign: Partial<InsertCampaign>): Promise<Campaign | undefined>;
   deleteCampaign(id: number): Promise<boolean>;
 
+  // Pro Bono Work operations
+  getProBonoWork(userId: number): Promise<ProBonoWork[]>;
+  getProBonoWorkItem(id: number): Promise<ProBonoWork | undefined>;
+  createProBonoWork(work: InsertProBonoWork): Promise<ProBonoWork>;
+  updateProBonoWork(id: number, work: Partial<InsertProBonoWork>): Promise<ProBonoWork | undefined>;
+  deleteProBonoWork(id: number): Promise<boolean>;
+
   // Stat operations
   getUserStats(userId: number): Promise<{
     totalAnimalsSaved: number;
@@ -56,6 +63,8 @@ export interface IStorage {
     mediaAnimalsSaved: number;
     campaignsCount: number;
     campaignsAnimalsSaved: number;
+    proBonoCount: number;
+    proBonoAnimalsSaved: number;
   }>;
   
   // Leaderboard operations
@@ -80,12 +89,14 @@ export class MemStorage implements IStorage {
   private veganConversions: Map<number, VeganConversion>;
   private mediaShared: Map<number, MediaShared>;
   private campaigns: Map<number, Campaign>;
+  private proBonoWork: Map<number, ProBonoWork>;
   
   private userIdCounter: number;
   private donationIdCounter: number;
   private veganConversionIdCounter: number;
   private mediaSharedIdCounter: number;
   private campaignIdCounter: number;
+  private proBonoWorkIdCounter: number;
   
   sessionStore: any;
 
@@ -95,12 +106,14 @@ export class MemStorage implements IStorage {
     this.veganConversions = new Map();
     this.mediaShared = new Map();
     this.campaigns = new Map();
+    this.proBonoWork = new Map();
     
     this.userIdCounter = 1;
     this.donationIdCounter = 1;
     this.veganConversionIdCounter = 1;
     this.mediaSharedIdCounter = 1;
     this.campaignIdCounter = 1;
+    this.proBonoWorkIdCounter = 1;
     
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // 24 hours in milliseconds
@@ -232,8 +245,7 @@ export class MemStorage implements IStorage {
       animalsSaved: media.animalsSaved,
       oneOffPieces: media.oneOffPieces || 0,
       postsPerMonth: media.postsPerMonth || 0,
-      estimatedReach: media.estimatedReach || 0,
-      estimatedPersuasiveness: media.estimatedPersuasiveness || 0,
+      interactions: media.interactions || 0,
       description: media.description || null,
       createdAt
     };
@@ -310,6 +322,51 @@ export class MemStorage implements IStorage {
     return this.campaigns.delete(id);
   }
 
+  async getProBonoWork(userId: number): Promise<ProBonoWork[]> {
+    return Array.from(this.proBonoWork.values()).filter(work => work.userId === userId);
+  }
+
+  async getProBonoWorkItem(id: number): Promise<ProBonoWork | undefined> {
+    return this.proBonoWork.get(id);
+  }
+
+  async createProBonoWork(work: InsertProBonoWork): Promise<ProBonoWork> {
+    const id = this.proBonoWorkIdCounter++;
+    const createdAt = new Date();
+    
+    const newWork: ProBonoWork = { 
+      ...work, 
+      id, 
+      createdAt,
+      hoursPerDay: work.hoursPerDay || 0,
+      daysPerWeek: work.daysPerWeek || 0,
+      organizationImpact: work.organizationImpact || 'Average',
+      hourlyValue: work.hourlyValue || 0,
+      dateEnded: work.dateEnded || null,
+      description: work.description || null
+    };
+    
+    this.proBonoWork.set(id, newWork);
+    return newWork;
+  }
+
+  async updateProBonoWork(id: number, work: Partial<InsertProBonoWork>): Promise<ProBonoWork | undefined> {
+    const existingWork = this.proBonoWork.get(id);
+    if (!existingWork) return undefined;
+    
+    const updatedWork = { ...existingWork, ...work };
+    this.proBonoWork.set(id, updatedWork);
+    return updatedWork;
+  }
+
+  async deleteProBonoWork(id: number): Promise<boolean> {
+    const work = this.proBonoWork.get(id);
+    if (!work) return false;
+    
+    this.proBonoWork.delete(id);
+    return true;
+  }
+
   // User statistics
   async getUserStats(userId: number): Promise<{
     totalAnimalsSaved: number;
@@ -321,19 +378,23 @@ export class MemStorage implements IStorage {
     mediaAnimalsSaved: number;
     campaignsCount: number;
     campaignsAnimalsSaved: number;
+    proBonoCount: number;
+    proBonoAnimalsSaved: number;
   }> {
     const userDonations = await this.getDonations(userId);
     const userVeganConversions = await this.getVeganConversions(userId);
     const userMediaShared = await this.getMediaShared(userId);
     const userCampaigns = await this.getCampaigns(userId);
+    const userProBonoWork = await this.getProBonoWork(userId);
 
     const donationsAnimalsSaved = userDonations.reduce((sum, donation) => sum + donation.animalsSaved, 0);
     const veganAnimalsSaved = userVeganConversions.reduce((sum, conversion) => sum + conversion.animalsSaved, 0);
     const mediaAnimalsSaved = userMediaShared.reduce((sum, media) => sum + media.animalsSaved, 0);
     const campaignsAnimalsSaved = userCampaigns.reduce((sum, campaign) => sum + campaign.animals_saved, 0);
+    const proBonoAnimalsSaved = userProBonoWork.reduce((sum, work) => sum + work.animalsSaved, 0);
 
     return {
-      totalAnimalsSaved: donationsAnimalsSaved + veganAnimalsSaved + mediaAnimalsSaved + campaignsAnimalsSaved,
+      totalAnimalsSaved: donationsAnimalsSaved + veganAnimalsSaved + mediaAnimalsSaved + campaignsAnimalsSaved + proBonoAnimalsSaved,
       donationsCount: userDonations.length,
       donationsAnimalsSaved,
       veganCount: userVeganConversions.length,
@@ -341,7 +402,9 @@ export class MemStorage implements IStorage {
       mediaCount: userMediaShared.length,
       mediaAnimalsSaved,
       campaignsCount: userCampaigns.length,
-      campaignsAnimalsSaved
+      campaignsAnimalsSaved,
+      proBonoCount: userProBonoWork.length,
+      proBonoAnimalsSaved,
     };
   }
 
@@ -538,6 +601,65 @@ export class DatabaseStorage implements IStorage {
     return true; // If no error occurs, consider it successful
   }
 
+  async getProBonoWork(userId: number): Promise<ProBonoWork[]> {
+    try {
+      console.log(`Getting pro bono work for user: ${userId}`);
+      const result = await db.select().from(proBonoWork).where(eq(proBonoWork.userId, userId));
+      console.log(`Retrieved pro bono work:`, result);
+      return result;
+    } catch (error) {
+      console.error('Error getting pro bono work:', error);
+      return [];
+    }
+  }
+
+  async getProBonoWorkItem(id: number): Promise<ProBonoWork | undefined> {
+    try {
+      const [work] = await db.select().from(proBonoWork).where(eq(proBonoWork.id, id));
+      return work || undefined;
+    } catch (error) {
+      console.error('Error getting pro bono work item:', error);
+      return undefined;
+    }
+  }
+
+  async createProBonoWork(work: InsertProBonoWork): Promise<ProBonoWork> {
+    try {
+      const [newWork] = await db
+        .insert(proBonoWork)
+        .values(work)
+        .returning();
+      return newWork;
+    } catch (error) {
+      console.error('Error creating pro bono work:', error);
+      throw error;
+    }
+  }
+
+  async updateProBonoWork(id: number, work: Partial<InsertProBonoWork>): Promise<ProBonoWork | undefined> {
+    try {
+      const [updatedWork] = await db
+        .update(proBonoWork)
+        .set(work)
+        .where(eq(proBonoWork.id, id))
+        .returning();
+      return updatedWork || undefined;
+    } catch (error) {
+      console.error('Error updating pro bono work:', error);
+      return undefined;
+    }
+  }
+
+  async deleteProBonoWork(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(proBonoWork).where(eq(proBonoWork.id, id));
+      return (result.rowCount ?? 0) > 0;
+    } catch (error) {
+      console.error('Error deleting pro bono work:', error);
+      return false;
+    }
+  }
+
   // User statistics
   async getUserStats(userId: number): Promise<{
     totalAnimalsSaved: number;
@@ -549,6 +671,8 @@ export class DatabaseStorage implements IStorage {
     mediaAnimalsSaved: number;
     campaignsCount: number;
     campaignsAnimalsSaved: number;
+    proBonoCount: number;
+    proBonoAnimalsSaved: number;
   }> {
     // Get all user data for accurate calculations
     const userDonations = await this.getDonations(userId);
@@ -610,8 +734,20 @@ export class DatabaseStorage implements IStorage {
     const campaignsCount = Number(campaignsResult[0]?.count || 0);
     const campaignsAnimalsSaved = Number(campaignsResult[0]?.totalSaved || 0);
 
+    // Pro bono work stats
+    const proBonoResult = await db
+      .select({
+        count: count(),
+        totalSaved: sum(proBonoWork.animalsSaved)
+      })
+      .from(proBonoWork)
+      .where(eq(proBonoWork.userId, userId));
+
+    const proBonoCount = Number(proBonoResult[0]?.count || 0);
+    const proBonoAnimalsSaved = Number(proBonoResult[0]?.totalSaved || 0);
+
     return {
-      totalAnimalsSaved: donationsAnimalsSaved + veganAnimalsSaved + mediaAnimalsSaved + campaignsAnimalsSaved,
+      totalAnimalsSaved: donationsAnimalsSaved + veganAnimalsSaved + mediaAnimalsSaved + campaignsAnimalsSaved + proBonoAnimalsSaved,
       donationsCount,
       donationsAnimalsSaved,
       veganCount,
@@ -619,7 +755,9 @@ export class DatabaseStorage implements IStorage {
       mediaCount,
       mediaAnimalsSaved,
       campaignsCount,
-      campaignsAnimalsSaved
+      campaignsAnimalsSaved,
+      proBonoCount,
+      proBonoAnimalsSaved,
     };
   }
   

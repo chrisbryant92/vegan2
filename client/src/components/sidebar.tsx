@@ -10,8 +10,10 @@ import {
   Home,
   LogOut,
   User,
+  Briefcase,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type NavItem = {
   label: string;
@@ -48,6 +50,11 @@ export function Sidebar() {
       label: "Online Campaigns",
       href: "/campaigns",
       icon: <Megaphone className="h-5 w-5" />,
+    },
+    {
+      label: "Pro Bono Work",
+      href: "/pro-bono",
+      icon: <Briefcase className="h-5 w-5" />,
     },
   ];
 
@@ -108,7 +115,11 @@ export function Sidebar() {
         </div>
       </nav>
 
-      <div className="p-4 border-t">
+      <div className="p-4 border-t space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-600">Theme</span>
+          <ThemeToggle />
+        </div>
         <Button
           variant="ghost"
           className="w-full justify-start text-gray-700 hover:text-red-600 hover:bg-red-50"

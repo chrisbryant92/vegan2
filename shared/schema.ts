@@ -50,8 +50,7 @@ export const mediaShared = pgTable("media_shared", {
   title: text("title").notNull(),
   oneOffPieces: integer("one_off_pieces").default(0),
   postsPerMonth: integer("posts_per_month").default(0),
-  estimatedReach: integer("estimated_reach").default(0),
-  estimatedPersuasiveness: integer("estimated_persuasiveness").default(0),
+  interactions: integer("interactions").default(0), // Likes, Comments, Shares
   dateStarted: timestamp("date_started").notNull(),
   dateEnded: timestamp("date_ended"),
   description: text("description"),
@@ -134,8 +133,7 @@ export const mediaSharedSchema = z.object({
   title: z.string().min(1, "Title is required"),
   oneOffPieces: z.number().min(0, "Must be a positive number"),
   postsPerMonth: z.number().min(0, "Must be a positive number"),
-  estimatedReach: z.number().min(0, "Must be a positive number"),
-  estimatedPersuasiveness: z.number().min(0, "Must be between 0-100").max(100, "Must be between 0-100"),
+  interactions: z.number().min(0, "Must be a positive number"),
   dateStarted: z.string().min(1, "Start date is required"),
   dateEnded: z.string().nullable().optional(),
   description: z.string().optional(),
@@ -146,8 +144,28 @@ export const mediaSharedSchema = z.object({
 export const insertMediaSharedSchema = createInsertSchema(mediaShared)
   .omit({ id: true, createdAt: true });
 
+// Pro Bono Work table
+export const proBonoWork = pgTable("pro_bono_work", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  organization: text("organization").notNull(),
+  role: text("role").notNull(),
+  dateStarted: timestamp("date_started").notNull(),
+  dateEnded: timestamp("date_ended"),
+  hoursPerDay: doublePrecision("hours_per_day").notNull(),
+  daysPerWeek: integer("days_per_week").notNull(),
+  organizationImpact: text("organization_impact").notNull().default('average'), // "Highest", "High", "Average", "Low"
+  hourlyValue: doublePrecision("hourly_value").notNull(), // $12 - $200
+  description: text("description"),
+  animalsSaved: integer("animals_saved").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertCampaignSchema = createInsertSchema(campaigns)
   .omit({ id: true, created_at: true });
+
+export const insertProBonoWorkSchema = createInsertSchema(proBonoWork)
+  .omit({ id: true, createdAt: true });
 
 // Form validation schema for campaigns
 export const campaignSchema = z.object({
@@ -158,6 +176,23 @@ export const campaignSchema = z.object({
   otherActions: z.number().min(0, "Must be a positive number").default(0),
   userId: z.number().optional(),
   totalActions: z.number().optional(),
+  animalsSaved: z.number().optional(),
+});
+
+// Form validation schema for pro bono work
+export const proBonoWorkSchema = z.object({
+  organization: z.string().min(1, "Organization name is required"),
+  role: z.string().min(1, "Role/position is required"),
+  dateStarted: z.string().min(1, "Start date is required"),
+  dateEnded: z.string().nullable().optional(),
+  hoursPerDay: z.number().positive("Hours per day must be positive").max(24, "Cannot exceed 24 hours per day"),
+  daysPerWeek: z.number().min(1, "Must be at least 1 day").max(7, "Cannot exceed 7 days per week"),
+  organizationImpact: z.enum(["Highest", "High", "Average", "Low"], {
+    errorMap: () => ({ message: "Organization impact is required" })
+  }).default("Average"),
+  hourlyValue: z.number().min(12, "Minimum hourly value is $12").max(200, "Maximum hourly value is $200"),
+  description: z.string().optional(),
+  userId: z.number().optional(),
   animalsSaved: z.number().optional(),
 });
 
@@ -176,6 +211,9 @@ export type MediaShared = typeof mediaShared.$inferSelect;
 
 export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
 export type Campaign = typeof campaigns.$inferSelect;
+
+export type InsertProBonoWork = z.infer<typeof insertProBonoWorkSchema>;
+export type ProBonoWork = typeof proBonoWork.$inferSelect;
 
 // Extending schemas for additional validations
 export const registerUserSchema = insertUserSchema.extend({
