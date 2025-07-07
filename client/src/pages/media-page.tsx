@@ -464,21 +464,6 @@ export default function MediaPage() {
                       )}
                     </div>
                     
-                    <div className="p-4 bg-purple-50 border border-purple-100 rounded-md mt-2 mb-4">
-                      <h4 className="text-sm font-semibold mb-2">Impact Calculation Explained:</h4>
-                      <p className="text-sm text-gray-700 mb-2">
-                        <span className="font-medium">Formula: </span>(((Date Ended - Date Started) × Posts Per Month / 30) + One-Off Pieces) × (Estimated Persuasiveness / 100) × (Estimated Reach / 5) × 120
-                      </p>
-                      <ul className="text-xs text-gray-600 space-y-1 pl-4 list-disc">
-                        <li><span className="font-medium">Ongoing Content:</span> We calculate the total number of posts over the time period</li>
-                        <li><span className="font-medium">One-Off Content:</span> Added directly to the total content count</li>
-                        <li><span className="font-medium">Persuasiveness Factor:</span> Divided by 100 to adjust for the modest impact of social media posts</li>
-                        <li><span className="font-medium">Reach:</span> Divided by 5 to adjust for typical overestimations in audience size</li>
-                        <li><span className="font-medium">Impact Factor:</span> 120 represents the number of animals saved if one person goes vegan for a year</li>
-                        <li><span className="font-medium">Example:</span> 3 years of monthly posting (5 posts/month) with 50% persuasiveness and 350 people reached = 767 animals saved</li>
-                      </ul>
-                    </div>
-                    
                     <div className="space-y-2">
                       <Label htmlFor="description">Description (Optional)</Label>
                       <Textarea
@@ -548,24 +533,11 @@ export default function MediaPage() {
                   </div>
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <div className="flex items-start gap-2">
-                      <Info className="h-5 w-5 text-blue-600 mt-0.5" />
-                      <div>
-                        <h4 className="font-medium text-blue-900">How Media Impact is Calculated</h4>
-                        <p className="text-sm text-blue-700 mt-1">
-                          Your media impact is calculated using this formula:
-                        </p>
-                        <code className="text-xs bg-blue-100 p-1 rounded mt-1 block overflow-x-auto">
-                          Total Posts × (Persuasiveness/100) × Reach × 0.001 × 120
-                        </code>
-                        <p className="text-xs text-blue-600 mt-1">
-                          Uses a realistic 0.1% conversion rate (0.001) for social media influence. Each person who reduces meat consumption saves approximately 120 animals per year. This accounts for the fact that only a tiny fraction of people who see social media posts actually change their behavior.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                <div className="mt-6 p-4 bg-blue-50 rounded-md">
+                  <h4 className="font-medium text-sm mb-2">Did you know?</h4>
+                  <p className="text-sm text-gray-700">
+                    Media impact uses a realistic 0.1% conversion rate for social media influence. Our formula: Total Posts × (Persuasiveness/100) × Reach × 0.001 × 120 animals per person per year. This accounts for the fact that only a tiny fraction of people who see social media posts actually change their behavior.
+                  </p>
                 </div>
               </CardContent>
             </Card>
