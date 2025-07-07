@@ -174,6 +174,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/donations/:id", ensureAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const [donationCheck] = await db.select().from(donations).where(eq(donations.id, id));
+      
+      if (!donationCheck) {
+        return res.status(404).json({ error: "Donation not found" });
+      }
+      
+      if (donationCheck.userId !== req.user!.id) {
+        return res.status(403).json({ error: "Not authorized to update this donation" });
+      }
+      
+      console.log("PATCH donation request body:", req.body);
+      
+      // Create a processed data object with only fields that are present in the body
+      const processedData: any = {};
+      
+      if (req.body.organization) processedData.organization = req.body.organization;
+      if (req.body.amount) processedData.amount = Number(req.body.amount);
+      if (req.body.currency) processedData.currency = req.body.currency;
+      if (req.body.organizationImpact) processedData.organizationImpact = req.body.organizationImpact;
+      if (req.body.donationType) processedData.donationType = req.body.donationType;
+      if (req.body.isMonthly !== undefined) processedData.isMonthly = req.body.isMonthly === true || req.body.isMonthly === "true";
+      if (req.body.date) processedData.date = new Date(req.body.date);
+      if (req.body.dateStarted) processedData.dateStarted = new Date(req.body.dateStarted);
+      if (req.body.dateEnded) processedData.dateEnded = req.body.dateEnded ? new Date(req.body.dateEnded) : null;
+      if (req.body.notes !== undefined) processedData.notes = req.body.notes || null;
+      if (req.body.animalsSaved) processedData.animalsSaved = Number(req.body.animalsSaved);
+      
+      console.log("Processed PATCH data:", processedData);
+      
+      // Execute database query directly
+      const [updatedDonation] = await db.update(donations)
+        .set(processedData)
+        .where(eq(donations.id, id))
+        .returning();
+      
+      console.log("Updated donation:", updatedDonation);
+      res.json(updatedDonation);
+    } catch (error) {
+      console.error("Error updating donation with PATCH:", error);
+      res.status(500).json({ error: "Failed to update donation: " + (error instanceof Error ? error.message : String(error)) });
+    }
+  });
+
   app.delete("/api/donations/:id", ensureAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
