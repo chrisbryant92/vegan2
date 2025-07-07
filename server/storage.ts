@@ -144,6 +144,7 @@ export class MemStorage implements IStorage {
       ...donation,
       id, 
       createdAt,
+      organizationImpact: donation.organizationImpact ?? 'average',
       isMonthly: donation.isMonthly ?? false,
       dateStarted: donation.dateStarted ?? null,
       dateEnded: donation.dateEnded ?? null,
@@ -257,7 +258,7 @@ export class MemStorage implements IStorage {
   async getCampaigns(userId: number): Promise<Campaign[]> {
     return Array.from(this.campaigns.values())
       .filter(campaign => campaign.userId === userId)
-      .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+      .sort((a, b) => new Date(b.start_date || new Date()).getTime() - new Date(a.start_date || new Date()).getTime());
   }
 
   async getCampaign(id: number): Promise<Campaign | undefined> {
@@ -266,20 +267,30 @@ export class MemStorage implements IStorage {
 
   async createCampaign(campaign: InsertCampaign): Promise<Campaign> {
     const id = this.campaignIdCounter++;
-    const createdAt = new Date();
+    const created_at = new Date();
     const newCampaign: Campaign = { 
       ...campaign, 
       id, 
-      createdAt,
+      created_at,
+      campaign_type: campaign.campaign_type ?? null,
       organization: campaign.organization ?? null,
       notes: campaign.notes ?? null,
-      endDate: campaign.endDate ?? null,
+      start_date: campaign.start_date ?? null,
+      end_date: campaign.end_date ?? null,
+      budget: campaign.budget ?? null,
+      scope: campaign.scope ?? null,
+      people_reached: campaign.people_reached ?? null,
+      people_recruited: campaign.people_recruited ?? null,
+      emails: campaign.emails ?? null,
+      social_media_actions: campaign.social_media_actions ?? null,
+      letters: campaign.letters ?? null,
+      other_actions: campaign.other_actions ?? null,
+      total_actions: campaign.total_actions ?? null,
       signed: campaign.signed ?? false,
       shared: campaign.shared ?? false,
       contacted: campaign.contacted ?? false,
       recruited: campaign.recruited ?? false,
-      donated: campaign.donated ?? false,
-      peopleRecruited: campaign.peopleRecruited ?? 0
+      donated: campaign.donated ?? false
     };
     this.campaigns.set(id, newCampaign);
     return newCampaign;
@@ -318,7 +329,7 @@ export class MemStorage implements IStorage {
     const donationsAnimalsSaved = userDonations.reduce((sum, donation) => sum + donation.animalsSaved, 0);
     const veganAnimalsSaved = userVeganConversions.reduce((sum, conversion) => sum + conversion.animalsSaved, 0);
     const mediaAnimalsSaved = userMediaShared.reduce((sum, media) => sum + media.animalsSaved, 0);
-    const campaignsAnimalsSaved = userCampaigns.reduce((sum, campaign) => sum + campaign.animalsSaved, 0);
+    const campaignsAnimalsSaved = userCampaigns.reduce((sum, campaign) => sum + campaign.animals_saved, 0);
 
     return {
       totalAnimalsSaved: donationsAnimalsSaved + veganAnimalsSaved + mediaAnimalsSaved + campaignsAnimalsSaved,
@@ -331,6 +342,39 @@ export class MemStorage implements IStorage {
       campaignsCount: userCampaigns.length,
       campaignsAnimalsSaved
     };
+  }
+
+  // Leaderboard operations  
+  async getLeaderboard(): Promise<{
+    id: number;
+    username: string;
+    name: string;
+    totalAnimalsSaved: number;
+    donationsAnimalsSaved: number;
+    veganAnimalsSaved: number;
+    mediaAnimalsSaved: number;
+    campaignsAnimalsSaved: number;
+  }[]> {
+    const allUsers = Array.from(this.users.values());
+    const leaderboard = [];
+    
+    for (const user of allUsers) {
+      const stats = await this.getUserStats(user.id);
+      
+      leaderboard.push({
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        totalAnimalsSaved: stats.totalAnimalsSaved,
+        donationsAnimalsSaved: stats.donationsAnimalsSaved,
+        veganAnimalsSaved: stats.veganAnimalsSaved,
+        mediaAnimalsSaved: stats.mediaAnimalsSaved,
+        campaignsAnimalsSaved: stats.campaignsAnimalsSaved
+      });
+    }
+    
+    // Sort by total animals saved (highest first)
+    return leaderboard.sort((a, b) => b.totalAnimalsSaved - a.totalAnimalsSaved);
   }
 }
 
@@ -467,7 +511,7 @@ export class DatabaseStorage implements IStorage {
     return db.select()
       .from(campaigns)
       .where(eq(campaigns.userId, userId))
-      .orderBy(desc(campaigns.createdAt));
+      .orderBy(desc(campaigns.created_at));
   }
 
   async getCampaign(id: number): Promise<Campaign | undefined> {
