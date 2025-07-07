@@ -144,6 +144,7 @@ export class MemStorage implements IStorage {
       ...donation,
       id, 
       createdAt,
+      currency: donation.currency ?? 'USD',
       organizationImpact: donation.organizationImpact ?? 'average',
       isMonthly: donation.isMonthly ?? false,
       dateStarted: donation.dateStarted ?? null,

@@ -17,8 +17,8 @@ export const donations = pgTable("donations", {
   userId: integer("user_id").notNull().references(() => users.id),
   organization: text("organization").notNull(),
   amount: doublePrecision("amount").notNull(),
+  currency: text("currency").notNull().default('USD'), // GBP, EUR, USD, CAD, AUD, NZD
   organizationImpact: text("organization_impact").notNull().default('average'), // "Highest", "High", "Average", "Low"
-  donationType: text("donation_type").notNull(), // "One-Off" or "Monthly"
   date: timestamp("date").notNull(), // Main date (for One-Off) or last donation date
   isMonthly: boolean("is_monthly").default(false), // Whether this is a monthly donation
   dateStarted: timestamp("date_started"), // When the monthly donation started
@@ -98,10 +98,12 @@ export const insertDonationSchema = createInsertSchema(donations)
 export const donationSchema = z.object({
   organization: z.string().min(1, "Organization name is required"),
   amount: z.number().positive("Amount must be positive"),
+  currency: z.enum(["GBP", "EUR", "USD", "CAD", "AUD", "NZD"], {
+    errorMap: () => ({ message: "Currency is required" })
+  }).default("USD"),
   organizationImpact: z.enum(["Highest", "High", "Average", "Low"], {
     errorMap: () => ({ message: "Organization impact is required" })
   }).default("Average"),
-  donationType: z.string().min(1, "Donation type is required"),
   date: z.string().min(1, "Date is required"),
   isMonthly: z.boolean().default(false),
   dateStarted: z.string().nullable().optional(),

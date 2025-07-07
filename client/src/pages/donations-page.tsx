@@ -40,8 +40,8 @@ export default function DonationsPage() {
     defaultValues: {
       organization: "",
       amount: 0,
+      currency: "USD",
       organizationImpact: "Average",
-      donationType: "",
       date: new Date().toISOString().split("T")[0],
       isMonthly: false,
       dateStarted: null,
@@ -58,8 +58,8 @@ export default function DonationsPage() {
       form.reset({
         organization: editingDonation.organization,
         amount: editingDonation.amount,
+        currency: (editingDonation.currency || "USD") as "GBP" | "EUR" | "USD" | "CAD" | "AUD" | "NZD",
         organizationImpact: (editingDonation.organizationImpact || "Average") as "Highest" | "High" | "Average" | "Low",
-        donationType: editingDonation.donationType,
         date: new Date(editingDonation.date).toISOString().split("T")[0],
         isMonthly: editingDonation.isMonthly || false,
         dateStarted: editingDonation.dateStarted ? new Date(editingDonation.dateStarted).toISOString().split("T")[0] : null,
@@ -89,8 +89,8 @@ export default function DonationsPage() {
       form.reset({
         organization: "",
         amount: 0,
+        currency: "USD",
         organizationImpact: "Average",
-        donationType: "",
         date: new Date().toISOString().split("T")[0],
         isMonthly: false,
         dateStarted: null,
@@ -130,8 +130,8 @@ export default function DonationsPage() {
       form.reset({
         organization: "",
         amount: 0,
+        currency: "USD",
         organizationImpact: "Average",
-        donationType: "",
         date: new Date().toISOString().split("T")[0],
         isMonthly: false,
         dateStarted: null,
@@ -208,8 +208,8 @@ export default function DonationsPage() {
     form.reset({
       organization: "",
       amount: 0,
+      currency: "USD",
       organizationImpact: "Average",
-      donationType: "",
       date: new Date().toISOString().split("T")[0],
       isMonthly: false,
       dateStarted: null,
@@ -275,16 +275,16 @@ export default function DonationsPage() {
   }, 0);
   
   // Prepare data for chart
-  const donationsByType = donations.reduce((acc, donation) => {
-    // Use the total amount to calculate animals saved for this donation type
+  const donationsByOrganization = donations.reduce((acc, donation) => {
+    // Use the total amount to calculate animals saved for this organization
     const totalAmount = calculateTotalAmount(donation);
     const impactLevel = donation.organizationImpact || "Average";
     const recalculatedImpact = calculateDonationImpact(totalAmount, impactLevel);
-    acc[donation.donationType] = (acc[donation.donationType] || 0) + recalculatedImpact;
+    acc[donation.organization] = (acc[donation.organization] || 0) + recalculatedImpact;
     return acc;
   }, {} as Record<string, number>);
 
-  const chartData = Object.entries(donationsByType).map(([name, value]) => ({
+  const chartData = Object.entries(donationsByOrganization).map(([name, value]) => ({
     name,
     value,
   }));
@@ -303,29 +303,41 @@ export default function DonationsPage() {
     {
       header: "Amount",
       accessorKey: "amount" as const,
-      cell: (donation: Donation) => formatCurrency(donation.amount),
+      cell: (donation: Donation) => {
+        const currencySymbols: Record<string, string> = {
+          'USD': '$',
+          'GBP': '£',
+          'EUR': '€',
+          'CAD': 'C$',
+          'AUD': 'A$',
+          'NZD': 'NZ$'
+        };
+        const symbol = currencySymbols[donation.currency || 'USD'] || '$';
+        return `${symbol}${donation.amount.toLocaleString()}`;
+      },
     },
     {
       header: "Total Amount",
       // Use a valid key from Donation type but override with custom cell render function
       accessorKey: "amount" as const, 
       id: "totalAmount",
-      cell: (donation: Donation) => formatCurrency(calculateTotalAmount(donation)),
+      cell: (donation: Donation) => {
+        const currencySymbols: Record<string, string> = {
+          'USD': '$',
+          'GBP': '£',
+          'EUR': '€',
+          'CAD': 'C$',
+          'AUD': 'A$',
+          'NZD': 'NZ$'
+        };
+        const symbol = currencySymbols[donation.currency || 'USD'] || '$';
+        return `${symbol}${calculateTotalAmount(donation).toLocaleString()}`;
+      },
     },
     {
-      header: "Donation Type",
-      accessorKey: "donationType" as const,
-      cell: (donation: Donation) => {
-        // Format the donation type to be user-friendly
-        const typeMap: Record<string, string> = {
-          oneTime: "One-time",
-          recurring: "Recurring",
-          matching: "Matching",
-          corporate: "Corporate",
-          other: "Other"
-        };
-        return typeMap[donation.donationType] || donation.donationType;
-      },
+      header: "Currency",
+      accessorKey: "currency" as const,
+      cell: (donation: Donation) => donation.currency || 'USD',
     },
     {
       header: "Impact Level",
@@ -426,69 +438,67 @@ export default function DonationsPage() {
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="amount">Amount ($)</Label>
-                        <Input
-                          id="amount"
-                          type="number"
-                          step="0.01"
-                          placeholder="0.00"
-                          {...form.register("amount", { valueAsNumber: true })}
-                        />
+                        <Label htmlFor="amount">Amount</Label>
+                        <div className="flex space-x-2">
+                          <Select
+                            onValueChange={(value: "GBP" | "EUR" | "USD" | "CAD" | "AUD" | "NZD") => form.setValue("currency", value)}
+                            defaultValue={form.getValues("currency") || "USD"}
+                          >
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="USD">USD</SelectItem>
+                              <SelectItem value="GBP">GBP</SelectItem>
+                              <SelectItem value="EUR">EUR</SelectItem>
+                              <SelectItem value="CAD">CAD</SelectItem>
+                              <SelectItem value="AUD">AUD</SelectItem>
+                              <SelectItem value="NZD">NZD</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input
+                            id="amount"
+                            type="number"
+                            step="0.01"
+                            placeholder="0.00"
+                            className="flex-1"
+                            {...form.register("amount", { valueAsNumber: true })}
+                          />
+                        </div>
                         {form.formState.errors.amount && (
                           <p className="text-sm text-red-500">
                             {form.formState.errors.amount.message}
                           </p>
                         )}
+                        {form.formState.errors.currency && (
+                          <p className="text-sm text-red-500">
+                            {form.formState.errors.currency.message}
+                          </p>
+                        )}
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="donationType">Donation Type</Label>
-                        <Select
-                          onValueChange={(value) => form.setValue("donationType", value)}
-                          defaultValue={form.getValues("donationType")}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select donation type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="oneTime">One-time</SelectItem>
-                            <SelectItem value="recurring">Recurring</SelectItem>
-                            <SelectItem value="matching">Matching</SelectItem>
-                            <SelectItem value="corporate">Corporate</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {form.formState.errors.donationType && (
-                          <p className="text-sm text-red-500">
-                            {form.formState.errors.donationType.message}
-                          </p>
-                        )}
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="organizationImpact">Organization Impact</Label>
-                        <Select
-                          onValueChange={(value: "Highest" | "High" | "Average" | "Low") => form.setValue("organizationImpact", value)}
-                          defaultValue={form.getValues("organizationImpact") || "Average"}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select impact level" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Highest">Highest (4.89 animals per $)</SelectItem>
-                            <SelectItem value="High">High (3.1 animals per $)</SelectItem>
-                            <SelectItem value="Average">Average (0.007 animals per $)</SelectItem>
-                            <SelectItem value="Low">Low (0.001 animals per $)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {form.formState.errors.organizationImpact && (
-                          <p className="text-sm text-red-500">
-                            {form.formState.errors.organizationImpact.message}
-                          </p>
-                        )}
-                      </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="organizationImpact">Organization Impact</Label>
+                      <Select
+                        onValueChange={(value: "Highest" | "High" | "Average" | "Low") => form.setValue("organizationImpact", value)}
+                        defaultValue={form.getValues("organizationImpact") || "Average"}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select impact level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Highest">Highest (4.89 animals per $)</SelectItem>
+                          <SelectItem value="High">High (3.1 animals per $)</SelectItem>
+                          <SelectItem value="Average">Average (0.007 animals per $)</SelectItem>
+                          <SelectItem value="Low">Low (0.001 animals per $)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {form.formState.errors.organizationImpact && (
+                        <p className="text-sm text-red-500">
+                          {form.formState.errors.organizationImpact.message}
+                        </p>
+                      )}
                     </div>
                     
                     <div className="space-y-4">
