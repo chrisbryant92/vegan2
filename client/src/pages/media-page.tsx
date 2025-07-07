@@ -39,8 +39,7 @@ export default function MediaPage() {
       title: "",
       oneOffPieces: 0,
       postsPerMonth: 0,
-      estimatedReach: 0,
-      estimatedPersuasiveness: 50,
+      interactions: 0,
       dateStarted: new Date().toISOString().split("T")[0],
       dateEnded: "",
       description: "",
@@ -54,14 +53,13 @@ export default function MediaPage() {
       const dateStarted = new Date(data.dateStarted);
       const dateEnded = data.dateEnded ? new Date(data.dateEnded) : null;
       
-      // Calculate impact based on the new formula
+      // Calculate impact based on the new formula (interactions * 20 for reach estimation)
       const animalsSaved = calculateMediaImpact(
         dateStarted,
         dateEnded,
         data.oneOffPieces,
         data.postsPerMonth,
-        data.estimatedReach,
-        data.estimatedPersuasiveness
+        data.interactions
       );
       
       const res = await apiRequest("POST", "/api/media-shared", {
@@ -106,14 +104,13 @@ export default function MediaPage() {
       const dateStarted = new Date(formData.dateStarted);
       const dateEnded = formData.dateEnded ? new Date(formData.dateEnded) : null;
       
-      // Calculate impact based on the formula
+      // Calculate impact based on the formula (interactions * 20 for reach estimation)
       const animalsSaved = calculateMediaImpact(
         dateStarted,
         dateEnded,
         formData.oneOffPieces,
         formData.postsPerMonth,
-        formData.estimatedReach,
-        formData.estimatedPersuasiveness
+        formData.interactions
       );
       
       const res = await apiRequest("PATCH", `/api/media-shared/${id}`, {
@@ -180,8 +177,7 @@ export default function MediaPage() {
         title: editingMedia.title,
         oneOffPieces: editingMedia.oneOffPieces || 0,
         postsPerMonth: editingMedia.postsPerMonth || 0,
-        estimatedReach: editingMedia.estimatedReach || 0,
-        estimatedPersuasiveness: editingMedia.estimatedPersuasiveness || 50,
+        interactions: editingMedia.interactions || 0,
         dateStarted: new Date(editingMedia.dateStarted).toISOString().split("T")[0],
         dateEnded: editingMedia.dateEnded ? new Date(editingMedia.dateEnded).toISOString().split("T")[0] : "",
         description: editingMedia.description || "",
@@ -210,8 +206,7 @@ export default function MediaPage() {
       title: "",
       oneOffPieces: 0,
       postsPerMonth: 0,
-      estimatedReach: 0,
-      estimatedPersuasiveness: 50,
+      interactions: 0,
       dateStarted: new Date().toISOString().split("T")[0],
       dateEnded: "",
       description: "",
@@ -270,13 +265,9 @@ export default function MediaPage() {
       cell: (media: MediaShared) => `${media.oneOffPieces} one-off + ${media.postsPerMonth}/month`,
     },
     {
-      header: "Reach",
-      accessorKey: "estimatedReach",
-    },
-    {
-      header: "Persuasiveness",
-      accessorKey: "estimatedPersuasiveness",
-      cell: (media: MediaShared) => `${media.estimatedPersuasiveness}%`,
+      header: "Interactions",
+      accessorKey: "interactions",
+      cell: (media: MediaShared) => formatNumber(media.interactions),
     },
     {
       header: "Impact",
@@ -418,50 +409,21 @@ export default function MediaPage() {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="estimatedReach">Estimated Reach (People)</Label>
+                      <Label htmlFor="interactions">Interactions (likes, comments, shares)</Label>
                       <Input
-                        id="estimatedReach"
+                        id="interactions"
                         type="number"
-                        placeholder="How many people saw this content"
-                        {...form.register("estimatedReach", { valueAsNumber: true })}
+                        placeholder="Total engagement on your content"
+                        {...form.register("interactions", { valueAsNumber: true })}
                       />
-                      {form.formState.errors.estimatedReach && (
+                      {form.formState.errors.interactions && (
                         <p className="text-sm text-red-500">
-                          {form.formState.errors.estimatedReach.message}
+                          {form.formState.errors.interactions.message}
                         </p>
                       )}
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="flex justify-between">
-                        <Label htmlFor="estimatedPersuasiveness">Estimated Persuasiveness (0-100%)</Label>
-                        <span className="text-sm text-muted-foreground">
-                          {form.watch("estimatedPersuasiveness")}%
-                        </span>
-                      </div>
-                      
-                      <Slider
-                        id="estimatedPersuasiveness"
-                        min={0}
-                        max={100}
-                        step={1}
-                        defaultValue={[50]}
-                        onValueChange={(values) => {
-                          form.setValue("estimatedPersuasiveness", values[0]);
-                        }}
-                      />
-                      
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Not Persuasive</span>
-                        <span>Moderately Persuasive</span>
-                        <span>Very Persuasive</span>
-                      </div>
-                      
-                      {form.formState.errors.estimatedPersuasiveness && (
-                        <p className="text-sm text-red-500">
-                          {form.formState.errors.estimatedPersuasiveness.message}
-                        </p>
-                      )}
+                      <p className="text-xs text-muted-foreground">
+                        We estimate reach as 20x your interactions
+                      </p>
                     </div>
                     
                     <div className="space-y-2">
@@ -536,7 +498,7 @@ export default function MediaPage() {
                 <div className="mt-6 p-4 bg-blue-50 rounded-md">
                   <h4 className="font-medium text-sm mb-2">Did you know?</h4>
                   <p className="text-sm text-gray-700">
-                    Media impact uses a realistic 0.1% conversion rate for social media influence. Our formula: Total Posts × (Persuasiveness/100) × Reach × 0.001 × 120 animals per person per year. This accounts for the fact that only a tiny fraction of people who see social media posts actually change their behavior.
+                    Media impact uses a realistic 0.1% conversion rate for social media influence. Our formula: Total Posts × (Interactions × 20 for reach) × 0.001 × 10 animals per person influenced. We estimate reach as 20x your interactions.
                   </p>
                 </div>
               </CardContent>
@@ -599,12 +561,12 @@ export default function MediaPage() {
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <h4 className="text-sm font-medium">Estimated Reach</h4>
-                      <p>{formatNumber(selectedMedia.estimatedReach || 0)} people</p>
+                      <h4 className="text-sm font-medium">Interactions</h4>
+                      <p>{formatNumber(selectedMedia.interactions || 0)}</p>
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium">Persuasiveness</h4>
-                      <p>{formatNumber(selectedMedia.estimatedPersuasiveness || 0)}%</p>
+                      <h4 className="text-sm font-medium">Estimated Reach</h4>
+                      <p>{formatNumber((selectedMedia.interactions || 0) * 20)} people</p>
                     </div>
                   </div>
                   
