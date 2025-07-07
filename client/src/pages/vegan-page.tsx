@@ -296,7 +296,7 @@ export default function VeganPage() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-background">
       <Sidebar />
       <div className="flex-1 lg:ml-64">
         <MobileNav />
@@ -304,8 +304,8 @@ export default function VeganPage() {
           <div className="max-w-6xl mx-auto space-y-8">
             {/* Header */}
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Vegan Conversions</h1>
-              <p className="text-gray-600 mt-2">
+              <h1 className="text-3xl font-bold text-foreground">Vegan Conversions</h1>
+              <p className="text-muted-foreground mt-2">
                 Track people you've influenced to reduce their animal product consumption
               </p>
             </div>

@@ -17,6 +17,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { proBonoWorkSchema } from "@shared/schema";
 import type { ProBonoWork } from "@shared/schema";
 import { z } from "zod";
+import { Sidebar } from "@/components/sidebar";
+import { MobileNav } from "@/components/mobile-nav";
 
 type ProBonoWorkFormValues = z.infer<typeof proBonoWorkSchema>;
 
@@ -170,14 +172,25 @@ export default function ProBonoPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Pro Bono Work</h1>
-          <p className="text-muted-foreground">
-            Track your volunteer work and professional services for animal welfare organizations
-          </p>
-        </div>
+    <div className="min-h-screen flex flex-col md:flex-row bg-background">
+      <Sidebar />
+      <MobileNav />
+      
+      <main className="flex-grow pb-20 md:pb-6">
+        <div className="p-4 md:p-8">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold mb-1 text-foreground">Pro Bono Work</h2>
+            <p className="text-muted-foreground">Track your volunteer work and professional services for animal welfare organizations</p>
+          </div>
+          
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-semibold text-foreground">Your Pro Bono Contributions</h3>
+                <p className="text-muted-foreground">
+                  Professional services donated to animal welfare organizations
+                </p>
+              </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={handleAddNew}>
@@ -383,9 +396,9 @@ export default function ProBonoPage() {
             </Form>
           </DialogContent>
         </Dialog>
-      </div>
+            </div>
 
-      <div className="grid gap-4">
+            <div className="grid gap-4">
         {proBonoWork.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-8">
@@ -459,7 +472,10 @@ export default function ProBonoPage() {
             </Card>
           ))
         )}
-      </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

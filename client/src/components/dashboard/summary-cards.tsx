@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { HandHeart, Leaf, Share2, Megaphone } from "lucide-react";
+import { HandHeart, Leaf, Share2, Megaphone, Building2 } from "lucide-react";
 import { calculateProgress, formatNumber } from "@/lib/utils";
 import { EditGoalsDialog } from "./edit-goals-dialog";
 
@@ -12,6 +12,7 @@ const CATEGORY_COLORS = {
   vegan: "#eab308", // Yellow
   media: "#3b82f6", // Blue
   campaigns: "#ef4444", // Red
+  proBono: "#8b5cf6", // Purple
 };
 
 interface SummaryCardProps {
@@ -30,6 +31,7 @@ function SummaryCard({ title, value, icon, progress, progressColor, goal }: Summ
   else if (title === "Conversions") color = CATEGORY_COLORS.vegan;
   else if (title === "Sharing") color = CATEGORY_COLORS.media;
   else if (title === "Online Campaigns") color = CATEGORY_COLORS.campaigns;
+  else if (title === "Pro Bono Work") color = CATEGORY_COLORS.proBono;
   
   return (
     <Card className="border-t-4" style={{ borderTopColor: color }}>
@@ -70,12 +72,14 @@ interface SummaryCardsProps {
     vegan: number;
     media: number;
     campaigns: number;
+    proBono: number;
   };
   goals?: {
     charitable?: number;
     vegan?: number;
     media?: number;
     campaigns?: number;
+    proBono?: number;
   };
   loading?: boolean;
 }
@@ -86,6 +90,7 @@ interface GoalsData {
   vegan: number;
   media: number;
   campaigns: number;
+  proBono: number;
 }
 
 // Total Impact Card component with stacked bar graph
@@ -101,6 +106,7 @@ function TotalImpactCard({
     vegan: number;
     media: number;
     campaigns: number;
+    proBono: number;
   }
 }) {
   // Calculate percentages of each category for the stacked bar
@@ -110,7 +116,8 @@ function TotalImpactCard({
     charitable: getPercentage(stats.charitable),
     vegan: getPercentage(stats.vegan),
     media: getPercentage(stats.media),
-    campaigns: getPercentage(stats.campaigns)
+    campaigns: getPercentage(stats.campaigns),
+    proBono: getPercentage(stats.proBono)
   };
 
   return (
@@ -143,6 +150,10 @@ function TotalImpactCard({
             <div className="h-full" style={{ 
               width: `${(stats.campaigns / totalValue) * 100}%`, 
               backgroundColor: CATEGORY_COLORS.campaigns 
+            }}></div>
+            <div className="h-full" style={{ 
+              width: `${(stats.proBono / totalValue) * 100}%`, 
+              backgroundColor: CATEGORY_COLORS.proBono 
             }}></div>
           </div>
         </div>
@@ -185,7 +196,8 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
     charitable: 250,
     vegan: 200,
     media: 150,
-    campaigns: 100
+    campaigns: 100,
+    proBono: 300
   };
   
   // State for custom goals
@@ -207,7 +219,8 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
     charitable: goals.charitable || customGoals.charitable,
     vegan: goals.vegan || customGoals.vegan,
     media: goals.media || customGoals.media,
-    campaigns: goals.campaigns || customGoals.campaigns
+    campaigns: goals.campaigns || customGoals.campaigns,
+    proBono: goals.proBono || customGoals.proBono
   };
 
   // Save goals to localStorage when they change
@@ -220,12 +233,13 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
     charitable: calculateProgress(stats.charitable, activeGoals.charitable),
     vegan: calculateProgress(stats.vegan, activeGoals.vegan),
     media: calculateProgress(stats.media, activeGoals.media),
-    campaigns: calculateProgress(stats.campaigns, activeGoals.campaigns)
+    campaigns: calculateProgress(stats.campaigns, activeGoals.campaigns),
+    proBono: calculateProgress(stats.proBono, activeGoals.proBono)
   };
   
   // Calculate total animals saved and total goal
-  const totalAnimalsSaved = stats.charitable + stats.vegan + stats.media + stats.campaigns;
-  const totalGoal = activeGoals.charitable + activeGoals.vegan + activeGoals.media + activeGoals.campaigns;
+  const totalAnimalsSaved = stats.charitable + stats.vegan + stats.media + stats.campaigns + stats.proBono;
+  const totalGoal = activeGoals.charitable + activeGoals.vegan + activeGoals.media + activeGoals.campaigns + activeGoals.proBono;
   const totalProgressPercentage = calculateProgress(totalAnimalsSaved, totalGoal);
   
   // Handle saving new goals
@@ -237,7 +251,8 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
     charitable: 0,
     vegan: 0,
     media: 0,
-    campaigns: 0
+    campaigns: 0,
+    proBono: 0
   };
   
   if (loading) {
@@ -273,8 +288,8 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
           </Card>
         </div>
         {/* Loading skeleton for category cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          {Array.from({ length: 5 }).map((_, i) => (
             <Card key={i}>
               <CardContent className="pt-6">
                 <div className="flex justify-between items-start mb-2">
@@ -316,7 +331,7 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
       </div>
       
       {/* Individual category cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <SummaryCard
           title="Charitable Donations"
           value={stats.charitable}
@@ -351,6 +366,15 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
           progress={progressPercentages.campaigns}
           progressColor="bg-amber-600"
           goal={activeGoals.campaigns}
+        />
+        
+        <SummaryCard
+          title="Pro Bono Work"
+          value={stats.proBono}
+          icon={<Building2 className="h-5 w-5 text-purple-600" />}
+          progress={progressPercentages.proBono}
+          progressColor="bg-purple-600"
+          goal={activeGoals.proBono}
         />
       </div>
     </div>

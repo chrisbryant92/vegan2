@@ -402,15 +402,15 @@ export default function DonationsPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
+    <div className="min-h-screen flex flex-col md:flex-row bg-background">
       <Sidebar />
       <MobileNav />
       
       <main className="flex-grow pb-20 md:pb-6">
         <div className="p-4 md:p-8">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-1">Charitable Donations</h2>
-            <p className="text-gray-600">Track the impact of your financial contributions</p>
+            <h2 className="text-2xl font-bold mb-1 text-foreground">Charitable Donations</h2>
+            <p className="text-muted-foreground">Track the impact of your financial contributions</p>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

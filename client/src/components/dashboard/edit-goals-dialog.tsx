@@ -19,6 +19,7 @@ interface GoalsData {
   vegan: number;
   media: number;
   campaigns: number;
+  proBono: number;
 }
 
 interface EditGoalsDialogProps {
@@ -111,6 +112,19 @@ export function EditGoalsDialog({ currentGoals, onSaveGoals }: EditGoalsDialogPr
               className="col-span-3"
               value={goals.campaigns}
               onChange={(e) => handleChange("campaigns", e.target.value)}
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="proBono" className="text-right">
+              Pro Bono Work
+            </Label>
+            <Input
+              id="proBono"
+              type="number"
+              min="1"
+              className="col-span-3"
+              value={goals.proBono}
+              onChange={(e) => handleChange("proBono", e.target.value)}
             />
           </div>
         </div>

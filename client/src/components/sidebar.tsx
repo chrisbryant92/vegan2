@@ -73,7 +73,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="hidden md:flex md:w-64 bg-white shadow-lg flex-shrink-0 flex-col h-screen">
+    <aside className="hidden md:flex md:w-64 bg-background border-r shadow-lg flex-shrink-0 flex-col h-screen">
       <div className="p-4 border-b flex items-center">
         <div className="flex items-center gap-2">
           <Avatar className="h-10 w-10 bg-primary text-primary-foreground">
@@ -89,8 +89,8 @@ export function Sidebar() {
             <AvatarFallback>{user?.name ? getInitials(user.name) : 'U'}</AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-medium text-sm">{user?.name}</p>
-            <p className="text-xs text-gray-500">{user?.username}</p>
+            <p className="font-medium text-sm text-foreground">{user?.name}</p>
+            <p className="text-xs text-muted-foreground">{user?.username}</p>
           </div>
         </div>
       </div>
@@ -102,8 +102,8 @@ export function Sidebar() {
               <Link href={item.href}>
                 <div
                   className={cn(
-                    "flex items-center p-2 rounded-md hover:bg-indigo-50 text-gray-700 hover:text-primary cursor-pointer",
-                    location === item.href && "bg-indigo-50 text-primary"
+                    "flex items-center p-2 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground cursor-pointer",
+                    location === item.href && "bg-accent text-foreground"
                   )}
                 >
                   <div className="w-6">{item.icon}</div>
@@ -117,12 +117,12 @@ export function Sidebar() {
 
       <div className="p-4 border-t space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">Theme</span>
+          <span className="text-sm text-muted-foreground">Theme</span>
           <ThemeToggle />
         </div>
         <Button
           variant="ghost"
-          className="w-full justify-start text-gray-700 hover:text-red-600 hover:bg-red-50"
+          className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10"
           onClick={handleLogout}
           disabled={logoutMutation.isPending}
         >

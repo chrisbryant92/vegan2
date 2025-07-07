@@ -32,12 +32,17 @@ export default function DashboardPage() {
     queryKey: ["/api/campaigns"],
   });
 
+  const { data: proBonoWork, isLoading: proBonoLoading } = useQuery({
+    queryKey: ["/api/pro-bono"],
+  });
+
   // Prepare data for the impact chart
   const chartData = {
     charitable: stats?.donationsAnimalsSaved || 0,
     vegan: stats?.veganAnimalsSaved || 0,
     media: stats?.mediaAnimalsSaved || 0,
     campaigns: stats?.campaignsAnimalsSaved || 0,
+    proBono: stats?.proBonoAnimalsSaved || 0,
     total: stats?.totalAnimalsSaved || 0,
   };
 
@@ -47,13 +52,14 @@ export default function DashboardPage() {
     vegan: stats?.veganAnimalsSaved || 0,
     media: stats?.mediaAnimalsSaved || 0,
     campaigns: stats?.campaignsAnimalsSaved || 0,
+    proBono: stats?.proBonoAnimalsSaved || 0,
   };
 
   // Combine all activities for the activity feed
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
 
   useEffect(() => {
-    if (donations && veganConversions && mediaShared && campaigns) {
+    if (donations && veganConversions && mediaShared && campaigns && proBonoWork) {
       const combined = [
         ...donations.map(d => ({
           id: `donation-${d.id}`,
@@ -72,9 +78,9 @@ export default function DashboardPage() {
         ...mediaShared.map(m => ({
           id: `media-${m.id}`,
           type: "media" as const,
-          title: `Shared ${m.mediaType}: "${m.title}" on ${m.platform}`,
+          title: `Shared "${m.title}" media campaign`,
           animalsSaved: m.animalsSaved,
-          date: m.date,
+          date: m.dateStarted,
         })),
         ...campaigns.map(c => ({
           id: `campaign-${c.id}`,
@@ -83,26 +89,33 @@ export default function DashboardPage() {
           animalsSaved: c.animals_saved,
           date: c.start_date || c.created_at,
         })),
+        ...proBonoWork.map(p => ({
+          id: `proBono-${p.id}`,
+          type: "proBono" as const,
+          title: `Pro bono ${p.role} work at ${p.organization}`,
+          animalsSaved: p.animalsSaved,
+          date: p.dateStarted,
+        })),
       ];
 
       // Sort by date (most recent first) and take latest 5
       combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       setRecentActivities(combined.slice(0, 5));
     }
-  }, [donations, veganConversions, mediaShared, campaigns]);
+  }, [donations, veganConversions, mediaShared, campaigns, proBonoWork]);
 
-  const isLoading = statsLoading || donationsLoading || veganLoading || mediaLoading || campaignsLoading;
+  const isLoading = statsLoading || donationsLoading || veganLoading || mediaLoading || campaignsLoading || proBonoLoading;
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
+    <div className="min-h-screen flex flex-col md:flex-row bg-background">
       <Sidebar />
       <MobileNav />
       
       <main className="flex-grow pb-20 md:pb-6">
         <div className="p-4 md:p-8">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-1">Your Impact Dashboard</h2>
-            <p className="text-gray-600">Track how many animals you've helped save</p>
+            <h2 className="text-2xl font-bold mb-1 text-foreground">Your Impact Dashboard</h2>
+            <p className="text-muted-foreground">Track how many animals you've helped save</p>
           </div>
           
           {/* Summary Cards */}
