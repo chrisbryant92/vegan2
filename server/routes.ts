@@ -6,11 +6,10 @@ import { z } from "zod";
 import { db, pool } from "./db";
 import { eq } from "drizzle-orm";
 import { desc } from "drizzle-orm";
-import { donations, campaigns, insertDonationSchema, insertVeganConversionSchema, insertMediaSharedSchema, insertCampaignSchema, campaignSchema, proBonoWorkSchema, insertProBonoWorkSchema } from "@shared/schema";
+import { donations, campaigns, veganConversions, mediaShared, proBonoWork, insertDonationSchema, insertVeganConversionSchema, insertMediaSharedSchema, insertCampaignSchema, campaignSchema, proBonoWorkSchema, insertProBonoWorkSchema } from "@shared/schema";
 import { sum, count } from "drizzle-orm";
 import { calculateDonationImpact } from "./utils";
 import { calculateProBonoImpact } from "../client/src/lib/calculations";
-import { z } from "zod";
 
 // Authentication middleware
 const ensureAuthenticated = (req: Request, res: Response, next: Function) => {
