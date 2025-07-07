@@ -332,6 +332,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/vegan-conversions/:id", ensureAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const [conversionCheck] = await db.select()
+        .from(veganConversions)
+        .where(eq(veganConversions.id, id));
+      
+      if (!conversionCheck) {
+        return res.status(404).json({ error: "Vegan conversion not found" });
+      }
+      
+      if (conversionCheck.userId !== req.user!.id) {
+        return res.status(403).json({ error: "Not authorized to update this vegan conversion" });
+      }
+      
+      console.log("PATCH vegan conversion request body:", req.body);
+      
+      // Create a processed data object with only fields that are present in the body
+      const processedData: any = {};
+      
+      if (req.body.personName) processedData.personName = req.body.personName;
+      if (req.body.dateStarted) processedData.dateStarted = new Date(req.body.dateStarted);
+      if (req.body.dateEnded) processedData.dateEnded = req.body.dateEnded ? new Date(req.body.dateEnded) : null;
+      if (req.body.dietBefore) processedData.dietBefore = req.body.dietBefore;
+      if (req.body.dietAfter) processedData.dietAfter = req.body.dietAfter;
+      if (req.body.influence !== undefined) processedData.influence = Number(req.body.influence);
+      if (req.body.notes !== undefined) processedData.notes = req.body.notes || null;
+      if (req.body.animalsSaved) processedData.animalsSaved = Number(req.body.animalsSaved);
+      
+      console.log("Processed PATCH vegan conversion data:", processedData);
+      
+      // Execute database query directly
+      const [updatedConversion] = await db.update(veganConversions)
+        .set(processedData)
+        .where(eq(veganConversions.id, id))
+        .returning();
+      
+      console.log("Updated vegan conversion:", updatedConversion);
+      res.json(updatedConversion);
+    } catch (error) {
+      console.error("Error updating vegan conversion with PATCH:", error);
+      res.status(500).json({ error: "Failed to update vegan conversion: " + (error instanceof Error ? error.message : String(error)) });
+    }
+  });
+
   app.delete("/api/vegan-conversions/:id", ensureAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -455,6 +500,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ error: "Failed to update media shared record: " + (error instanceof Error ? error.message : String(error)) });
       }
+    }
+  });
+
+  app.patch("/api/media-shared/:id", ensureAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const [mediaCheck] = await db.select()
+        .from(mediaShared)
+        .where(eq(mediaShared.id, id));
+      
+      if (!mediaCheck) {
+        return res.status(404).json({ error: "Media shared record not found" });
+      }
+      
+      if (mediaCheck.userId !== req.user!.id) {
+        return res.status(403).json({ error: "Not authorized to update this media record" });
+      }
+      
+      console.log("PATCH media shared request body:", req.body);
+      
+      // Create a processed data object with only fields that are present in the body
+      const processedData: any = {};
+      
+      if (req.body.title) processedData.title = req.body.title;
+      if (req.body.oneOffPieces !== undefined) processedData.one_off_pieces = Number(req.body.oneOffPieces);
+      if (req.body.postsPerMonth !== undefined) processedData.posts_per_month = Number(req.body.postsPerMonth);
+      if (req.body.estimatedReach !== undefined) processedData.estimated_reach = Number(req.body.estimatedReach);
+      if (req.body.estimatedPersuasiveness !== undefined) processedData.estimated_persuasiveness = Number(req.body.estimatedPersuasiveness);
+      if (req.body.dateStarted) processedData.date_started = new Date(req.body.dateStarted);
+      if (req.body.dateEnded) processedData.date_ended = req.body.dateEnded ? new Date(req.body.dateEnded) : null;
+      if (req.body.description !== undefined) processedData.description = req.body.description || null;
+      if (req.body.animalsSaved) processedData.animals_saved = Number(req.body.animalsSaved);
+      
+      console.log("Processed PATCH media shared data:", processedData);
+      
+      // Execute database query directly
+      const [updatedMedia] = await db.update(mediaShared)
+        .set(processedData)
+        .where(eq(mediaShared.id, id))
+        .returning();
+      
+      console.log("Updated media shared:", updatedMedia);
+      res.json(updatedMedia);
+    } catch (error) {
+      console.error("Error updating media shared with PATCH:", error);
+      res.status(500).json({ error: "Failed to update media shared: " + (error instanceof Error ? error.message : String(error)) });
     }
   });
 
@@ -623,6 +714,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/campaigns/:id", ensureAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const [campaignCheck] = await db.select()
+        .from(campaigns)
+        .where(eq(campaigns.id, id));
+      
+      if (!campaignCheck) {
+        return res.status(404).json({ error: "Campaign not found" });
+      }
+      
+      if (campaignCheck.userId !== req.user!.id) {
+        return res.status(403).json({ error: "Not authorized to update this campaign" });
+      }
+      
+      console.log("PATCH campaign request body:", req.body);
+      
+      // Create a processed data object with only fields that are present in the body
+      const processedData: any = {};
+      
+      if (req.body.name) processedData.name = req.body.name;
+      if (req.body.emails !== undefined) processedData.emails = Number(req.body.emails);
+      if (req.body.socialMediaActions !== undefined) processedData.social_media_actions = Number(req.body.socialMediaActions);
+      if (req.body.letters !== undefined) processedData.letters = Number(req.body.letters);
+      if (req.body.otherActions !== undefined) processedData.other_actions = Number(req.body.otherActions);
+      if (req.body.totalActions !== undefined) processedData.total_actions = Number(req.body.totalActions);
+      if (req.body.notes !== undefined) processedData.notes = req.body.notes || null;
+      if (req.body.animalsSaved !== undefined) processedData.animals_saved = Number(req.body.animalsSaved);
+      
+      console.log("Processed PATCH campaign data:", processedData);
+      
+      // Execute database query directly
+      const [updatedCampaign] = await db.update(campaigns)
+        .set(processedData)
+        .where(eq(campaigns.id, id))
+        .returning();
+      
+      console.log("Updated campaign:", updatedCampaign);
+      res.json(updatedCampaign);
+    } catch (error) {
+      console.error("Error updating campaign with PATCH:", error);
+      res.status(500).json({ error: "Failed to update campaign: " + (error instanceof Error ? error.message : String(error)) });
+    }
+  });
+
   app.delete("/api/campaigns/:id", ensureAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -734,6 +870,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ error: 'Failed to update pro bono work record' });
       }
+    }
+  });
+
+  app.patch('/api/pro-bono/:id', ensureAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const [proBonoCheck] = await db.select()
+        .from(proBonoWork)
+        .where(eq(proBonoWork.id, id));
+      
+      if (!proBonoCheck) {
+        return res.status(404).json({ error: "Pro bono work not found" });
+      }
+      
+      if (proBonoCheck.userId !== req.user!.id) {
+        return res.status(403).json({ error: "Not authorized to update this pro bono work" });
+      }
+      
+      console.log("PATCH pro bono work request body:", req.body);
+      
+      // Create a processed data object with only fields that are present in the body
+      const processedData: any = {};
+      
+      if (req.body.organization) processedData.organization = req.body.organization;
+      if (req.body.role) processedData.role = req.body.role;
+      if (req.body.dateStarted) processedData.date_started = new Date(req.body.dateStarted);
+      if (req.body.dateEnded) processedData.date_ended = req.body.dateEnded ? new Date(req.body.dateEnded) : null;
+      if (req.body.hoursPerDay !== undefined) processedData.hours_per_day = Number(req.body.hoursPerDay);
+      if (req.body.daysPerWeek !== undefined) processedData.days_per_week = Number(req.body.daysPerWeek);
+      if (req.body.organizationImpact) processedData.organization_impact = req.body.organizationImpact;
+      if (req.body.hourlyValue !== undefined) processedData.hourly_value = Number(req.body.hourlyValue);
+      if (req.body.notes !== undefined) processedData.notes = req.body.notes || null;
+      if (req.body.animalsSaved !== undefined) processedData.animals_saved = Number(req.body.animalsSaved);
+      
+      console.log("Processed PATCH pro bono data:", processedData);
+      
+      // Execute database query directly
+      const [updatedProBono] = await db.update(proBonoWork)
+        .set(processedData)
+        .where(eq(proBonoWork.id, id))
+        .returning();
+      
+      console.log("Updated pro bono work:", updatedProBono);
+      res.json(updatedProBono);
+    } catch (error) {
+      console.error("Error updating pro bono work with PATCH:", error);
+      res.status(500).json({ error: "Failed to update pro bono work: " + (error instanceof Error ? error.message : String(error)) });
     }
   });
 
