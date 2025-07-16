@@ -156,6 +156,7 @@ export const proBonoWork = pgTable("pro_bono_work", {
   daysPerWeek: integer("days_per_week").notNull(),
   organizationImpact: text("organization_impact").notNull().default('average'), // "Highest", "High", "Average", "Low"
   hourlyValue: doublePrecision("hourly_value").notNull(), // $12 - $200
+  rateType: text("rate_type").notNull().default('pro_bono'), // "pro_bono" or "reduced_rate"
   description: text("description"),
   animalsSaved: integer("animals_saved").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -191,6 +192,9 @@ export const proBonoWorkSchema = z.object({
     errorMap: () => ({ message: "Organization impact is required" })
   }).default("Average"),
   hourlyValue: z.number().min(12, "Minimum hourly value is $12").max(200, "Maximum hourly value is $200"),
+  rateType: z.enum(["pro_bono", "reduced_rate"], {
+    errorMap: () => ({ message: "Rate type is required" })
+  }).default("pro_bono"),
   description: z.string().optional(),
   userId: z.number().optional(),
   animalsSaved: z.number().optional(),

@@ -77,6 +77,7 @@ export interface IStorage {
     veganAnimalsSaved: number;
     mediaAnimalsSaved: number;
     campaignsAnimalsSaved: number;
+    proBonoAnimalsSaved: number;
   }[]>;
 
   // Session store
@@ -790,7 +791,8 @@ export class DatabaseStorage implements IStorage {
           donationsAnimalsSaved: stats.donationsAnimalsSaved,
           veganAnimalsSaved: stats.veganAnimalsSaved,
           mediaAnimalsSaved: stats.mediaAnimalsSaved,
-          campaignsAnimalsSaved: stats.campaignsAnimalsSaved
+          campaignsAnimalsSaved: stats.campaignsAnimalsSaved,
+          proBonoAnimalsSaved: stats.proBonoAnimalsSaved
         });
       }
       

@@ -115,6 +115,7 @@ export default function ProBonoPage() {
       daysPerWeek: 5,
       organizationImpact: "Average",
       hourlyValue: 50,
+      rateType: "pro_bono",
       description: "",
     },
   });
@@ -138,6 +139,7 @@ export default function ProBonoPage() {
       daysPerWeek: work.daysPerWeek,
       organizationImpact: work.organizationImpact as "Highest" | "High" | "Average" | "Low",
       hourlyValue: work.hourlyValue,
+      rateType: (work.rateType || "pro_bono") as "pro_bono" | "reduced_rate",
       description: work.description || "",
     });
   };
@@ -159,6 +161,7 @@ export default function ProBonoPage() {
       daysPerWeek: 5,
       organizationImpact: "Average",
       hourlyValue: 50,
+      rateType: "pro_bono",
       description: "",
     });
   };
@@ -223,7 +226,7 @@ export default function ProBonoPage() {
                           <FormItem>
                             <FormLabel>Organization</FormLabel>
                             <FormControl>
-                              <Input placeholder="e.g., ASPCA, Farm Sanctuary" {...field} />
+                              <Input placeholder="e.g., The Humane League, Good Food Institute" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -334,29 +337,52 @@ export default function ProBonoPage() {
                       />
                     </div>
 
-                    <FormField
-                      control={form.control}
-                      name="organizationImpact"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Organization Impact Level</FormLabel>
-                          <FormControl>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select impact level" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Highest">Highest Impact</SelectItem>
-                                <SelectItem value="High">High Impact</SelectItem>
-                                <SelectItem value="Average">Average Impact</SelectItem>
-                                <SelectItem value="Low">Low Impact</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="organizationImpact"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Organization Impact Level</FormLabel>
+                            <FormControl>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select impact level" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Highest">Highest Impact</SelectItem>
+                                  <SelectItem value="High">High Impact</SelectItem>
+                                  <SelectItem value="Average">Average Impact</SelectItem>
+                                  <SelectItem value="Low">Low Impact</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="rateType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Rate Type</FormLabel>
+                            <FormControl>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select rate type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="pro_bono">100% Pro Bono</SelectItem>
+                                  <SelectItem value="reduced_rate">50% Reduced Fee</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
                     <FormField
                       control={form.control}
@@ -419,6 +445,52 @@ export default function ProBonoPage() {
               </CardContent>
             </Card>
 
+            {/* Impact Calculation Explanation */}
+            <Card>
+              <CardHeader>
+                <CardTitle>How We Calculate Animal Impact</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Rate Type Impact</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• <strong>100% Pro Bono:</strong> Full hourly value counted toward donation impact</li>
+                    <li>• <strong>50% Reduced Fee:</strong> Half of hourly value counted toward donation impact</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2">Organization Impact Multipliers</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• <strong>Highest Impact:</strong> 4.89x multiplier (ACE top recommendations)</li>
+                    <li>• <strong>High Impact:</strong> 2.5x multiplier (highly effective organizations)</li>
+                    <li>• <strong>Average Impact:</strong> 1x multiplier (standard animal welfare)</li>
+                    <li>• <strong>Low Impact:</strong> 0.5x multiplier (traditional welfare approaches)</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">Recommended Organizations</h4>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Animal Charity Evaluators' top recommendations for highest impact:
+                  </p>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• The Humane League (corporate campaigns)</li>
+                    <li>• Good Food Institute (alternative proteins)</li>
+                    <li>• Wild Animal Initiative (wild animal welfare research)</li>
+                    <li>• Faunalytics (animal advocacy research)</li>
+                    <li>• Animal Charity Evaluators (movement building)</li>
+                  </ul>
+                </div>
+
+                <div className="border-t pt-4">
+                  <p className="text-xs text-muted-foreground">
+                    <strong>Calculation:</strong> (Total Hours × Hourly Value × Rate Type %) ÷ Animals Saved per Dollar × Organization Multiplier
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Pro Bono Work Records */}
             <Card>
               <CardHeader>
@@ -471,7 +543,7 @@ export default function ProBonoPage() {
                             </div>
                           </div>
                           
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                             <div>
                               <p className="text-muted-foreground">Period</p>
                               <p>{formatDate(work.dateStarted)} - {work.dateEnded ? formatDate(work.dateEnded) : 'Ongoing'}</p>
@@ -479,6 +551,10 @@ export default function ProBonoPage() {
                             <div>
                               <p className="text-muted-foreground">Schedule</p>
                               <p>{work.hoursPerDay}h/day, {work.daysPerWeek} days/week</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Rate Type</p>
+                              <p>{work.rateType === 'pro_bono' ? '100% Pro Bono' : '50% Reduced Fee'}</p>
                             </div>
                             <div>
                               <p className="text-muted-foreground">Total Hours</p>

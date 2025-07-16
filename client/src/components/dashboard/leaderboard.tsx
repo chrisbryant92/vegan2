@@ -17,6 +17,7 @@ type LeaderboardEntry = {
   veganAnimalsSaved: number;
   mediaAnimalsSaved: number;
   campaignsAnimalsSaved: number;
+  proBonoAnimalsSaved: number;
 };
 
 export function Leaderboard() {
@@ -38,6 +39,8 @@ export function Leaderboard() {
         return b.mediaAnimalsSaved - a.mediaAnimalsSaved;
       case "campaigns":
         return b.campaignsAnimalsSaved - a.campaignsAnimalsSaved;
+      case "probono":
+        return b.proBonoAnimalsSaved - a.proBonoAnimalsSaved;
       default:
         return b.totalAnimalsSaved - a.totalAnimalsSaved;
     }
@@ -71,6 +74,8 @@ export function Leaderboard() {
         return entry.mediaAnimalsSaved;
       case "campaigns":
         return entry.campaignsAnimalsSaved;
+      case "probono":
+        return entry.proBonoAnimalsSaved;
       default:
         return entry.totalAnimalsSaved;
     }
@@ -86,6 +91,8 @@ export function Leaderboard() {
         return "Sharing";
       case "campaigns":
         return "Campaigns";
+      case "probono":
+        return "Pro Bono";
       default:
         return "Total";
     }
@@ -105,12 +112,13 @@ export function Leaderboard() {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="total" className="w-full" onValueChange={setSelectedCategory}>
-          <TabsList className="grid grid-cols-5 mb-4">
+          <TabsList className="grid grid-cols-6 mb-4">
             <TabsTrigger value="total">Total</TabsTrigger>
             <TabsTrigger value="donations">Donations</TabsTrigger>
             <TabsTrigger value="conversions">Conversions</TabsTrigger>
             <TabsTrigger value="sharing">Sharing</TabsTrigger>
             <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+            <TabsTrigger value="probono">Pro Bono</TabsTrigger>
           </TabsList>
           
           <TabsContent value={selectedCategory} className="mt-0">
@@ -162,7 +170,7 @@ export function Leaderboard() {
                     {user?.name || user?.username} (You)
                   </div>
                   <div className="font-medium text-right">
-                    {formatNumber(getCategoryValue(sortedLeaderboard.find(entry => entry.id === user?.id) || { totalAnimalsSaved: 0, donationsAnimalsSaved: 0, veganAnimalsSaved: 0, mediaAnimalsSaved: 0, campaignsAnimalsSaved: 0 } as LeaderboardEntry))}
+                    {formatNumber(getCategoryValue(sortedLeaderboard.find(entry => entry.id === user?.id) || { totalAnimalsSaved: 0, donationsAnimalsSaved: 0, veganAnimalsSaved: 0, mediaAnimalsSaved: 0, campaignsAnimalsSaved: 0, proBonoAnimalsSaved: 0 } as LeaderboardEntry))}
                     <span className="text-xs text-muted-foreground ml-1">animals</span>
                   </div>
                 </div>

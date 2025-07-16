@@ -8,8 +8,7 @@ import { eq } from "drizzle-orm";
 import { desc } from "drizzle-orm";
 import { donations, campaigns, veganConversions, mediaShared, proBonoWork, insertDonationSchema, insertVeganConversionSchema, insertMediaSharedSchema, insertCampaignSchema, campaignSchema, proBonoWorkSchema, insertProBonoWorkSchema } from "@shared/schema";
 import { sum, count } from "drizzle-orm";
-import { calculateDonationImpact } from "./utils";
-import { calculateProBonoImpact } from "../client/src/lib/calculations";
+import { calculateDonationImpact, calculateProBonoImpact } from "./utils";
 
 // Authentication middleware
 const ensureAuthenticated = (req: Request, res: Response, next: Function) => {
@@ -799,12 +798,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Calculate animals saved using the new pro bono calculation
       const animalsSaved = calculateProBonoImpact(
-        new Date(validatedData.dateStarted),
-        validatedData.dateEnded ? new Date(validatedData.dateEnded) : null,
         validatedData.hoursPerDay,
         validatedData.daysPerWeek,
+        validatedData.hourlyValue,
         validatedData.organizationImpact,
-        validatedData.hourlyValue
+        validatedData.rateType || 'pro_bono',
+        new Date(validatedData.dateStarted),
+        validatedData.dateEnded ? new Date(validatedData.dateEnded) : undefined
       );
 
       const proBonoWorkData = {
@@ -841,12 +841,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         animalsSaved = calculateProBonoImpact(
-          validatedData.dateStarted ? new Date(validatedData.dateStarted) : existingWork.dateStarted,
-          validatedData.dateEnded !== undefined ? (validatedData.dateEnded ? new Date(validatedData.dateEnded) : null) : existingWork.dateEnded,
           validatedData.hoursPerDay ?? existingWork.hoursPerDay,
           validatedData.daysPerWeek ?? existingWork.daysPerWeek,
+          validatedData.hourlyValue ?? existingWork.hourlyValue,
           validatedData.organizationImpact ?? existingWork.organizationImpact,
-          validatedData.hourlyValue ?? existingWork.hourlyValue
+          validatedData.rateType ?? existingWork.rateType ?? 'pro_bono',
+          validatedData.dateStarted ? new Date(validatedData.dateStarted) : existingWork.dateStarted,
+          validatedData.dateEnded !== undefined ? (validatedData.dateEnded ? new Date(validatedData.dateEnded) : null) : existingWork.dateEnded
         );
       }
 
@@ -900,7 +901,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.body.daysPerWeek !== undefined) processedData.days_per_week = Number(req.body.daysPerWeek);
       if (req.body.organizationImpact) processedData.organization_impact = req.body.organizationImpact;
       if (req.body.hourlyValue !== undefined) processedData.hourly_value = Number(req.body.hourlyValue);
-      if (req.body.notes !== undefined) processedData.notes = req.body.notes || null;
+      if (req.body.rateType) processedData.rate_type = req.body.rateType;
+      if (req.body.description !== undefined) processedData.description = req.body.description || null;
       if (req.body.animalsSaved !== undefined) processedData.animals_saved = Number(req.body.animalsSaved);
       
       console.log("Processed PATCH pro bono data:", processedData);
