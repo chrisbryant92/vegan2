@@ -32,10 +32,7 @@ export default function ProBonoPage() {
 
   const createMutation = useMutation({
     mutationFn: async (data: ProBonoWorkFormValues) => {
-      return apiRequest('/api/pro-bono', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      return apiRequest('POST', '/api/pro-bono', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/pro-bono'] });
@@ -57,10 +54,7 @@ export default function ProBonoPage() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: ProBonoWorkFormValues }) => {
-      return apiRequest(`/api/pro-bono/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      });
+      return apiRequest('PUT', `/api/pro-bono/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/pro-bono'] });
@@ -83,9 +77,7 @@ export default function ProBonoPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/pro-bono/${id}`, {
-        method: 'DELETE',
-      });
+      return apiRequest('DELETE', `/api/pro-bono/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/pro-bono'] });
