@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+// Removed PieChart import as we're using a cleaner top organizations display
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Donation, donationSchema } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
@@ -642,33 +642,45 @@ export default function DonationsPage() {
                 <CardTitle>Your Donation Impact</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex justify-center mb-6">
-                  <div className="relative w-48 h-48">
-                    <div className="absolute inset-0 flex items-center justify-center flex-col">
-                      <span className="text-4xl font-bold text-primary">{formatNumber(totalAnimalsSaved)}</span>
-                      <span className="text-sm text-muted-foreground">Animals Saved</span>
-                    </div>
-                    
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={chartData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={80}
-                          dataKey="value"
-                          label={false}
-                        >
-                          {chartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip formatter={(value) => [`${formatNumber(value as number)} animals`, 'Impact']} />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
+                <div className="text-center mb-6">
+                  <div className="mb-4">
+                    <span className="text-4xl font-bold text-primary">{formatNumber(totalAnimalsSaved)}</span>
+                    <p className="text-sm text-muted-foreground">Animals Saved</p>
                   </div>
+                  
+                  {/* Top Organizations */}
+                  {chartData.length > 0 && (
+                    <div className="mt-6">
+                      <h4 className="text-sm font-medium mb-3">Top Organizations by Impact</h4>
+                      <div className="space-y-2">
+                        {chartData
+                          .sort((a, b) => b.value - a.value)
+                          .slice(0, 5)
+                          .map((org, index) => {
+                            const percentage = ((org.value / totalAnimalsSaved) * 100).toFixed(1);
+                            return (
+                              <div key={org.name} className="flex items-center justify-between text-sm">
+                                <div className="flex items-center gap-2">
+                                  <div 
+                                    className="w-3 h-3 rounded-full" 
+                                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                                  />
+                                  <span className="font-medium truncate max-w-[150px]" title={org.name}>
+                                    {org.name}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-muted-foreground">{percentage}%</span>
+                                  <span className="font-medium text-primary">
+                                    {formatNumber(org.value)}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="space-y-3">
@@ -703,9 +715,13 @@ export default function DonationsPage() {
                 </div>
                 
                 <div className="mt-6 p-4 bg-muted/30 rounded-md">
-                  <h4 className="font-medium text-sm mb-2">Did you know?</h4>
+                  <h4 className="font-medium text-sm mb-2">Impact Calculation</h4>
                   <p className="text-sm text-muted-foreground">
-                    Donation impact varies dramatically by organization effectiveness. Our formula: Amount × Impact Factor. Highest impact organizations like those focused on farmed animals save 4.89 animals per dollar, while average organizations save 0.007 animals per dollar. Monthly donations are calculated over their specified time period.
+                    Donation impact varies dramatically by organization effectiveness. Our formula: Amount × Impact Factor. Highest impact organizations like those focused on farmed animals save 4.6 animals per dollar, while average organizations save 0.007 animals per dollar. Monthly donations are calculated over their specified time period.
+                    <br /><br />
+                    <a href="https://docs.google.com/spreadsheets/d/1LEtE4sGdNHN4w_yWM2E_dktS5JNGZqQY4A7w-QBHcOA/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">
+                      View calculation methodology and research sources →
+                    </a>
                   </p>
                 </div>
               </CardContent>
