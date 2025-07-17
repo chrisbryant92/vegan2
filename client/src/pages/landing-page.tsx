@@ -58,17 +58,17 @@ export default function LandingPage() {
           variants={container}
         >
           <motion.h1 
-            className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-12 bg-gradient-to-r from-indigo-600 to-blue-500 text-transparent bg-clip-text leading-normal pt-3 pb-5"
+            className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-12 bg-gradient-to-r from-green-600 to-emerald-500 text-transparent bg-clip-text leading-normal pt-3 pb-5"
             variants={item}
           >
-            Animal Saving Calculator
+            Vegan 2.0
           </motion.h1>
           
           <motion.p 
             className="text-xl md:text-2xl mb-8 text-gray-700 leading-relaxed py-2"
             variants={item}
           >
-            Track and visualize your real-world impact on animal welfare
+            Next-generation impact tracking for animal welfare advocates
           </motion.p>
           
           <motion.div 
