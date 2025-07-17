@@ -494,7 +494,7 @@ export default function DonationsPage() {
                           <SelectValue placeholder="Select impact level" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Highest">Highest (4.89 animals per $)</SelectItem>
+                          <SelectItem value="Highest">Highest (4.6 animals per $)</SelectItem>
                           <SelectItem value="High">High (3.1 animals per $)</SelectItem>
                           <SelectItem value="Average">Average (0.007 animals per $)</SelectItem>
                           <SelectItem value="Low">Low (0.001 animals per $)</SelectItem>

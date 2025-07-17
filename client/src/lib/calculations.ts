@@ -4,7 +4,7 @@
 // Donation impact values based on organization effectiveness
 // These values represent the number of animals saved per dollar donated
 const DONATION_IMPACT_FACTORS = {
-  highest: 4.89,  // For the most effective animal welfare charities (4.89 animals per dollar)
+  highest: 4.6,   // For the most effective animal welfare charities (4.6 animals per dollar - geometric mean of 9 estimates)
   high: 3.1,      // For highly effective charities (3.1 animals per dollar)
   average: 0.007, // For average effectiveness charities (0.007 animals per dollar)
   low: 0.001,     // For lower effectiveness charities (0.001 animals per dollar)
@@ -54,13 +54,15 @@ export function calculateDonationImpact(amount: number, organizationImpact: stri
 }
 
 // Diet type animals saved per year mapping
+// Based on 146.2 animals consumed per year by average meat-eater (geometric mean of UK: 126.4, Germany: 140, US: 173, worldwide: 149)
+// Data source: https://docs.google.com/spreadsheets/d/1KUcEWd50HoJ3i89azb1O1-HRWGChkRU18xPvRN2zGKQ/edit?gid=1826119359#gid=1826119359
 const DIET_ANIMALS_PER_YEAR = {
-  'meat-heavy': -60,    // Costs 60 animals/year (baseline is worse than omnivore)
-  'omnivore': 0,        // Baseline - saves 0 animals/year
-  'flexitarian': 60,    // Saves 60 animals/year
-  'pescetarian': 75,    // Saves 75 animals/year
-  'vegetarian': 90,     // Saves 90 animals/year
-  'vegan': 120          // Saves 120 animals/year
+  'meat-heavy': -29.2,  // Costs 29.2 animals/year (20% more than omnivore baseline: 146.2 * 0.2)
+  'omnivore': 0,        // Baseline - saves 0 animals/year (146.2 animals consumed)
+  'flexitarian': 58.5,  // Saves 58.5 animals/year (40% reduction: 146.2 * 0.4)
+  'pescetarian': 117,   // Saves 117 animals/year (80% reduction: 146.2 * 0.8)
+  'vegetarian': 131.6,  // Saves 131.6 animals/year (90% reduction: 146.2 * 0.9)
+  'vegan': 146.2        // Saves 146.2 animals/year (100% reduction: full baseline)
 } as const;
 
 export type DietType = keyof typeof DIET_ANIMALS_PER_YEAR;

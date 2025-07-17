@@ -578,7 +578,17 @@ export default function VeganPage() {
                   <div className="mt-6 p-4 bg-muted/30 rounded-md">
                     <h4 className="font-medium text-sm mb-2">Did you know?</h4>
                     <p className="text-sm text-muted-foreground">
-                      Our calculations are based on research showing different diet types save varying numbers of animals per year. Going vegan saves about 120 animals annually, while even small reductions help!
+                      Our calculations are based on research showing the average meat-eater consumes 146.2 animals per year. Different diet types save varying numbers of animals annually - going vegan saves the full 146.2 animals, while even small reductions help!
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      <a 
+                        href="https://docs.google.com/spreadsheets/d/1KUcEWd50HoJ3i89azb1O1-HRWGChkRU18xPvRN2zGKQ/edit?gid=1826119359#gid=1826119359" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline"
+                      >
+                        View data source and calculation methodology →
+                      </a>
                     </p>
                   </div>
                 </CardContent>

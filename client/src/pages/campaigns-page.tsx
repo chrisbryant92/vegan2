@@ -450,6 +450,16 @@ export default function CampaignsPage() {
                             <li><span className="font-medium">Phone/Letters:</span> Each saves 10 animals (high effort, personalized contact)</li>
                             <li><span className="font-medium">Other Actions:</span> Each worth 5 animals (average impact across action types)</li>
                           </ul>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            <a 
+                              href="https://docs.google.com/spreadsheets/d/1KUcEWd50HoJ3i89azb1O1-HRWGChkRU18xPvRN2zGKQ/edit?gid=1826119359#gid=1826119359" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 underline"
+                            >
+                              View data source and calculation methodology →
+                            </a>
+                          </p>
                         </div>
                         <Progress
                           value={Math.min(100, calculateCampaignImpact(

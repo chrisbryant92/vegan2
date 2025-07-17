@@ -115,7 +115,17 @@ export default function DashboardPage() {
         <div className="p-4 md:p-8">
           <div className="mb-6">
             <h2 className="text-2xl font-bold mb-1 text-foreground">Your Impact Dashboard</h2>
-            <p className="text-muted-foreground">Track how many animals you've helped save</p>
+            <p className="text-muted-foreground">
+              Track how many animals you've helped save • {" "}
+              <a 
+                href="https://docs.google.com/spreadsheets/d/1KUcEWd50HoJ3i89azb1O1-HRWGChkRU18xPvRN2zGKQ/edit?gid=1826119359#gid=1826119359" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 underline"
+              >
+                Data underlying our model is here
+              </a>
+            </p>
           </div>
           
           {/* Summary Cards */}

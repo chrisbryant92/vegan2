@@ -454,11 +454,21 @@ export default function ProBonoPage() {
                 <div>
                   <h4 className="font-semibold mb-2">Organization Impact Multipliers</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• <strong>Highest Impact:</strong> 4.89x multiplier (ACE top recommendations)</li>
+                    <li>• <strong>Highest Impact:</strong> 4.6x multiplier (ACE top recommendations)</li>
                     <li>• <strong>High Impact:</strong> 2.5x multiplier (highly effective organizations)</li>
                     <li>• <strong>Average Impact:</strong> 1x multiplier (standard animal welfare)</li>
                     <li>• <strong>Low Impact:</strong> 0.5x multiplier (traditional welfare approaches)</li>
                   </ul>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    <a 
+                      href="https://docs.google.com/spreadsheets/d/1KUcEWd50HoJ3i89azb1O1-HRWGChkRU18xPvRN2zGKQ/edit?gid=1826119359#gid=1826119359" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      View data source and calculation methodology →
+                    </a>
+                  </p>
                 </div>
 
                 <div>
