@@ -164,10 +164,25 @@ export const proBonoWork = pgTable("pro_bono_work", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const feedback = pgTable("feedback", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  name: text("name"),
+  email: text("email"),
+  subject: text("subject").notNull(),
+  message: text("message").notNull(),
+  type: text("type").notNull().default("bug"), // "bug", "suggestion", "question"
+  status: text("status").notNull().default("pending"), // "pending", "sent", "acknowledged"
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertCampaignSchema = createInsertSchema(campaigns)
   .omit({ id: true, created_at: true });
 
 export const insertProBonoWorkSchema = createInsertSchema(proBonoWork)
+  .omit({ id: true, createdAt: true });
+
+export const insertFeedbackSchema = createInsertSchema(feedback)
   .omit({ id: true, createdAt: true });
 
 // Form validation schema for campaigns
@@ -202,6 +217,18 @@ export const proBonoWorkSchema = z.object({
   animalsSaved: z.number().optional(),
 });
 
+// Form validation schema for feedback
+export const feedbackSchema = z.object({
+  name: z.string().optional(),
+  email: z.string().email("Invalid email format").optional(),
+  subject: z.string().min(1, "Subject is required"),
+  message: z.string().min(10, "Message must be at least 10 characters"),
+  type: z.enum(["bug", "suggestion", "question"], {
+    errorMap: () => ({ message: "Feedback type is required" })
+  }).default("bug"),
+  userId: z.number().optional(),
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -220,6 +247,9 @@ export type Campaign = typeof campaigns.$inferSelect;
 
 export type InsertProBonoWork = z.infer<typeof insertProBonoWorkSchema>;
 export type ProBonoWork = typeof proBonoWork.$inferSelect;
+
+export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
+export type Feedback = typeof feedback.$inferSelect;
 
 // Extending schemas for additional validations
 export const registerUserSchema = insertUserSchema.extend({

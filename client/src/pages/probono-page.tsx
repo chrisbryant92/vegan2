@@ -452,21 +452,24 @@ export default function ProBonoPage() {
                 </div>
                 
                 <div>
-                  <h4 className="font-semibold mb-2">Organization Impact Multipliers</h4>
+                  <h4 className="font-semibold mb-2">Organization Impact Factors</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• <strong>Highest Impact:</strong> 4.6x multiplier (ACE top recommendations)</li>
-                    <li>• <strong>High Impact:</strong> 2.5x multiplier (highly effective organizations)</li>
-                    <li>• <strong>Average Impact:</strong> 1x multiplier (standard animal welfare)</li>
-                    <li>• <strong>Low Impact:</strong> 0.5x multiplier (traditional welfare approaches)</li>
+                    <li>• <strong>Highest Impact:</strong> 4.6 animals per dollar (ACE top recommendations)</li>
+                    <li>• <strong>High Impact:</strong> 3.1 animals per dollar (highly effective organizations)</li>
+                    <li>• <strong>Average Impact:</strong> 0.007 animals per dollar (standard animal welfare)</li>
+                    <li>• <strong>Low Impact:</strong> 0.001 animals per dollar (traditional welfare approaches)</li>
                   </ul>
                   <p className="text-xs text-muted-foreground mt-2">
+                    Professional services are converted to dollar equivalents, then multiplied by organization effectiveness. 
+                    Highest impact organizations focused on farmed animals save 4.6 animals per dollar, while average organizations save 0.007 animals per dollar.
+                    <br /><br />
                     <a 
-                      href="https://docs.google.com/spreadsheets/d/1KUcEWd50HoJ3i89azb1O1-HRWGChkRU18xPvRN2zGKQ/edit?gid=1826119359#gid=1826119359" 
+                      href="https://docs.google.com/spreadsheets/d/1LEtE4sGdNHN4w_yWM2E_dktS5JNGZqQY4A7w-QBHcOA/edit?gid=0#gid=0" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:text-blue-800 underline"
                     >
-                      View data source and calculation methodology →
+                      View calculation methodology and research sources →
                     </a>
                   </p>
                 </div>
@@ -487,7 +490,7 @@ export default function ProBonoPage() {
 
                 <div className="border-t pt-4">
                   <p className="text-xs text-muted-foreground">
-                    <strong>Calculation:</strong> (Total Hours × Hourly Value × Rate Type %) ÷ Animals Saved per Dollar × Organization Multiplier
+                    <strong>Calculation:</strong> (Total Hours × Hourly Value × Rate Type %) × Organization Impact Factor
                   </p>
                 </div>
               </CardContent>

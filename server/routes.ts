@@ -6,7 +6,7 @@ import { z } from "zod";
 import { db, pool } from "./db";
 import { eq } from "drizzle-orm";
 import { desc } from "drizzle-orm";
-import { donations, campaigns, veganConversions, mediaShared, proBonoWork, insertDonationSchema, insertVeganConversionSchema, insertMediaSharedSchema, insertCampaignSchema, campaignSchema, proBonoWorkSchema, insertProBonoWorkSchema } from "@shared/schema";
+import { donations, campaigns, veganConversions, mediaShared, proBonoWork, feedback, insertDonationSchema, insertVeganConversionSchema, insertMediaSharedSchema, insertCampaignSchema, campaignSchema, proBonoWorkSchema, insertProBonoWorkSchema, feedbackSchema, insertFeedbackSchema } from "@shared/schema";
 import { sum, count } from "drizzle-orm";
 import { calculateDonationImpact, calculateProBonoImpact } from "./utils";
 
@@ -936,6 +936,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting pro bono work:', error);
       res.status(500).json({ error: 'Failed to delete pro bono work record' });
+    }
+  });
+
+  // Feedback routes
+  app.post('/api/feedback', async (req, res) => {
+    try {
+      console.log("Feedback request body:", req.body);
+      
+      // Validate the feedback data
+      const validatedData = feedbackSchema.parse(req.body);
+      
+      // Add user ID if authenticated
+      const userId = req.isAuthenticated() ? req.user?.id : null;
+      
+      // Insert feedback into database
+      const [newFeedback] = await db.insert(feedback).values({
+        userId: userId,
+        name: validatedData.name || null,
+        email: validatedData.email || null,
+        subject: validatedData.subject,
+        message: validatedData.message,
+        type: validatedData.type,
+        status: 'pending'
+      }).returning();
+      
+      console.log("Created feedback:", newFeedback);
+      res.status(201).json({ 
+        message: "Thank you for your feedback! We'll review it and get back to you.",
+        id: newFeedback.id 
+      });
+    } catch (error) {
+      console.error("Error creating feedback:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: 'Validation failed', details: error.errors });
+      } else {
+        res.status(500).json({ error: "Failed to submit feedback: " + (error instanceof Error ? error.message : String(error)) });
+      }
+    }
+  });
+
+  // Admin route to get pending feedback (weekly email compilation)
+  app.get('/api/feedback/pending', async (req, res) => {
+    try {
+      // Get feedback that hasn't been sent yet
+      const pendingFeedback = await db.select()
+        .from(feedback)
+        .where(eq(feedback.status, 'pending'))
+        .orderBy(desc(feedback.createdAt));
+      
+      res.json(pendingFeedback);
+    } catch (error) {
+      console.error("Error getting pending feedback:", error);
+      res.status(500).json({ error: "Failed to get pending feedback" });
     }
   });
 

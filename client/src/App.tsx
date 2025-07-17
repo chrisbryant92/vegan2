@@ -13,6 +13,7 @@ import VeganPage from "@/pages/vegan-page";
 import MediaPage from "@/pages/media-page";
 import CampaignsPage from "@/pages/campaigns-page";
 import ProBonoPage from "@/pages/probono-page";
+import FeedbackPage from "@/pages/feedback-page";
 import LandingPage from "@/pages/landing-page";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -28,6 +29,7 @@ function Router() {
       <ProtectedRoute path="/media-shared" component={MediaPage} />
       <ProtectedRoute path="/campaigns" component={CampaignsPage} />
       <ProtectedRoute path="/pro-bono" component={ProBonoPage} />
+      <Route path="/feedback" component={FeedbackPage} />
       <Route component={NotFound} />
     </Switch>
   );
