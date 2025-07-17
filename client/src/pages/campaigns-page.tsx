@@ -504,6 +504,13 @@ export default function CampaignsPage() {
                             <li><span className="font-medium">Rallies:</span> Each rally saves 10 animals (high visibility public advocacy)</li>
                             <li><span className="font-medium">Other Actions:</span> Each worth 5 animals (average impact across action types)</li>
                           </ul>
+                          <div className="bg-amber-50 border border-amber-200 rounded p-3 mt-3">
+                            <p className="text-xs text-amber-800 font-medium mb-1">⚠️ Research Limitation</p>
+                            <p className="text-xs text-amber-700">
+                              Campaign impact calculations are the least well-researched part of our model. If you have more accurate estimates for animals saved per action, 
+                              please share them via our <a href="/feedback" className="underline font-medium">Feedback form</a> - we will gratefully incorporate better data.
+                            </p>
+                          </div>
                           <p className="text-xs text-muted-foreground mt-2">
                             <a 
                               href="https://docs.google.com/spreadsheets/d/1KUcEWd50HoJ3i89azb1O1-HRWGChkRU18xPvRN2zGKQ/edit?gid=1826119359#gid=1826119359" 
