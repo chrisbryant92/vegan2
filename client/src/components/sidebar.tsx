@@ -57,11 +57,6 @@ export function Sidebar() {
       href: "/pro-bono",
       icon: <Briefcase className="h-5 w-5" />,
     },
-    {
-      label: "Feedback",
-      href: "/feedback",
-      icon: <MessageSquare className="h-5 w-5" />,
-    },
   ];
 
   const handleLogout = () => {
@@ -122,19 +117,33 @@ export function Sidebar() {
       </nav>
 
       <div className="p-4 border-t space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Theme</span>
-          <ThemeToggle />
+        <Link href="/feedback">
+          <div
+            className={cn(
+              "flex items-center p-2 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground cursor-pointer",
+              location === "/feedback" && "bg-accent text-foreground"
+            )}
+          >
+            <MessageSquare className="h-5 w-5 mr-2" />
+            <span>Feedback</span>
+          </div>
+        </Link>
+        
+        <div className="border-t pt-2 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Theme</span>
+            <ThemeToggle />
+          </div>
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            onClick={handleLogout}
+            disabled={logoutMutation.isPending}
+          >
+            <LogOut className="h-5 w-5 mr-2" />
+            <span>Logout</span>
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-          onClick={handleLogout}
-          disabled={logoutMutation.isPending}
-        >
-          <LogOut className="h-5 w-5 mr-2" />
-          <span>Logout</span>
-        </Button>
       </div>
     </aside>
   );

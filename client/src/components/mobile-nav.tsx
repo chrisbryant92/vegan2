@@ -53,11 +53,6 @@ export function MobileNav() {
       href: "/pro-bono",
       icon: <Briefcase className="h-5 w-5" />,
     },
-    {
-      label: "Feedback",
-      href: "/feedback",
-      icon: <MessageSquare className="h-5 w-5" />,
-    },
   ];
 
   const handleLogout = () => {
@@ -124,15 +119,30 @@ export function MobileNav() {
                   </div>
                 ))}
                 
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-gray-700 hover:text-red-600 hover:bg-red-50"
-                  onClick={handleLogout}
-                  disabled={logoutMutation.isPending}
-                >
-                  <LogOut className="h-5 w-5 mr-2" />
-                  <span>Logout</span>
-                </Button>
+                <div className="border-t pt-3 mt-3">
+                  <Link href="/feedback">
+                    <div
+                      className={cn(
+                        "flex items-center p-2 rounded-md hover:bg-indigo-50 text-gray-700 hover:text-primary cursor-pointer",
+                        location === "/feedback" && "bg-indigo-50 text-primary"
+                      )}
+                      onClick={() => setOpen(false)}
+                    >
+                      <MessageSquare className="h-5 w-5 mr-2" />
+                      <span>Feedback</span>
+                    </div>
+                  </Link>
+                  
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-gray-700 hover:text-red-600 hover:bg-red-50 mt-2"
+                    onClick={handleLogout}
+                    disabled={logoutMutation.isPending}
+                  >
+                    <LogOut className="h-5 w-5 mr-2" />
+                    <span>Logout</span>
+                  </Button>
+                </div>
               </div>
             </nav>
           </SheetContent>
