@@ -55,7 +55,7 @@ test('Database Schema Validation', async () => {
 // Calculation Engine Tests
 test('Donation Impact Calculations', () => {
   const testCases = [
-    { amount: 100, impact: 'Highest', expected: 460 },
+    { amount: 100, impact: 'Highest', expected: 440 },
     { amount: 100, impact: 'High', expected: 310 },
     { amount: 100, impact: 'Average', expected: 1 },
     { amount: 100, impact: 'Low', expected: 0 }

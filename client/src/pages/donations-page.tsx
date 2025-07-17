@@ -717,7 +717,7 @@ export default function DonationsPage() {
                 <div className="mt-6 p-4 bg-muted/30 rounded-md">
                   <h4 className="font-medium text-sm mb-2">Impact Calculation</h4>
                   <p className="text-sm text-muted-foreground">
-                    Donation impact varies dramatically by organization effectiveness. Our formula: Amount × Impact Factor. Highest impact organizations like those focused on farmed animals save 4.6 animals per dollar, while average organizations save 0.007 animals per dollar. Monthly donations are calculated over their specified time period.
+                    Donation impact varies dramatically by organization effectiveness. Our formula: Amount × Impact Factor. Highest impact organizations like those focused on farmed animals save 4.4 animals per dollar, while average organizations save 0.007 animals per dollar. Monthly donations are calculated over their specified time period.
                     <br /><br />
                     <a href="https://docs.google.com/spreadsheets/d/1LEtE4sGdNHN4w_yWM2E_dktS5JNGZqQY4A7w-QBHcOA/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">
                       View calculation methodology and research sources →

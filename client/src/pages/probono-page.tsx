@@ -454,7 +454,7 @@ export default function ProBonoPage() {
                 <div>
                   <h4 className="font-semibold mb-2">Organization Impact Factors</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• <strong>Highest Impact:</strong> 4.6 animals per dollar (ACE top recommendations)</li>
+                    <li>• <strong>Highest Impact:</strong> 4.4 animals per dollar (ACE top recommendations)</li>
                     <li>• <strong>High Impact:</strong> 3.1 animals per dollar (highly effective organizations)</li>
                     <li>• <strong>Average Impact:</strong> 0.007 animals per dollar (standard animal welfare)</li>
                     <li>• <strong>Low Impact:</strong> 0.001 animals per dollar (traditional welfare approaches)</li>

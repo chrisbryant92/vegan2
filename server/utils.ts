@@ -2,7 +2,7 @@
 
 // Constants for donation impact calculations
 const DONATION_IMPACT_FACTORS = {
-  highest: 4.6,   // For the most effective animal welfare charities (4.6 animals per dollar - geometric mean of 9 estimates)
+  highest: 4.4,   // For the most effective animal welfare charities (4.4 animals per dollar - geometric mean of 9 estimates)
   high: 3.1,      // For highly effective charities (3.1 animals per dollar)
   average: 0.007, // For average effectiveness charities (0.007 animals per dollar)
   low: 0.001,     // For lower effectiveness charities (0.001 animals per dollar)
