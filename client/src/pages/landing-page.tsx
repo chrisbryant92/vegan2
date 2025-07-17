@@ -68,7 +68,7 @@ export default function LandingPage() {
             className="text-xl md:text-2xl mb-8 text-gray-700 leading-relaxed py-2"
             variants={item}
           >
-            Next-generation impact tracking for animal welfare advocates
+            Next-generation impact tracking for animal advocates
           </motion.p>
           
           <motion.div 

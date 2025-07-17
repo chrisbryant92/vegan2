@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Animal Impact Tracker is a full-stack web application built to help animal welfare advocates track and measure their impact across four key categories: charitable donations, vegan conversions, media sharing, and online campaigns. The application provides comprehensive analytics, leaderboards, and impact visualization to motivate users and showcase collective progress in animal welfare efforts.
+The Animal Impact Tracker is a full-stack web application built to help animal advocates track and measure their impact across four key categories: charitable donations, vegan conversions, media sharing, and online campaigns. The application provides comprehensive analytics, leaderboards, and impact visualization to motivate users and showcase collective progress in animal welfare efforts.
 
 ## System Architecture
 
@@ -112,6 +112,7 @@ Preferred communication style: Simple, everyday language.
 ### July 17, 2025 - Beta Launch Preparation
 - **Rebranding**: Updated app title to "Vegan 2.0" with new logo and favicon
 - **Impact Factor Update**: Reduced highest impact charity rate from 4.6 to 4.4 animals per dollar across all systems
+- **Terminology Update**: Changed "animal welfare advocates" to "animal advocates" throughout application
 - **Feedback System**: Complete feedback collection system with database storage and weekly email compilation
 - **Pro Bono Consistency**: Updated pro bono page terminology and impact factors to match donations page (4.4 animals per dollar for highest impact)
 - **Campaign Research Notice**: Added transparency notice acknowledging campaigns as least researched model component, with invitation for user feedback

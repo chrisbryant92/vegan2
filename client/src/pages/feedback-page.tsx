@@ -86,7 +86,7 @@ export default function FeedbackPage() {
               <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-6">
                 <h3 className="text-lg font-semibold mb-2">Thank You!</h3>
                 <p className="text-sm text-muted-foreground">
-                  Your feedback helps us build a better tool for animal welfare advocates. 
+                  Your feedback helps us build a better tool for animal advocates. 
                   Every suggestion and bug report contributes to improving the impact tracking experience.
                 </p>
               </div>
