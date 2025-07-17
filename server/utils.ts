@@ -43,3 +43,25 @@ export function calculateProBonoImpact(
   
   return Math.round(monetaryValue * impactFactor);
 }
+
+// Calculate animals saved from campaign participation
+// Formula: (Emails*5)+(Social Media Actions*2)+(Letters/Phone Calls*10)+(Leaflets*2)+(Rallies*10)+(Other Actions*5)
+export function calculateCampaignImpact(
+  emails: number = 0,
+  socialMediaActions: number = 0,
+  letters: number = 0,
+  leaflets: number = 0,
+  rallies: number = 0,
+  otherActions: number = 0
+): number {
+  const impact = 
+    (emails * 5) + 
+    (socialMediaActions * 2) + 
+    (letters * 10) + 
+    (leaflets * 2) + 
+    (rallies * 10) + 
+    (otherActions * 5);
+  
+  // Return as whole number, minimum 0
+  return Math.max(0, Math.round(impact));
+}

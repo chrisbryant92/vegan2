@@ -30,7 +30,7 @@ function SummaryCard({ title, value, icon, progress, progressColor, goal }: Summ
   if (title === "Charitable Donations") color = CATEGORY_COLORS.charitable;
   else if (title === "Conversions") color = CATEGORY_COLORS.vegan;
   else if (title === "Sharing") color = CATEGORY_COLORS.media;
-  else if (title === "Online Campaigns") color = CATEGORY_COLORS.campaigns;
+  else if (title === "Campaigns") color = CATEGORY_COLORS.campaigns;
   else if (title === "Pro Bono Work") color = CATEGORY_COLORS.proBono;
   
   return (
@@ -365,7 +365,7 @@ export function SummaryCards({ stats, goals = {}, loading = false }: SummaryCard
         />
         
         <SummaryCard
-          title="Online Campaigns"
+          title="Campaigns"
           value={stats.campaigns}
           icon={<Megaphone className="h-5 w-5 text-amber-600" />}
           progress={progressPercentages.campaigns}

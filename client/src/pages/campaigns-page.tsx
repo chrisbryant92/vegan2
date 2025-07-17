@@ -26,6 +26,8 @@ const campaignSchema = z.object({
   emails: z.number().min(0, "Must be a positive number").default(0),
   socialMediaActions: z.number().min(0, "Must be a positive number").default(0),
   letters: z.number().min(0, "Must be a positive number").default(0),
+  leaflets: z.number().min(0, "Must be a positive number").default(0),
+  rallies: z.number().min(0, "Must be a positive number").default(0),
   otherActions: z.number().min(0, "Must be a positive number").default(0),
 });
 
@@ -49,6 +51,8 @@ export default function CampaignsPage() {
       emails: 0,
       socialMediaActions: 0,
       letters: 0,
+      leaflets: 0,
+      rallies: 0,
       otherActions: 0,
     },
   });
@@ -57,13 +61,15 @@ export default function CampaignsPage() {
   const createCampaign = useMutation({
     mutationFn: async (data: CampaignFormValues) => {
       // Calculate the total actions
-      const totalActions = data.emails + data.socialMediaActions + data.letters + data.otherActions;
+      const totalActions = data.emails + data.socialMediaActions + data.letters + data.leaflets + data.rallies + data.otherActions;
       
       // Calculate impact using the new formula
       const animalsSaved = calculateCampaignImpact(
         data.emails,
         data.socialMediaActions,
         data.letters,
+        data.leaflets,
+        data.rallies,
         data.otherActions
       );
       
@@ -301,8 +307,8 @@ export default function CampaignsPage() {
       <main className="flex-grow pb-20 md:pb-6">
         <div className="p-4 md:p-8">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-1 text-foreground">Online Campaigns</h2>
-            <p className="text-muted-foreground">Track the impact of your online activism and campaigns</p>
+            <h2 className="text-2xl font-bold mb-1 text-foreground">Campaigns</h2>
+            <p className="text-muted-foreground">Track the impact of your activism and campaigns</p>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -396,6 +402,48 @@ export default function CampaignsPage() {
                         </div>
                         
                         <div className="space-y-2">
+                          <Label htmlFor="leaflets">Leaflets Distributed</Label>
+                          <Input
+                            id="leaflets"
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            {...form.register("leaflets", { 
+                              valueAsNumber: true,
+                              setValueAs: (value) => value === "" ? 0 : parseInt(value, 10) 
+                            })}
+                          />
+                          {form.formState.errors.leaflets && (
+                            <p className="text-sm text-red-500">
+                              {form.formState.errors.leaflets.message}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground">Each leaflet saves approximately 2 animals</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="rallies">Rallies Attended</Label>
+                          <Input
+                            id="rallies"
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            {...form.register("rallies", { 
+                              valueAsNumber: true,
+                              setValueAs: (value) => value === "" ? 0 : parseInt(value, 10) 
+                            })}
+                          />
+                          {form.formState.errors.rallies && (
+                            <p className="text-sm text-red-500">
+                              {form.formState.errors.rallies.message}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground">Each rally attendance saves approximately 10 animals</p>
+                        </div>
+                        
+                        <div className="space-y-2">
                           <Label htmlFor="otherActions">Other Actions</Label>
                           <Input
                             id="otherActions"
@@ -423,6 +471,8 @@ export default function CampaignsPage() {
                             {(form.watch("emails") || 0) + 
                              (form.watch("socialMediaActions") || 0) + 
                              (form.watch("letters") || 0) + 
+                             (form.watch("leaflets") || 0) + 
+                             (form.watch("rallies") || 0) + 
                              (form.watch("otherActions") || 0)} actions
                           </span>
                         </div>
@@ -434,6 +484,8 @@ export default function CampaignsPage() {
                               form.watch("emails") || 0,
                               form.watch("socialMediaActions") || 0,
                               form.watch("letters") || 0,
+                              form.watch("leaflets") || 0,
+                              form.watch("rallies") || 0,
                               form.watch("otherActions") || 0
                             )} animals
                           </span>
@@ -442,12 +494,14 @@ export default function CampaignsPage() {
                         <div className="p-4 bg-muted/30 border border-muted rounded-md my-3">
                           <h4 className="text-sm font-semibold mb-2">Impact Calculation Explained:</h4>
                           <p className="text-sm text-muted-foreground mb-2">
-                            <span className="font-medium">Formula: </span>(Emails × 5) + (Social Media Actions × 2) + (Phone Calls/Letters × 10) + (Other Actions × 5)
+                            <span className="font-medium">Formula: </span>(Emails × 5) + (Social Media × 2) + (Phone Calls/Letters × 10) + (Leaflets × 2) + (Rallies × 10) + (Other Actions × 5)
                           </p>
                           <ul className="text-xs text-gray-600 space-y-1 pl-4 list-disc">
                             <li><span className="font-medium">Emails:</span> Each email is worth 5 animals (quick but moderate impact)</li>
                             <li><span className="font-medium">Social Media:</span> Each action saves 2 animals (lower effort but broad reach)</li>
                             <li><span className="font-medium">Phone/Letters:</span> Each saves 10 animals (high effort, personalized contact)</li>
+                            <li><span className="font-medium">Leaflets:</span> Each leaflet saves 2 animals (direct outreach with informational material)</li>
+                            <li><span className="font-medium">Rallies:</span> Each rally saves 10 animals (high visibility public advocacy)</li>
                             <li><span className="font-medium">Other Actions:</span> Each worth 5 animals (average impact across action types)</li>
                           </ul>
                           <p className="text-xs text-muted-foreground mt-2">
@@ -466,11 +520,13 @@ export default function CampaignsPage() {
                             form.watch("emails") || 0,
                             form.watch("socialMediaActions") || 0,
                             form.watch("letters") || 0,
+                            form.watch("leaflets") || 0,
+                            form.watch("rallies") || 0,
                             form.watch("otherActions") || 0
                           ) / 10)}
                           className="h-2"
                         />
-                        <p className="text-xs text-muted-foreground mt-1">Formula: (Emails×5)+(Social Media×2)+(Phone Calls/Letters×10)+(Other Actions×5)</p>
+                        <p className="text-xs text-muted-foreground mt-1">Formula: (Emails×5)+(Social Media×2)+(Phone Calls/Letters×10)+(Leaflets×2)+(Rallies×10)+(Other Actions×5)</p>
                       </div>
                     </div>
                     

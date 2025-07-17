@@ -47,7 +47,7 @@ export function Sidebar() {
       icon: <Share2 className="h-5 w-5" />,
     },
     {
-      label: "Online Campaigns",
+      label: "Campaigns",
       href: "/campaigns",
       icon: <Megaphone className="h-5 w-5" />,
     },

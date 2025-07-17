@@ -58,7 +58,7 @@ export const mediaShared = pgTable("media_shared", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Online Campaigns table
+// Campaigns table
 export const campaigns = pgTable("campaigns", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
@@ -74,6 +74,8 @@ export const campaigns = pgTable("campaigns", {
   emails: integer("emails").default(0),
   social_media_actions: integer("social_media_actions").default(0),
   letters: integer("letters").default(0),
+  leaflets: integer("leaflets").default(0),
+  rallies: integer("rallies").default(0),
   other_actions: integer("other_actions").default(0),
   total_actions: integer("total_actions").default(0),
   notes: text("notes"),

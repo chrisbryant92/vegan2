@@ -579,11 +579,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         INSERT INTO campaigns (
           name, campaign_type, organization, start_date, end_date, 
           budget, scope, people_reached, people_recruited, emails, 
-          social_media_actions, letters, other_actions, total_actions, 
+          social_media_actions, letters, leaflets, rallies, other_actions, total_actions, 
           notes, animals_saved, user_id, signed, shared, contacted, 
           recruited, donated
         ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
         ) RETURNING *
       `;
 
@@ -600,16 +600,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         Number(req.body.emails || 0), // $10 - emails
         Number(req.body.socialMediaActions || 0), // $11 - social_media_actions
         Number(req.body.letters || 0), // $12 - letters
-        Number(req.body.otherActions || 0), // $13 - other_actions
-        Number(req.body.totalActions || 0), // $14 - total_actions
-        req.body.notes || null,      // $15 - notes
-        Number(req.body.animalsSaved), // $16 - animals_saved
-        userId,                      // $17 - user_id
-        false,                       // $18 - signed
-        false,                       // $19 - shared
-        false,                       // $20 - contacted
-        false,                       // $21 - recruited
-        false                        // $22 - donated
+        Number(req.body.leaflets || 0), // $13 - leaflets
+        Number(req.body.rallies || 0), // $14 - rallies
+        Number(req.body.otherActions || 0), // $15 - other_actions
+        Number(req.body.totalActions || 0), // $16 - total_actions
+        req.body.notes || null,      // $17 - notes
+        Number(req.body.animalsSaved), // $18 - animals_saved
+        userId,                      // $19 - user_id
+        false,                       // $20 - signed
+        false,                       // $21 - shared
+        false,                       // $22 - contacted
+        false,                       // $23 - recruited
+        false                        // $24 - donated
       ];
 
       console.log("Executing direct SQL insert with values:", values);
@@ -692,6 +694,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.body.emails !== undefined) processedData.emails = Number(req.body.emails);
       if (req.body.socialMediaActions !== undefined) processedData.social_media_actions = Number(req.body.socialMediaActions);
       if (req.body.letters !== undefined) processedData.letters = Number(req.body.letters);
+      if (req.body.leaflets !== undefined) processedData.leaflets = Number(req.body.leaflets);
+      if (req.body.rallies !== undefined) processedData.rallies = Number(req.body.rallies);
       if (req.body.otherActions !== undefined) processedData.other_actions = Number(req.body.otherActions);
       if (req.body.totalActions !== undefined) processedData.total_actions = Number(req.body.totalActions);
       if (req.body.notes !== undefined) processedData.notes = req.body.notes || null;
