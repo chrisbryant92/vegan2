@@ -110,6 +110,7 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 17, 2025 - Beta Launch Preparation
+- **Rebranding**: Updated app title to "Vegan 2.0" with new logo and favicon
 - **Feedback System**: Complete feedback collection system with database storage and weekly email compilation
 - **Pro Bono Consistency**: Updated pro bono page terminology and impact factors to match donations page (4.6 animals per dollar for highest impact)
 - **Campaign Research Notice**: Added transparency notice acknowledging campaigns as least researched model component, with invitation for user feedback

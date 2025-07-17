@@ -75,10 +75,13 @@ export function MobileNav() {
       {/* Top bar */}
       <div className="md:hidden bg-white shadow-sm p-4 flex justify-between items-center">
         <div className="flex items-center">
-          <Avatar className="h-8 w-8 mr-2 bg-primary text-primary-foreground">
-            <AvatarFallback>AI</AvatarFallback>
-          </Avatar>
-          <h1 className="text-lg font-bold text-primary">Animal Impact</h1>
+          <div className="h-8 w-8 mr-2 bg-green-600 rounded-full flex items-center justify-center">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L15.5 8.5H20L16 13L17.5 20L12 16.5L6.5 20L8 13L4 8.5H8.5L12 2Z" fill="white"/>
+              <path d="M12 8C13.1046 8 14 8.89543 14 10C14 11.1046 13.1046 12 12 12C10.8954 12 10 11.1046 10 10C10 8.89543 10.8954 8 12 8Z" fill="#16a34a"/>
+            </svg>
+          </div>
+          <h1 className="text-lg font-bold text-primary">Vegan 2.0</h1>
         </div>
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
