@@ -57,6 +57,16 @@ export function Sidebar() {
       href: "/pro-bono",
       icon: <Briefcase className="h-5 w-5" />,
     },
+    {
+      label: "Leaderboard",
+      href: "/leaderboard",
+      icon: <User className="h-5 w-5" />,
+    },
+    {
+      label: "Profile",
+      href: "/profile",
+      icon: <User className="h-5 w-5" />,
+    },
   ];
 
   const handleLogout = () => {

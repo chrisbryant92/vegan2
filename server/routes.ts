@@ -2,6 +2,14 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
+import passport from "passport";
+import "./oauth";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import crypto from "crypto";
+import { profileUpdateSchema, passwordChangeSchema } from "@shared/schema";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { db, pool } from "./db";
 import { eq } from "drizzle-orm";
@@ -9,6 +17,7 @@ import { desc } from "drizzle-orm";
 import { donations, campaigns, veganConversions, mediaShared, proBonoWork, feedback, insertDonationSchema, insertVeganConversionSchema, insertMediaSharedSchema, insertCampaignSchema, campaignSchema, proBonoWorkSchema, insertProBonoWorkSchema, feedbackSchema, insertFeedbackSchema } from "@shared/schema";
 import { sum, count } from "drizzle-orm";
 import { calculateDonationImpact, calculateProBonoImpact } from "./utils";
+import express from "express";
 
 // Authentication middleware
 const ensureAuthenticated = (req: Request, res: Response, next: Function) => {
@@ -18,9 +27,127 @@ const ensureAuthenticated = (req: Request, res: Response, next: Function) => {
   res.status(401).json({ error: "Unauthorized" });
 };
 
+// Configure multer for file uploads
+const uploadDir = path.join(process.cwd(), 'uploads', 'profiles');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const upload = multer({
+  dest: uploadDir,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  },
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup authentication routes
+  // Setup authentication routes (includes session setup and passport initialization)
   setupAuth(app);
+
+  // OAuth Routes
+  app.get('/api/auth/google',
+    passport.authenticate('google', { scope: ['profile', 'email'] })
+  );
+
+  app.get('/api/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/login' }),
+    (req, res) => {
+      res.redirect('/');
+    }
+  );
+
+  app.get('/api/auth/facebook',
+    passport.authenticate('facebook', { scope: ['email'] })
+  );
+
+  app.get('/api/auth/facebook/callback',
+    passport.authenticate('facebook', { failureRedirect: '/login' }),
+    (req, res) => {
+      res.redirect('/');
+    }
+  );
+
+  // Profile routes
+  app.patch("/api/profile", ensureAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const validatedData = profileUpdateSchema.parse(req.body);
+      
+      const updatedUser = await storage.updateUser(userId, {
+        displayName: validatedData.displayName,
+        tags: validatedData.tags || []
+      });
+      
+      res.json({ message: "Profile updated successfully", user: updatedUser });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(400).json({ error: error instanceof Error ? error.message : "Failed to update profile" });
+    }
+  });
+
+  app.patch("/api/change-password", ensureAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.password) {
+        return res.status(400).json({ error: "Cannot change password for OAuth account" });
+      }
+      
+      const validatedData = passwordChangeSchema.parse(req.body);
+      
+      // Verify current password
+      const isCurrentPasswordValid = await bcrypt.compare(validatedData.currentPassword, user.password);
+      if (!isCurrentPasswordValid) {
+        return res.status(400).json({ error: "Current password is incorrect" });
+      }
+      
+      // Hash new password
+      const hashedNewPassword = await bcrypt.hash(validatedData.newPassword, 10);
+      
+      await storage.updateUser(userId, { password: hashedNewPassword });
+      
+      res.json({ message: "Password changed successfully" });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      res.status(400).json({ error: error instanceof Error ? error.message : "Failed to change password" });
+    }
+  });
+
+  app.post("/api/upload-profile-photo", ensureAuthenticated, upload.single('photo'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+      
+      const userId = req.user!.id;
+      const fileExtension = path.extname(req.file.originalname);
+      const filename = `${userId}_${Date.now()}${fileExtension}`;
+      const finalPath = path.join(uploadDir, filename);
+      
+      // Move file to final location
+      fs.renameSync(req.file.path, finalPath);
+      
+      // Update user profile photo path
+      const photoUrl = `/uploads/profiles/${filename}`;
+      await storage.updateUser(userId, { profilePhoto: photoUrl });
+      
+      res.json({ message: "Photo uploaded successfully", photoUrl });
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+      res.status(500).json({ error: "Failed to upload photo" });
+    }
+  });
+
+  // Serve uploaded files
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
   // Get user stats
   app.get("/api/stats", ensureAuthenticated, async (req, res) => {
@@ -41,6 +168,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
       res.status(500).json({ error: "Failed to get leaderboard data" });
+    }
+  });
+
+  // Get leaderboard filtered by tag
+  app.get("/api/leaderboard/tag/:tag", ensureAuthenticated, async (req, res) => {
+    try {
+      const tag = req.params.tag;
+      const leaderboard = await storage.getLeaderboardByTag(tag);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching tag leaderboard:", error);
+      res.status(500).json({ error: "Failed to get tag leaderboard data" });
     }
   });
 

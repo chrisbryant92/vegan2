@@ -15,7 +15,13 @@ export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByGoogleId(googleId: string): Promise<User | undefined>;
+  getUserByFacebookId(facebookId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, updates: Partial<User>): Promise<User>;
+  linkGoogleAccount(userId: number, googleId: string): Promise<void>;
+  linkFacebookAccount(userId: number, facebookId: string): Promise<void>;
 
   // Donation operations
   getDonations(userId: number): Promise<Donation[]>;
@@ -72,6 +78,23 @@ export interface IStorage {
     id: number;
     username: string;
     name: string;
+    displayName?: string;
+    tags?: string[];
+    totalAnimalsSaved: number;
+    donationsAnimalsSaved: number;
+    veganAnimalsSaved: number;
+    mediaAnimalsSaved: number;
+    campaignsAnimalsSaved: number;
+    proBonoAnimalsSaved: number;
+  }[]>;
+  
+  getLeaderboardByTag(tag: string): Promise<{
+    id: number;
+    username: string;
+    name: string;
+    displayName?: string;
+    tags?: string[];
+    hasTag: boolean;
     totalAnimalsSaved: number;
     donationsAnimalsSaved: number;
     veganAnimalsSaved: number;
@@ -464,6 +487,41 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.googleId, googleId));
+    return user;
+  }
+
+  async getUserByFacebookId(facebookId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.facebookId, facebookId));
+    return user;
+  }
+
+  async updateUser(id: number, updates: Partial<User>): Promise<User> {
+    const [user] = await db.update(users)
+      .set(updates)
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async linkGoogleAccount(userId: number, googleId: string): Promise<void> {
+    await db.update(users)
+      .set({ googleId, authProvider: 'google' })
+      .where(eq(users.id, userId));
+  }
+
+  async linkFacebookAccount(userId: number, facebookId: string): Promise<void> {
+    await db.update(users)
+      .set({ facebookId, authProvider: 'facebook' })
+      .where(eq(users.id, userId));
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;
@@ -787,6 +845,8 @@ export class DatabaseStorage implements IStorage {
           id: user.id,
           username: user.username,
           name: user.name,
+          displayName: user.displayName,
+          tags: user.tags,
           totalAnimalsSaved: stats.totalAnimalsSaved,
           donationsAnimalsSaved: stats.donationsAnimalsSaved,
           veganAnimalsSaved: stats.veganAnimalsSaved,
@@ -800,6 +860,61 @@ export class DatabaseStorage implements IStorage {
       return leaderboard.sort((a, b) => b.totalAnimalsSaved - a.totalAnimalsSaved);
     } catch (error) {
       console.error("Error getting leaderboard:", error);
+      return [];
+    }
+  }
+
+  async getLeaderboardByTag(tag: string): Promise<{
+    id: number;
+    username: string;
+    name: string;
+    displayName?: string;
+    tags?: string[];
+    hasTag: boolean;
+    totalAnimalsSaved: number;
+    donationsAnimalsSaved: number;
+    veganAnimalsSaved: number;
+    mediaAnimalsSaved: number;
+    campaignsAnimalsSaved: number;
+    proBonoAnimalsSaved: number;
+  }[]> {
+    try {
+      // Get all users
+      const allUsers = await db.select().from(users);
+      
+      // Get stats for each user and create leaderboard
+      const leaderboard = [];
+      
+      for (const user of allUsers) {
+        // Check if user has the tag
+        const hasTag = user.tags?.includes(tag) || false;
+        
+        // Only include users with the tag
+        if (hasTag) {
+          // Get user stats
+          const stats = await this.getUserStats(user.id);
+          
+          leaderboard.push({
+            id: user.id,
+            username: user.username,
+            name: user.name,
+            displayName: user.displayName,
+            tags: user.tags,
+            hasTag,
+            totalAnimalsSaved: stats.totalAnimalsSaved,
+            donationsAnimalsSaved: stats.donationsAnimalsSaved,
+            veganAnimalsSaved: stats.veganAnimalsSaved,
+            mediaAnimalsSaved: stats.mediaAnimalsSaved,
+            campaignsAnimalsSaved: stats.campaignsAnimalsSaved,
+            proBonoAnimalsSaved: stats.proBonoAnimalsSaved
+          });
+        }
+      }
+      
+      // Sort by total animals saved (highest first)
+      return leaderboard.sort((a, b) => b.totalAnimalsSaved - a.totalAnimalsSaved);
+    } catch (error) {
+      console.error("Error getting tag leaderboard:", error);
       return [];
     }
   }

@@ -6,8 +6,15 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  password: text("password"), // Optional for OAuth users
   name: text("name").notNull(),
+  email: text("email").unique(),
+  displayName: text("display_name"),
+  profilePhoto: text("profile_photo"), // URL or path to uploaded image
+  tags: text("tags").array().default([]), // Array of tags for grouping/leaderboards
+  googleId: text("google_id").unique(), // For Google OAuth
+  facebookId: text("facebook_id").unique(), // For Facebook OAuth
+  authProvider: text("auth_provider").default("local"), // "local", "google", "facebook"
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -91,6 +98,22 @@ export const campaigns = pgTable("campaigns", {
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users)
   .omit({ id: true, createdAt: true });
+
+// Profile update schema
+export const profileUpdateSchema = z.object({
+  displayName: z.string().min(1, "Display name is required").max(50, "Display name must be under 50 characters"),
+  tags: z.array(z.string().min(1).max(30)).max(10, "Maximum 10 tags allowed").optional(),
+});
+
+// Password change schema
+export const passwordChangeSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(6, "New password must be at least 6 characters"),
+  confirmPassword: z.string().min(1, "Please confirm your new password"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
 export const insertDonationSchema = createInsertSchema(donations)
   .omit({ id: true, createdAt: true });

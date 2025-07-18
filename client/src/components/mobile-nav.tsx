@@ -13,6 +13,8 @@ import {
   Menu,
   Briefcase,
   MessageSquare,
+  Trophy,
+  User,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -52,6 +54,16 @@ export function MobileNav() {
       label: "Pro Bono Work",
       href: "/pro-bono",
       icon: <Briefcase className="h-5 w-5" />,
+    },
+    {
+      label: "Leaderboard",
+      href: "/leaderboard",
+      icon: <Trophy className="h-5 w-5" />,
+    },
+    {
+      label: "Profile",
+      href: "/profile",
+      icon: <User className="h-5 w-5" />,
     },
   ];
 

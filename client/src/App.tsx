@@ -15,6 +15,8 @@ import CampaignsPage from "@/pages/campaigns-page";
 import ProBonoPage from "@/pages/probono-page";
 import FeedbackPage from "@/pages/feedback-page";
 import LandingPage from "@/pages/landing-page";
+import ProfilePage from "@/pages/profile-page";
+import LeaderboardPage from "@/pages/leaderboard-page";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { AuthProvider } from "@/hooks/use-auth";
 
@@ -30,6 +32,8 @@ function Router() {
       <ProtectedRoute path="/campaigns" component={CampaignsPage} />
       <ProtectedRoute path="/pro-bono" component={ProBonoPage} />
       <Route path="/feedback" component={FeedbackPage} />
+      <ProtectedRoute path="/profile" component={ProfilePage} />
+      <ProtectedRoute path="/leaderboard" component={LeaderboardPage} />
       <Route component={NotFound} />
     </Switch>
   );

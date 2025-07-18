@@ -15,6 +15,7 @@ type AuthContextType = {
   loginMutation: UseMutationResult<User, Error, LoginUser>;
   logoutMutation: UseMutationResult<void, Error, void>;
   registerMutation: UseMutationResult<User, Error, RegisterUser>;
+  refetchUser: () => void;
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -102,6 +103,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refetch();
   }, [refetch]);
 
+  const refetchUser = () => {
+    refetch();
+    queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -111,6 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginMutation,
         logoutMutation,
         registerMutation,
+        refetchUser,
       }}
     >
       {children}
