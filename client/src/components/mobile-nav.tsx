@@ -34,7 +34,7 @@ export function MobileNav() {
       icon: <HandHeart className="h-5 w-5" />,
     },
     {
-      label: "Vegan Conversions",
+      label: "Conversions",
       href: "/vegan-conversions",
       icon: <Leaf className="h-5 w-5" />,
     },

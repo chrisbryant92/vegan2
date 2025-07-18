@@ -24,12 +24,12 @@ import { calculateVeganImpact, DietType } from "@/lib/calculations";
 type VeganConversionFormValues = z.infer<typeof veganConversionSchema>;
 
 const DIET_OPTIONS = [
-  { value: "meat-heavy", label: "Meat-heavy (-60 animals/year)", description: "High meat consumption" },
+  { value: "meat-heavy", label: "Meat-heavy (-29 animals/year)", description: "High meat consumption" },
   { value: "omnivore", label: "Omnivore (0 animals/year)", description: "Standard diet baseline" },
-  { value: "flexitarian", label: "Flexitarian (+60 animals/year)", description: "Reduced meat consumption" },
-  { value: "pescetarian", label: "Pescetarian (+75 animals/year)", description: "Fish but no meat" },
-  { value: "vegetarian", label: "Vegetarian (+90 animals/year)", description: "No meat or fish" },
-  { value: "vegan", label: "Vegan (+120 animals/year)", description: "No animal products" },
+  { value: "flexitarian", label: "Flexitarian (+58 animals/year)", description: "Reduced meat consumption" },
+  { value: "pescetarian", label: "Pescetarian (+117 animals/year)", description: "Fish but no meat" },
+  { value: "vegetarian", label: "Vegetarian (+131 animals/year)", description: "No meat or fish" },
+  { value: "vegan", label: "Vegan (+146 animals/year)", description: "No animal products" },
 ];
 
 export default function VeganPage() {

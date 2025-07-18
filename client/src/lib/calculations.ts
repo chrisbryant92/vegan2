@@ -54,15 +54,15 @@ export function calculateDonationImpact(amount: number, organizationImpact: stri
 }
 
 // Diet type animals saved per year mapping
-// Based on 146.2 animals consumed per year by average meat-eater (geometric mean of UK: 126.4, Germany: 140, US: 173, worldwide: 149)
+// Based on 146 animals consumed per year by average meat-eater (updated baseline)
 // Data source: https://docs.google.com/spreadsheets/d/1KUcEWd50HoJ3i89azb1O1-HRWGChkRU18xPvRN2zGKQ/edit?gid=1826119359#gid=1826119359
 const DIET_ANIMALS_PER_YEAR = {
-  'meat-heavy': -29.2,  // Costs 29.2 animals/year (20% more than omnivore baseline: 146.2 * 0.2)
-  'omnivore': 0,        // Baseline - saves 0 animals/year (146.2 animals consumed)
-  'flexitarian': 58.5,  // Saves 58.5 animals/year (40% reduction: 146.2 * 0.4)
-  'pescetarian': 117,   // Saves 117 animals/year (80% reduction: 146.2 * 0.8)
-  'vegetarian': 131.6,  // Saves 131.6 animals/year (90% reduction: 146.2 * 0.9)
-  'vegan': 146.2        // Saves 146.2 animals/year (100% reduction: full baseline)
+  'meat-heavy': -29.2,  // Costs 29.2 animals/year (20% more than omnivore baseline: 146 * 0.2)
+  'omnivore': 0,        // Baseline - saves 0 animals/year (146 animals consumed)
+  'flexitarian': 58.4,  // Saves 58.4 animals/year (40% reduction: 146 * 0.4)
+  'pescetarian': 116.8, // Saves 116.8 animals/year (80% reduction: 146 * 0.8)
+  'vegetarian': 131.4,  // Saves 131.4 animals/year (90% reduction: 146 * 0.9)
+  'vegan': 146          // Saves 146 animals/year (100% reduction: full baseline)
 } as const;
 
 export type DietType = keyof typeof DIET_ANIMALS_PER_YEAR;

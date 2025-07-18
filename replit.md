@@ -112,6 +112,8 @@ Preferred communication style: Simple, everyday language.
 ### July 17, 2025 - Beta Launch Preparation
 - **Rebranding**: Updated app title to "Vegan 2.0" with new logo and favicon
 - **Impact Factor Update**: Reduced highest impact charity rate from 4.6 to 4.4 animals per dollar across all systems
+- **Conversion Baseline Update**: Updated omnivore baseline from 146.2 to 146 animals/year with proportional adjustments to all diet types
+- **Navigation Terminology**: Changed "Vegan Conversions" to "Conversions" in navigation menus for cleaner interface
 - **Terminology Update**: Changed "animal welfare advocates" to "animal advocates" throughout application
 - **Feedback System**: Complete feedback collection system with database storage and weekly email compilation
 - **Pro Bono Consistency**: Updated pro bono page terminology and impact factors to match donations page (4.4 animals per dollar for highest impact)
