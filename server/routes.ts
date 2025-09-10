@@ -1214,6 +1214,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Printful integration routes
+  app.get('/api/printful/products', async (req, res) => {
+    try {
+      const { printfulService } = await import('./printfulService');
+      const products = await printfulService.getCatalogProducts();
+      res.json(products);
+    } catch (error) {
+      console.error('Error getting Printful products:', error);
+      res.status(500).json({ error: 'Failed to get Printful products' });
+    }
+  });
+
+  app.post('/api/printful/sync-products', async (req, res) => {
+    try {
+      const { printfulService } = await import('./printfulService');
+      const products = await printfulService.getCatalogProducts();
+      
+      // Sync products to database
+      let syncedCount = 0;
+      for (const product of products) {
+        try {
+          // Check if product already exists
+          const existing = await storage.getProducts();
+          const existingProduct = existing.find(p => p.printfulId === product.id);
+          
+          if (!existingProduct) {
+            await storage.createProduct({
+              printfulId: product.id,
+              name: product.title,
+              description: product.description || null,
+              image: product.image || null,
+              category: product.type || null,
+              isActive: true
+            });
+            
+            // Sync variants
+            if (product.variants) {
+              for (const variant of product.variants) {
+                await storage.createProductVariant({
+                  productId: existing.length + syncedCount + 1, // This is a simplified approach
+                  printfulVariantId: variant.id,
+                  name: variant.name,
+                  size: variant.size || null,
+                  color: variant.color || null,
+                  colorCode: variant.color_code || null,
+                  price: parseFloat(variant.price || '0'),
+                  currency: 'USD',
+                  image: variant.image || null,
+                  isAvailable: variant.availability === 'available'
+                });
+              }
+            }
+            
+            syncedCount++;
+          }
+        } catch (productError) {
+          console.error(`Error syncing product ${product.id}:`, productError);
+        }
+      }
+      
+      res.json({ message: `Synced ${syncedCount} products from Printful`, totalProducts: products.length });
+    } catch (error) {
+      console.error('Error syncing Printful products:', error);
+      res.status(500).json({ error: 'Failed to sync Printful products' });
+    }
+  });
+
   // Feedback routes
   app.post('/api/feedback', async (req, res) => {
     try {
