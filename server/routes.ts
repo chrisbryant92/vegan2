@@ -1226,55 +1226,163 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/printful/stores', async (req, res) => {
+    try {
+      const { printfulService } = await import('./printfulService');
+      const stores = await printfulService.getStores();
+      res.json(stores);
+    } catch (error) {
+      console.error('Error getting Printful stores:', error);
+      res.status(500).json({ error: 'Failed to get Printful stores' });
+    }
+  });
+
+  app.get('/api/printful/debug-store', async (req, res) => {
+    try {
+      const { printfulService } = await import('./printfulService');
+      console.log('Getting stores first...');
+      
+      try {
+        const stores = await printfulService.getStores();
+        console.log('Stores response:', stores);
+        
+        if (stores && stores.length > 0) {
+          const firstStore = stores[0];
+          console.log('Using first store:', firstStore);
+          
+          try {
+            const storeProducts = await printfulService.getStoreProducts(firstStore.id);
+            console.log('Store products response:', storeProducts);
+            res.json({ 
+              success: true, 
+              store: firstStore,
+              count: storeProducts ? storeProducts.length : 0,
+              products: storeProducts 
+            });
+          } catch (productsError) {
+            res.json({ 
+              success: false,
+              store: firstStore,
+              productsError: productsError.message
+            });
+          }
+        } else {
+          res.json({ 
+            success: false,
+            message: 'No stores found',
+            stores: stores 
+          });
+        }
+      } catch (storesError) {
+        res.json({ 
+          success: false,
+          storesError: storesError.message
+        });
+      }
+    } catch (error) {
+      console.error('Debug endpoint error:', error);
+      res.status(500).json({ error: 'Debug failed', details: error.message });
+    }
+  });
+
   app.post('/api/printful/sync-products', async (req, res) => {
     try {
       const { printfulService } = await import('./printfulService');
-      const products = await printfulService.getCatalogProducts();
       
-      // Sync products to database
-      let syncedCount = 0;
-      for (const product of products) {
-        try {
-          // Check if product already exists
-          const existing = await storage.getProducts();
-          const existingProduct = existing.find(p => p.printfulId === product.id);
-          
-          if (!existingProduct) {
-            await storage.createProduct({
-              printfulId: product.id,
-              name: product.title,
-              description: product.description || null,
-              image: product.image || null,
-              category: product.type || null,
-              isActive: true
-            });
-            
-            // Sync variants
-            if (product.variants) {
-              for (const variant of product.variants) {
-                await storage.createProductVariant({
-                  productId: existing.length + syncedCount + 1, // This is a simplified approach
-                  printfulVariantId: variant.id,
-                  name: variant.name,
-                  size: variant.size || null,
-                  color: variant.color || null,
-                  colorCode: variant.color_code || null,
-                  price: parseFloat(variant.price || '0'),
-                  currency: 'USD',
-                  image: variant.image || null,
-                  isAvailable: variant.availability === 'available'
-                });
-              }
-            }
-            
-            syncedCount++;
-          }
-        } catch (productError) {
-          console.error(`Error syncing product ${product.id}:`, productError);
+      console.log('Starting Printful product sync...');
+      
+      // Since sync products don't exist yet, use catalog products 
+      // and filter for the 5 specific products you want
+      const catalogProducts = await printfulService.getCatalogProducts();
+      
+      // Define the 5 products you want by searching for key terms
+      const wantedProductTypes = [
+        { terms: ['cap', 'hat'], name: 'Cap' },
+        { terms: ['unisex', 'crewneck', 'sweatshirt'], name: 'Unisex Sweatshirt' },
+        { terms: ['phone case', 'iphone'], name: 'Phone Case' },
+        { terms: ['tote bag', 'tote'], name: 'Tote Bag' },
+        { terms: ['premium t-shirt'], name: 'T-Shirt' }
+      ];
+      
+      let selectedProducts = [];
+      
+      // Find one product for each wanted type
+      for (const wanted of wantedProductTypes) {
+        const matchingProduct = catalogProducts.find(product => 
+          wanted.terms.some(term => product.title.toLowerCase().includes(term.toLowerCase()))
+        );
+        if (matchingProduct) {
+          selectedProducts.push(matchingProduct);
         }
       }
       
-      res.json({ message: `Synced ${syncedCount} products from Printful`, totalProducts: products.length });
+      console.log(`Found ${selectedProducts.length} matching products from catalog`);
+      
+      // Clear existing products
+      await db.delete(products);
+      await db.delete(productVariants);
+      
+      // Add the filtered catalog products as available products
+      let syncedCount = 0;
+      for (const product of selectedProducts) {
+        console.log(`Adding product: ${product.title}`);
+        
+        // Insert product
+        const [insertedProduct] = await db.insert(products).values({
+          printfulId: product.id,
+          name: product.title,
+          description: `Premium ${product.title} - 100% of profits go to effective animal charities`,
+          image: product.image,
+          category: product.type,
+          isActive: true
+        });
+        
+        // Get product variants from catalog
+        try {
+          const productDetails = await printfulService.getProduct(product.id);
+          
+          if (productDetails.variants) {
+            for (const variant of productDetails.variants.slice(0, 5)) { // Limit to 5 variants per product
+              await db.insert(productVariants).values({
+                productId: insertedProduct.id,
+                printfulVariantId: variant.id,
+                name: `${variant.name}${variant.color ? ` - ${variant.color}` : ''}${variant.size ? ` (${variant.size})` : ''}`,
+                size: variant.size || null,
+                color: variant.color || null,
+                colorCode: variant.color_code || null,
+                price: 2500, // Default $25.00 - will be updated when you create sync products
+                currency: 'USD',
+                image: variant.image || product.image,
+                isAvailable: true
+              });
+            }
+          }
+        } catch (variantError) {
+          console.log(`Could not get variants for ${product.title}:`, variantError.message);
+          // Create a default variant if we can't get variants
+          await db.insert(productVariants).values({
+            productId: insertedProduct.id,
+            printfulVariantId: product.id,
+            name: `${product.title} - Default`,
+            size: null,
+            color: null,
+            colorCode: null,
+            price: 2500,
+            currency: 'USD',
+            image: product.image,
+            isAvailable: true
+          });
+        }
+        
+        syncedCount++;
+      }
+      
+      console.log(`Successfully added ${syncedCount} products`);
+      
+      res.json({ 
+        message: `Added ${syncedCount} catalog products. Create sync products in Printful to get actual designs and pricing.`, 
+        synced: syncedCount 
+      });
     } catch (error) {
       console.error('Error syncing Printful products:', error);
       res.status(500).json({ error: 'Failed to sync Printful products' });

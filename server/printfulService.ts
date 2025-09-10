@@ -21,6 +21,38 @@ class PrintfulService {
     }
   }
 
+  // Get stores information  
+  async getStores() {
+    try {
+      const response = await this.client.get('stores');
+      return response.result;
+    } catch (error) {
+      throw new Error(`Printful Stores API Error: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  // Get user's actual store products (sync products)
+  async getStoreProducts(storeId?: number) {
+    try {
+      // Try different endpoints for store products
+      let endpoint;
+      if (storeId) {
+        // Try the sync products endpoint with store_id parameter
+        endpoint = `sync/products?store_id=${storeId}`;
+      } else {
+        endpoint = 'sync/products';
+      }
+      const response = await this.client.get(endpoint);
+      return response.result;
+    } catch (error) {
+      console.error('Printful Store API raw error:', error);
+      if (error && typeof error === 'object') {
+        throw new Error(`Printful Store API Error: ${JSON.stringify(error)}`);
+      }
+      throw new Error(`Printful Store API Error: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
   // Get specific product details with variants
   async getProduct(productId: number) {
     try {
@@ -28,6 +60,16 @@ class PrintfulService {
       return response.result;
     } catch (error) {
       throw new Error(`Product not found: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  // Get specific sync product details with variants
+  async getSyncProduct(syncProductId: number) {
+    try {
+      const response = await this.client.get(`sync/products/${syncProductId}`);
+      return response.result;
+    } catch (error) {
+      throw new Error(`Sync product not found: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
