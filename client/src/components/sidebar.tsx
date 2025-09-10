@@ -12,6 +12,7 @@ import {
   User,
   Briefcase,
   MessageSquare,
+  ShoppingCart,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -56,6 +57,11 @@ export function Sidebar() {
       label: "Pro Bono Work",
       href: "/pro-bono",
       icon: <Briefcase className="h-5 w-5" />,
+    },
+    {
+      label: "Store",
+      href: "/store",
+      icon: <ShoppingCart className="h-5 w-5" />,
     },
     {
       label: "Leaderboard",

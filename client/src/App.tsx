@@ -14,6 +14,7 @@ import MediaPage from "@/pages/media-page";
 import CampaignsPage from "@/pages/campaigns-page";
 import ProBonoPage from "@/pages/probono-page";
 import FeedbackPage from "@/pages/feedback-page";
+import StorePage from "@/pages/store-page";
 import LandingPage from "@/pages/landing-page";
 import ProfilePage from "@/pages/profile-page";
 import LeaderboardPage from "@/pages/leaderboard-page";
@@ -32,6 +33,7 @@ function Router() {
       <ProtectedRoute path="/campaigns" component={CampaignsPage} />
       <ProtectedRoute path="/pro-bono" component={ProBonoPage} />
       <Route path="/feedback" component={FeedbackPage} />
+      <Route path="/store" component={StorePage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <ProtectedRoute path="/leaderboard" component={LeaderboardPage} />
       <Route component={NotFound} />
