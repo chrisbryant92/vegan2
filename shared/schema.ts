@@ -199,6 +199,94 @@ export const feedback = pgTable("feedback", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Store Products table - Sync with Printful catalog
+export const products = pgTable("products", {
+  id: serial("id").primaryKey(),
+  printfulId: integer("printful_id").unique().notNull(), // Printful catalog product ID
+  name: text("name").notNull(),
+  description: text("description"),
+  image: text("image"), // Main product image URL
+  category: text("category"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Product Variants table - Different sizes, colors, etc.
+export const productVariants = pgTable("product_variants", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
+  printfulVariantId: integer("printful_variant_id").unique().notNull(), // Printful variant ID
+  name: text("name").notNull(), // e.g., "Small - Black"
+  size: text("size"),
+  color: text("color"),
+  colorCode: text("color_code"), // Hex color code
+  price: doublePrecision("price").notNull(),
+  currency: text("currency").notNull().default("USD"),
+  image: text("image"), // Variant-specific image
+  isAvailable: boolean("is_available").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Orders table
+export const orders = pgTable("orders", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  printfulOrderId: integer("printful_order_id").unique(), // Printful order ID when submitted
+  status: text("status").notNull().default("draft"), // "draft", "pending", "submitted", "processing", "shipped", "delivered", "cancelled"
+  totalAmount: doublePrecision("total_amount").notNull(),
+  currency: text("currency").notNull().default("USD"),
+  
+  // Shipping information
+  shippingName: text("shipping_name").notNull(),
+  shippingEmail: text("shipping_email").notNull(),
+  shippingPhone: text("shipping_phone"),
+  shippingAddress1: text("shipping_address1").notNull(),
+  shippingAddress2: text("shipping_address2"),
+  shippingCity: text("shipping_city").notNull(),
+  shippingState: text("shipping_state").notNull(),
+  shippingCountry: text("shipping_country").notNull().default("US"),
+  shippingZip: text("shipping_zip").notNull(),
+  
+  // Payment information
+  paymentMethod: text("payment_method"), // "stripe", "paypal", etc.
+  paymentId: text("payment_id"), // Payment processor transaction ID
+  paidAt: timestamp("paid_at"),
+  
+  // Fulfillment information
+  trackingNumber: text("tracking_number"),
+  trackingUrl: text("tracking_url"),
+  shippedAt: timestamp("shipped_at"),
+  deliveredAt: timestamp("delivered_at"),
+  
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Order Items table - Individual products in an order
+export const orderItems = pgTable("order_items", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").notNull().references(() => orders.id, { onDelete: "cascade" }),
+  productId: integer("product_id").notNull().references(() => products.id),
+  variantId: integer("variant_id").notNull().references(() => productVariants.id),
+  quantity: integer("quantity").notNull(),
+  price: doublePrecision("price").notNull(), // Price at time of order
+  currency: text("currency").notNull().default("USD"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Cart Items table - User shopping cart
+export const cartItems = pgTable("cart_items", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  productId: integer("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
+  variantId: integer("variant_id").notNull().references(() => productVariants.id, { onDelete: "cascade" }),
+  quantity: integer("quantity").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const insertCampaignSchema = createInsertSchema(campaigns)
   .omit({ id: true, created_at: true });
 
@@ -207,6 +295,21 @@ export const insertProBonoWorkSchema = createInsertSchema(proBonoWork)
 
 export const insertFeedbackSchema = createInsertSchema(feedback)
   .omit({ id: true, createdAt: true });
+
+export const insertProductSchema = createInsertSchema(products)
+  .omit({ id: true, createdAt: true, updatedAt: true });
+
+export const insertProductVariantSchema = createInsertSchema(productVariants)
+  .omit({ id: true, createdAt: true });
+
+export const insertOrderSchema = createInsertSchema(orders)
+  .omit({ id: true, createdAt: true, updatedAt: true });
+
+export const insertOrderItemSchema = createInsertSchema(orderItems)
+  .omit({ id: true, createdAt: true });
+
+export const insertCartItemSchema = createInsertSchema(cartItems)
+  .omit({ id: true, createdAt: true, updatedAt: true });
 
 // Form validation schema for campaigns
 export const campaignSchema = z.object({
@@ -252,6 +355,32 @@ export const feedbackSchema = z.object({
   userId: z.number().optional(),
 });
 
+// Form validation schema for adding items to cart
+export const addToCartSchema = z.object({
+  productId: z.number().positive("Product ID is required"),
+  variantId: z.number().positive("Product variant is required"),
+  quantity: z.number().min(1, "Quantity must be at least 1").max(10, "Maximum 10 items per product"),
+});
+
+// Form validation schema for updating cart items
+export const updateCartItemSchema = z.object({
+  quantity: z.number().min(0, "Quantity cannot be negative").max(10, "Maximum 10 items per product"),
+});
+
+// Form validation schema for creating orders
+export const createOrderSchema = z.object({
+  shippingName: z.string().min(1, "Name is required"),
+  shippingEmail: z.string().email("Valid email is required"),
+  shippingPhone: z.string().optional(),
+  shippingAddress1: z.string().min(1, "Address is required"),
+  shippingAddress2: z.string().optional(),
+  shippingCity: z.string().min(1, "City is required"),
+  shippingState: z.string().min(2, "State is required"),
+  shippingCountry: z.string().min(2, "Country is required").default("US"),
+  shippingZip: z.string().min(5, "ZIP code is required"),
+  notes: z.string().optional(),
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -273,6 +402,21 @@ export type ProBonoWork = typeof proBonoWork.$inferSelect;
 
 export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
 export type Feedback = typeof feedback.$inferSelect;
+
+export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type Product = typeof products.$inferSelect;
+
+export type InsertProductVariant = z.infer<typeof insertProductVariantSchema>;
+export type ProductVariant = typeof productVariants.$inferSelect;
+
+export type InsertOrder = z.infer<typeof insertOrderSchema>;
+export type Order = typeof orders.$inferSelect;
+
+export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
+export type OrderItem = typeof orderItems.$inferSelect;
+
+export type InsertCartItem = z.infer<typeof insertCartItemSchema>;
+export type CartItem = typeof cartItems.$inferSelect;
 
 // Extending schemas for additional validations
 export const registerUserSchema = insertUserSchema.extend({
