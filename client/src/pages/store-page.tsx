@@ -167,6 +167,12 @@ export default function StorePage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Vegan 2.0 Store</h1>
           <p className="text-gray-600">Support animal advocacy with our merchandise</p>
+          <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+            <p className="text-sm text-emerald-800">
+              <strong>🌱 Making an Impact:</strong> Displaying Vegan 2.0 merchandise helps spread awareness about effective animal advocacy. 
+              <strong> 100% of profits go directly to effective animal charities</strong> to maximize your impact for animals.
+            </p>
+          </div>
         </div>
         {isAuthenticated && (
           <Button
