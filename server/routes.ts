@@ -1078,6 +1078,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Store API routes
+  app.get('/api/store/products', async (req, res) => {
+    try {
+      const products = await storage.getProducts();
+      res.json(products);
+    } catch (error) {
+      console.error('Error getting products:', error);
+      res.status(500).json({ error: 'Failed to get products' });
+    }
+  });
+
+  app.get('/api/store/products/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const product = await storage.getProduct(id);
+      
+      if (!product) {
+        return res.status(404).json({ error: 'Product not found' });
+      }
+      
+      const variants = await storage.getProductVariants(id);
+      res.json({ ...product, variants });
+    } catch (error) {
+      console.error('Error getting product:', error);
+      res.status(500).json({ error: 'Failed to get product' });
+    }
+  });
+
+  app.get('/api/store/cart', ensureAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const cartItems = await storage.getCartItems(userId);
+      res.json(cartItems);
+    } catch (error) {
+      console.error('Error getting cart:', error);
+      res.status(500).json({ error: 'Failed to get cart items' });
+    }
+  });
+
+  app.post('/api/store/cart', ensureAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const { productId, variantId, quantity } = req.body;
+      
+      const cartItem = await storage.addToCart(userId, productId, variantId, quantity);
+      res.status(201).json(cartItem);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      res.status(500).json({ error: 'Failed to add item to cart' });
+    }
+  });
+
+  app.put('/api/store/cart/:id', ensureAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { quantity } = req.body;
+      
+      const cartItem = await storage.updateCartItem(id, quantity);
+      res.json(cartItem);
+    } catch (error) {
+      console.error('Error updating cart item:', error);
+      res.status(500).json({ error: 'Failed to update cart item' });
+    }
+  });
+
+  app.delete('/api/store/cart/:id', ensureAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.removeFromCart(id);
+      
+      if (!success) {
+        return res.status(404).json({ error: 'Cart item not found' });
+      }
+      
+      res.json({ message: 'Item removed from cart' });
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+      res.status(500).json({ error: 'Failed to remove item from cart' });
+    }
+  });
+
+  app.post('/api/store/orders', ensureAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const orderData = req.body;
+      
+      // Get cart items
+      const cartItems = await storage.getCartItems(userId);
+      
+      if (cartItems.length === 0) {
+        return res.status(400).json({ error: 'Cart is empty' });
+      }
+      
+      // Calculate total
+      const totalAmount = cartItems.reduce((sum, item) => sum + (item.variant.price * item.quantity), 0);
+      
+      // Create order
+      const order = await storage.createOrder({
+        ...orderData,
+        userId,
+        totalAmount,
+        status: 'pending'
+      });
+      
+      // Create order items
+      const orderItemsData = cartItems.map(item => ({
+        orderId: order.id,
+        productId: item.productId,
+        variantId: item.variantId,
+        quantity: item.quantity,
+        price: item.variant.price
+      }));
+      
+      await storage.createOrderItems(orderItemsData);
+      
+      // Clear cart
+      await storage.clearCart(userId);
+      
+      res.status(201).json(order);
+    } catch (error) {
+      console.error('Error creating order:', error);
+      res.status(500).json({ error: 'Failed to create order' });
+    }
+  });
+
+  app.get('/api/store/orders', ensureAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const orders = await storage.getOrders(userId);
+      res.json(orders);
+    } catch (error) {
+      console.error('Error getting orders:', error);
+      res.status(500).json({ error: 'Failed to get orders' });
+    }
+  });
+
   // Feedback routes
   app.post('/api/feedback', async (req, res) => {
     try {
